@@ -1,11 +1,12 @@
 import numpy as np
-from tests.examples.environment import RequestEnvironment
-from tests.examples.tooldelivery_v3_mdp import ToolDeliveryMDP_V3
-from tests.examples.tooldelivery_v3_policy import ToolDeliveryPolicy_V3
-import tests.examples.tooldelivery_v3_state_action as T3SA
+from .environment import RequestEnvironment
+from .tooldelivery_v3_mdp import ToolDeliveryMDP_V3
+from .tooldelivery_v3_policy import ToolDeliveryPolicy_V3
+import ai_coach_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
 
 
 class ToolDeliveryEnv_V3(RequestEnvironment):
+
   def __init__(self, use_policy=True):
     td_mmdp = ToolDeliveryMDP_V3()
     policy = ToolDeliveryPolicy_V3(td_mmdp) if use_policy else None
@@ -91,6 +92,7 @@ class ToolDeliveryEnv_V3(RequestEnvironment):
     return False
 
   def get_latentstate(self, obstate_idx):
+
     def choice_latent_state(np_prior_p_latent):
       lat_state = None
       if np_prior_p_latent[0][0] == 1.0:

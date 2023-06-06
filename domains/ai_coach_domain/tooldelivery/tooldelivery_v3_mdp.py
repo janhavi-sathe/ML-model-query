@@ -2,10 +2,11 @@ import numpy as np
 from ai_coach_core.models.mdp import MDP
 from ai_coach_core.utils.mdp_utils import StateSpace, ActionSpace
 from ai_coach_core.utils.exceptions import InvalidTransitionError
-import tests.examples.tooldelivery_v3_state_action as T3SA
+import ai_coach_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
 
 
 class ToolDeliveryMDP_V3(MDP):
+
   def __init__(self):
     self.num_tools = len(T3SA.ToolNames)
     self.num_x_grid = 5
