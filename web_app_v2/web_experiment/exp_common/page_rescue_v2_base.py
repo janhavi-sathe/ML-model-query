@@ -503,82 +503,86 @@ class RescueV2GamePageBase(ExperimentPageBase):
     routes = game_env["routes"]  # type: Sequence[Place]
     work_locations = game_env["work_locations"]
 
-    if user_data.data[Exp1UserData.PARTIAL_OBS]:
-      po_outer_ltwh = [
-          self.GAME_LEFT, self.GAME_TOP, self.GAME_WIDTH, self.GAME_HEIGHT
-      ]
+    obj = co.Circle("yo", (0, 0), 2, fill_color="green", alpha=0.8)
+    overlay_obs.append(obj)
 
-      circles = []
-      for place in places:
-        if place.visible:
-          for circle in RESCUE_V2_PLACE_DRAW_INFO[place.name].circles:
-            cen_cnvs = coord_2_canvas(place.coord[0] + circle[0],
-                                      place.coord[1] + circle[1])
-            rad_cnvs = size_2_canvas(circle[2], 0)[0]
-            circles.append((*cen_cnvs, rad_cnvs))
+    # if user_data.data[Exp1UserData.PARTIAL_OBS]:
+    #   po_outer_ltwh = [
+    #       self.GAME_LEFT, self.GAME_TOP, self.GAME_WIDTH, self.GAME_HEIGHT
+    #   ]
 
-      a1_pos = game_env["a1_pos"]
-      a1_coord = coord_2_canvas(*location_2_coord_v2(a1_pos, places, routes))
-      radius = size_2_canvas(0.06, 0)[0]
-      circles.append((*a1_coord, radius))
+    #   circles = []
+    #   for place in places:
+    #     if place.visible:
+    #       for circle in RESCUE_V2_PLACE_DRAW_INFO[place.name].circles:
+    #         cen_cnvs = coord_2_canvas(place.coord[0] + circle[0],
+    #                                   place.coord[1] + circle[1])
+    #         rad_cnvs = size_2_canvas(circle[2], 0)[0]
+    #         circles.append((*cen_cnvs, rad_cnvs))
 
-      obj = co.ClippedRectangle(co.PO_LAYER, po_outer_ltwh, list_circle=circles)
-      overlay_obs.append(obj)
+    #   a1_pos = game_env["a1_pos"]
+    #   a1_coord = coord_2_canvas(*location_2_coord_v2(a1_pos, places, routes))
+    #   radius = size_2_canvas(0.06, 0)[0]
+    #   circles.append((*a1_coord, radius))
 
-    if (user_data.data[Exp1UserData.SHOW_LATENT]
-        and not user_data.data[Exp1UserData.SELECT]):
-      a1_latent = game_env["a1_latent"]
-      if a1_latent is not None:
-        coord = location_2_coord_v2(work_locations[a1_latent], places, routes)
-        if coord is not None:
-          radius = size_2_canvas(0.05, 0)[0]
-          x_cen = coord[0]
-          y_cen = coord[1]
-          obj = co.BlinkCircle(co.CUR_LATENT,
-                               coord_2_canvas(x_cen, y_cen),
-                               radius,
-                               line_color="red",
-                               fill=False,
-                               border=True,
-                               linewidth=3)
-          overlay_obs.append(obj)
+    #   obj = co.ClippedRectangle(co.PO_LAYER, po_outer_ltwh, list_circle=circles)
+    #   overlay_obs.append(obj)
 
-    if user_data.data[Exp1UserData.SELECT]:
-      obj = co.Rectangle(co.SEL_LAYER, (self.GAME_LEFT, self.GAME_TOP),
-                         (self.GAME_WIDTH, self.GAME_HEIGHT),
-                         fill_color="white",
-                         alpha=0.8)
-      overlay_obs.append(obj)
+    # if (user_data.data[Exp1UserData.SHOW_LATENT]
+    #     and not user_data.data[Exp1UserData.SELECT]):
+    #   a1_latent = game_env["a1_latent"]
+    #   if a1_latent is not None:
+    #     coord = location_2_coord_v2(work_locations[a1_latent], places, routes)
+    #     if coord is not None:
+    #       radius = size_2_canvas(0.05, 0)[0]
+    #       x_cen = coord[0]
+    #       y_cen = coord[1]
+    #       obj = co.BlinkCircle(co.CUR_LATENT,
+    #                            coord_2_canvas(x_cen, y_cen),
+    #                            radius,
+    #                            line_color="red",
+    #                            fill=False,
+    #                            border=True,
+    #                            linewidth=3)
+    #       overlay_obs.append(obj)
 
-      radius = size_2_canvas(0.05, 0)[0]
-      font_size = 20
+    # if user_data.data[Exp1UserData.SELECT]:
+    #   obj = co.Rectangle(co.SEL_LAYER, (self.GAME_LEFT, self.GAME_TOP),
+    #                      (self.GAME_WIDTH, self.GAME_HEIGHT),
+    #                      fill_color="white",
+    #                      alpha=0.8)
+    #   overlay_obs.append(obj)
 
-      for idx, loc in enumerate(work_locations):
-        coord = location_2_coord_v2(loc, places, routes)
-        obj = co.SelectingCircle(self.latent2selbtn(idx),
-                                 coord_2_canvas(*coord), radius, font_size, "")
-        overlay_obs.append(obj)
+    #   radius = size_2_canvas(0.05, 0)[0]
+    #   font_size = 20
+
+    #   for idx, loc in enumerate(work_locations):
+    #     coord = location_2_coord_v2(loc, places, routes)
+    #     obj = co.SelectingCircle(self.latent2selbtn(idx),
+    #                              coord_2_canvas(*coord), radius, font_size, "")
+    #     overlay_obs.append(obj)
 
     return overlay_obs
 
   def _game_overlay_names(self, game_env, user_data: Exp1UserData) -> List:
 
     overlay_names = []
-    work_locations = game_env["work_locations"]
-    if user_data.data[Exp1UserData.PARTIAL_OBS]:
-      overlay_names.append(co.PO_LAYER)
+    overlay_names.append("hi")
+    # work_locations = game_env["work_locations"]
+    # if user_data.data[Exp1UserData.PARTIAL_OBS]:
+    #   overlay_names.append(co.PO_LAYER)
 
-    if (user_data.data[Exp1UserData.SHOW_LATENT]
-        and not user_data.data[Exp1UserData.SELECT]):
-      a1_latent = game_env["a1_latent"]
-      if a1_latent is not None:
-        overlay_names.append(co.CUR_LATENT)
+    # if (user_data.data[Exp1UserData.SHOW_LATENT]
+    #     and not user_data.data[Exp1UserData.SELECT]):
+    #   a1_latent = game_env["a1_latent"]
+    #   if a1_latent is not None:
+    #     overlay_names.append(co.CUR_LATENT)
 
-    if user_data.data[Exp1UserData.SELECT]:
-      overlay_names.append(co.SEL_LAYER)
+    # if user_data.data[Exp1UserData.SELECT]:
+    #   overlay_names.append(co.SEL_LAYER)
 
-      for idx, loc in enumerate(work_locations):
-        overlay_names.append(self.latent2selbtn(idx))
+    #   for idx, loc in enumerate(work_locations):
+    #     overlay_names.append(self.latent2selbtn(idx))
 
     return overlay_names
 

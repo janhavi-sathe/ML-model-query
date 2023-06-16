@@ -9,6 +9,7 @@ DEMO_TEMPLATE = {
     E_SessionName.Cleanup_partial_dcol: 'session_b_test.html',
     E_SessionName.Rescue_full_dcol: 'session_b_test.html',
     E_SessionName.Rescue_partial_dcol: 'session_b_test.html',
+    E_SessionName.ToolDelivery: 'session_b_test.html',
 }
 
 for e_session in E_SessionName:

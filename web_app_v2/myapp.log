@@ -1,0 +1,112 @@
+[2023-06-06 14:49:43,091] INFO in __init__: Create app!
+[2023-06-06 21:17:22,153] INFO in __init__: Create app!
+[2023-06-06 21:20:59,986] INFO in __init__: Create app!
+[2023-06-06 21:26:10,781] INFO in __init__: Create app!
+[2023-06-06 21:26:19,926] INFO in views: User register1234 attempts to log in
+[2023-06-06 21:26:55,754] ERROR in app: Exception on /rescue [GET]
+Traceback (most recent call last):
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\flask\app.py", line 2073, in wsgi_app
+    response = self.full_dispatch_request()
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\flask\app.py", line 1518, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\flask\app.py", line 1516, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\flask\app.py", line 1502, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**req.view_args)
+  File "D:\Documents\Coding\unhelkarlab\ai-coach\web_app_v2\web_experiment\auth\functions.py", line 22, in wrapped_view
+    return view(**kwargs)
+  File "D:\Documents\Coding\unhelkarlab\ai-coach\web_app_v2\web_experiment\instruction\views.py", line 49, in rescue
+    group_id = session["groupid"]
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\flask\sessions.py", line 79, in __getitem__
+    return super().__getitem__(key)
+KeyError: 'groupid'
+[2023-06-06 21:29:23,850] INFO in views: User register1234 attempts to log in
+[2023-06-06 21:29:32,510] INFO in views: User register1234 added a new user register1234.
+[2023-06-06 21:29:45,681] INFO in views: User register1234 added a new user arnav.
+[2023-06-06 21:29:58,250] INFO in views: User register1234 added a new user aa.
+[2023-06-07 09:04:31,438] INFO in __init__: Create app!
+[2023-06-07 09:13:32,323] INFO in views: User aa attempts to log in
+[2023-06-07 09:13:32,642] INFO in views: User aa accesses to overview.
+[2023-06-07 09:13:39,197] INFO in views: User aa accesses pre-experiment survey.
+[2023-06-07 09:14:00,935] INFO in views: User aa accesses to movers_and_packers.
+[2023-06-07 09:14:03,689] INFO in views: User aa accesses to dcol_tutorial1.
+[2023-06-07 09:14:04,402] INFO in events: aa(-70HBUJqRd9Oh43rAAAB) connected to socketio /DataCol_movers_tutorial
+[2023-06-07 10:37:42,487] INFO in events: -70HBUJqRd9Oh43rAAAB disconnected from /DataCol_movers_tutorial
+[2023-06-15 16:15:50,416] INFO in __init__: Create app!
+[2023-06-15 16:19:11,580] INFO in views: User register1234 attempts to log in
+[2023-06-15 16:32:27,450] ERROR in app: Exception on /ToolDelivery [GET]
+Traceback (most recent call last):
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\flask\app.py", line 2073, in wsgi_app
+    response = self.full_dispatch_request()
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\flask\app.py", line 1518, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\flask\app.py", line 1516, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\flask\app.py", line 1502, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**req.view_args)
+  File "D:\Documents\Coding\unhelkarlab\ai-coach\web_app_v2\web_experiment\demo\views.py", line 21, in view_func
+    return render_template(DEMO_TEMPLATE[e_session],
+KeyError: <E_SessionName.ToolDelivery: 6>
+[2023-06-15 18:25:36,309] INFO in __init__: Create app!
+[2023-06-15 18:26:59,372] ERROR in server: message handler error
+Traceback (most recent call last):
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\flask_socketio\__init__.py", line 763, in _handle_event
+    ret = handler(auth)
+TypeError: initial_canvas() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\engineio\server.py", line 596, in _trigger_event
+    return self.handlers[event](*args)
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\socketio\server.py", line 742, in _handle_eio_message
+    self._handle_connect(eio_sid, pkt.namespace, pkt.data)
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\socketio\server.py", line 638, in _handle_connect
+    success = self._trigger_event(
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\socketio\server.py", line 714, in _trigger_event
+    return self.handlers[namespace][event](*args)
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\flask_socketio\__init__.py", line 284, in _handler
+    return self._handle_event(handler, message, namespace, sid,
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\flask_socketio\__init__.py", line 765, in _handle_event
+    ret = handler()
+  File "D:\Documents\Coding\unhelkarlab\ai-coach\web_app_v2\web_experiment\demo\events.py", line 25, in initial_canvas
+    event_impl.initial_canvas(env_id, name_space, e_session.name, user_data,
+  File "D:\Documents\Coding\unhelkarlab\ai-coach\web_app_v2\web_experiment\exp_common\events_impl.py", line 74, in initial_canvas
+    imgs = get_imgs(domain_type)
+  File "D:\Documents\Coding\unhelkarlab\ai-coach\web_app_v2\web_experiment\exp_common\events_impl.py", line 49, in get_imgs
+    raise ValueError("invalid domain")
+ValueError: invalid domain
+[2023-06-15 18:44:07,285] INFO in __init__: Create app!
+[2023-06-15 18:44:09,026] ERROR in server: message handler error
+Traceback (most recent call last):
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\flask_socketio\__init__.py", line 763, in _handle_event
+    ret = handler(auth)
+TypeError: initial_canvas() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\engineio\server.py", line 596, in _trigger_event
+    return self.handlers[event](*args)
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\socketio\server.py", line 742, in _handle_eio_message
+    self._handle_connect(eio_sid, pkt.namespace, pkt.data)
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\socketio\server.py", line 638, in _handle_connect
+    success = self._trigger_event(
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\socketio\server.py", line 714, in _trigger_event
+    return self.handlers[namespace][event](*args)
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\flask_socketio\__init__.py", line 284, in _handler
+    return self._handle_event(handler, message, namespace, sid,
+  File "D:\ProgramData\anaconda3\envs\ai_coach\lib\site-packages\flask_socketio\__init__.py", line 765, in _handle_event
+    ret = handler()
+  File "D:\Documents\Coding\unhelkarlab\ai-coach\web_app_v2\web_experiment\demo\events.py", line 25, in initial_canvas
+    event_impl.initial_canvas(env_id, name_space, e_session.name, user_data,
+  File "D:\Documents\Coding\unhelkarlab\ai-coach\web_app_v2\web_experiment\exp_common\events_impl.py", line 89, in initial_canvas
+    imgs = get_imgs(domain_type)
+  File "D:\Documents\Coding\unhelkarlab\ai-coach\web_app_v2\web_experiment\exp_common\events_impl.py", line 51, in get_imgs
+    {'name': co.IMG_CABINET, 'src': url_for('static', filename='tooldelivery_images/cabinet.png')},  # noqa: E501
+AttributeError: module 'web_experiment.exp_common.canvas_objects' has no attribute 'IMG_CABINET'
+[2023-06-15 18:48:35,638] INFO in __init__: Create app!
+[2023-06-16 08:48:41,275] INFO in __init__: Create app!
+[2023-06-16 09:06:36,509] INFO in __init__: Create app!
+[2023-06-16 09:46:14,504] INFO in __init__: Create app!
+[2023-06-16 10:12:15,018] INFO in __init__: Create app!

@@ -57,6 +57,18 @@ IMG_AMBULANCE = "ambulance"
 IMG_TOWER = "tower"
 IMG_THUNDER = "thunder"
 
+# images for tooldelivery domain
+IMG_CABINET = "cabinet"
+IMG_CIRCULATING = "circulating"
+IMG_HUMAN = "human"
+IMG_PATIENT = "patient"
+IMG_SCALPEL = "scalpel"
+IMG_SCRUB = "scrub"
+IMG_STORAGE = "storage"
+IMG_SURGEON = "surgeon"
+IMG_SUTURE = "suture"
+IMG_TABLE = "table"
+
 ################################################################################
 # Classes here should always match with corresponding javascript classes
 ################################################################################
