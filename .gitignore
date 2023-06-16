@@ -39,4 +39,5 @@ weights/
 node_modules/
 package-lock.json
 .eslintrc.json
-package.json 
+package.json
+
