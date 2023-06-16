@@ -26,7 +26,7 @@ def get_imgs(domain_type: EDomainType):
         {'name': co.IMG_ROBOT_BAG, 'src': url_for('static', filename='boxpush_images/robot_bag.svg')},  # noqa: E501
     ]
     # yapf: enable
-  elif domain_type == EDomainType.Rescue:
+  elif domain_type in [EDomainType.Rescue, EDomainType.Blackout]:
     # yapf: disable
     imgs = [
         {'name': co.IMG_WORK, 'src': url_for('static', filename='rescue_images/warning.svg')},  # noqa: E501

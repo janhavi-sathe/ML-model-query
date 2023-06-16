@@ -3,7 +3,8 @@ from typing import Mapping, Sequence
 from web_experiment.define import EDomainType
 from web_experiment.exp_common.page_base import ExperimentPageBase
 import web_experiment.exp_common.page_exp1_common as pgc
-from web_experiment.demo.pages import BoxPushV2Demo, RescueDemo, ToolDeliveryDemo
+from web_experiment.demo.pages import (BoxPushV2Demo, RescueDemo, RescueV2Demo,
+                                       ToolDeliveryDemo)
 
 
 class E_SessionName(Enum):
@@ -13,7 +14,9 @@ class E_SessionName(Enum):
   Cleanup_partial_dcol = 3
   Rescue_full_dcol = 4
   Rescue_partial_dcol = 5
-  ToolDelivery = 6
+  Blackout_full_dcol = 6
+  Blackout_partial_dcol = 7
+  ToolDelivery = 8
 
 
 SESSION_TITLE = {
@@ -23,6 +26,8 @@ SESSION_TITLE = {
     E_SessionName.Cleanup_partial_dcol: 'Cleanup - Partially Observable',
     E_SessionName.Rescue_full_dcol: 'Rescue - Fully Observable',
     E_SessionName.Rescue_partial_dcol: 'Rescue - Partially Observable',
+    E_SessionName.Blackout_full_dcol: 'Blackout - Fully Observable',
+    E_SessionName.Blackout_partial_dcol: 'Blackout - Partially Observable',
     E_SessionName.ToolDelivery: 'ToolDelivery',
 }
 
@@ -53,6 +58,16 @@ PAGE_LIST_RESCUE = [
     RescueDemo(True),
 ]
 
+PAGE_LIST_BLACKOUT_FULL_OBS = [
+    pgc.CanvasPageStart(EDomainType.Blackout),
+    RescueV2Demo(False),
+]
+
+PAGE_LIST_BLACKOUT = [
+    pgc.CanvasPageStart(EDomainType.Blackout),
+    RescueV2Demo(True),
+]
+
 PAGE_LIST_TOOLDELIVERY = [
     pgc.CanvasPageStart(EDomainType.ToolDelivery),
     ToolDeliveryDemo(False),
@@ -65,5 +80,7 @@ GAMEPAGES = {
     E_SessionName.Cleanup_partial_dcol: PAGE_LIST_CLEANUP,
     E_SessionName.Rescue_full_dcol: PAGE_LIST_RESCUE_FULL_OBS,
     E_SessionName.Rescue_partial_dcol: PAGE_LIST_RESCUE,
+    E_SessionName.Blackout_full_dcol: PAGE_LIST_BLACKOUT_FULL_OBS,
+    E_SessionName.Blackout_partial_dcol: PAGE_LIST_BLACKOUT,
     E_SessionName.ToolDelivery: PAGE_LIST_TOOLDELIVERY,
 }  # type: Mapping[E_SessionName, Sequence[ExperimentPageBase]]

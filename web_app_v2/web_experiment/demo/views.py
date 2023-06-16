@@ -9,12 +9,15 @@ DEMO_TEMPLATE = {
     E_SessionName.Cleanup_partial_dcol: 'session_b_test.html',
     E_SessionName.Rescue_full_dcol: 'session_b_test.html',
     E_SessionName.Rescue_partial_dcol: 'session_b_test.html',
+    E_SessionName.Blackout_full_dcol: 'session_b_test.html',
+    E_SessionName.Blackout_partial_dcol: 'session_b_test.html',
     E_SessionName.ToolDelivery: 'session_b_test.html',
 }
 
 for e_session in E_SessionName:
 
   def make_view_func(e_session: E_SessionName):
+
     def view_func():
       if request.method == "POST":
         return redirect(url_for("demo.demo"))

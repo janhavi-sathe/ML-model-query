@@ -25,7 +25,8 @@ class EDomainType(Enum):
   Movers = 0
   Cleanup = 1
   Rescue = 2
-  ToolDelivery = 3
+  Blackout = 3
+  ToolDelivery = 4
 
 
 class EMode(Enum):
@@ -61,6 +62,7 @@ class PageKey:
   Movers_and_packers = "movers_and_packers"
   Clean_up = "clean_up"
   Rescue = "rescue"
+  Blackout = "blackout"
   Tool_delivery = "tool_delivery"
 
   PreExperiment = "preexperiment"
