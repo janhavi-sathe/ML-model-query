@@ -14,8 +14,11 @@ class ToolDeliveryMDP_V3(MDP):
     self.cabinet_loc = (2, 4)
     self.storage_loc = (0, 4)
     self.handover_loc = (4, 1)
-    self.walls = [(1.5, i) for i in range(self.num_y_grid)]
-    self.doors = [(1.5, 1)]
+    self.walls = []
+    for idx in range(self.num_y_grid):
+      if idx != 1:  # y = 1 is a door
+        self.walls.append((1.95, idx))
+
     super().__init__()
     self.num_agents = 3
 
@@ -303,12 +306,6 @@ class ToolDeliveryMDP_V3(MDP):
         x_a, x_b = x_b, x_a
       if y_a > y_b:
         y_a, y_b = y_b, y_a
-
-      for x_d, y_d in self.doors:
-        if y_a == y_b and y_a == y_d and x_a < x_d and x_b > x_d:
-          return True
-        if x_a == x_b and x_a == x_d and y_a < y_d and y_b > y_d:
-          return True
 
       for x_w, y_w in self.walls:
         if y_a == y_b and y_a == y_w and x_a < x_w and x_b > x_w:

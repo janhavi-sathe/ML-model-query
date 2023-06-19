@@ -1,11 +1,13 @@
+import abc
 from typing import Hashable, Tuple
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
 from ai_coach_domain.simulator import Simulator
+from PIL import Image, ImageTk
 
 
 # TODO: game configuration ui / logic
-class AppInterface():
+class AppInterface(abc.ABC):
 
   def __init__(self) -> None:
     self.main_window = None
@@ -21,10 +23,12 @@ class AppInterface():
     self._event_based = True
     self._trajectory = None
     self._current_step = 0
+    self.cached_images = {}
 
   def run(self):
     self.main_window.mainloop()
 
+  @abc.abstractmethod
   def _init_game(self):
     'define game related variables and objects'
     # self.game = Simulator()
@@ -141,14 +145,16 @@ class AppInterface():
     else:
       self._trajectory = None
 
+  @abc.abstractmethod
   def _conv_key_to_agent_event(self,
                                key_sym) -> Tuple[Hashable, Hashable, Hashable]:
-    pass
+    return None, None, None
 
+  @abc.abstractmethod
   def _conv_mouse_to_agent_event(
       self, is_left: bool,
       cursor_pos: Tuple[float, float]) -> Tuple[Hashable, Hashable, Hashable]:
-    pass
+    return None, None, None
 
   def _on_key_pressed(self, key_event):
     if not self._started:
@@ -237,8 +243,17 @@ class AppInterface():
                                    y_pos_ed,
                                    fill=color)
 
-  def create_text(self, x_center, y_center, txt, color='black'):
-    return self.canvas.create_text(x_center, y_center, text=txt, fill=color)
+  def create_text(self, x_center, y_center, txt, color='black', font=None):
+    if font is None:
+      font = ("Purisa", 10, 'bold')
+    if color is None:
+      color = 'black'
+
+    return self.canvas.create_text(x_center,
+                                   y_center,
+                                   text=txt,
+                                   fill=color,
+                                   font=font)
 
   def create_triangle(self, x_st, y_st, width, height, color):
     x_pos_1 = x_st
@@ -252,3 +267,25 @@ class AppInterface():
     points = [x_pos_1, y_pos_1, x_pos_3, y_pos_3, x_pos_2, y_pos_2]
 
     return self.canvas.create_polygon(points, fill=color)
+
+  def create_image(self, x_cen, y_cen, width, height, obj_name, file_name):
+    if obj_name not in self.cached_images:
+      img = Image.open(file_name)
+      f_w, f_h = img.size
+      w_ratio = width / f_w
+      h_ratio = height / f_h
+
+      if w_ratio < h_ratio:
+        width = int(width)
+        height = int(f_h * w_ratio)
+      else:
+        width = int(f_w * h_ratio)
+        height = int(height)
+
+      img = img.resize((width, height), Image.ANTIALIAS)
+      img = ImageTk.PhotoImage(img)
+      self.cached_images[obj_name] = img
+    else:
+      img = self.cached_images[obj_name]
+
+    return self.canvas.create_image(x_cen, y_cen, anchor=tk.CENTER, image=img)
