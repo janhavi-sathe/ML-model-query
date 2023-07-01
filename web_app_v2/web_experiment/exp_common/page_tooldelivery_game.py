@@ -2,12 +2,8 @@ from ai_coach_domain.tooldelivery.play_animation import ToolDeliveryPlayer
 from ai_coach_domain.agent import InteractiveAgent
 from ai_coach_domain.tooldelivery.tooldelivery_v3_mdp import ToolDeliveryMDP_V3
 from ai_coach_domain.tooldelivery.tooldelivery_v3_policy import ToolDeliveryPolicy_V3
+from ai_coach_domain.tooldelivery.simulator import ToolDeliverySimulator
 
-from ai_coach_domain.rescue_v2.simulator import RescueSimulatorV2
-from ai_coach_domain.agent import InteractiveAgent
-from ai_coach_domain.rescue_v2.agent import AIAgent_Rescue_PartialObs
-from ai_coach_domain.rescue_v2.mdp import MDP_Rescue_Task, MDP_Rescue_Agent
-from ai_coach_domain.rescue_v2.policy import Policy_Rescue
 from ai_coach_domain.rescue_v2.maps import MAP_RESCUE
 from web_experiment.models import db, User
 from web_experiment.exp_common.page_base import Exp1UserData
@@ -16,10 +12,6 @@ from web_experiment.exp_common.helper import (get_file_name,
 from web_experiment.exp_common.page_tooldelivery_base import ToolDeliveryGamePageBase
 
 TEMPERATURE = 0.3
-RESCUE_TEAMMATE_POLICY = Policy_Rescue(MDP_Rescue_Task(**MAP_RESCUE),
-                                       MDP_Rescue_Agent(**MAP_RESCUE),
-                                       TEMPERATURE, RescueSimulatorV2.AGENT2)
-
 
 class ToolDeliveryGamePage(ToolDeliveryGamePageBase):
 
@@ -30,9 +22,8 @@ class ToolDeliveryGamePage(ToolDeliveryGamePageBase):
                prompt_freq: int = 5) -> None:
     super().__init__(manual_latent_selection, MAP_RESCUE, auto_prompt,
                      prompt_on_change, prompt_freq)
-    global RESCUE_TEAMMATE_POLICY
 
-    self._TEAMMATE_POLICY = RESCUE_TEAMMATE_POLICY
+    self._TEAMMATE_POLICY = ToolDeliveryPolicy_V3
 
   def _on_game_finished(self, user_game_data: Exp1UserData):
     '''
@@ -40,7 +31,7 @@ class ToolDeliveryGamePage(ToolDeliveryGamePageBase):
     '''
     super()._on_game_finished(user_game_data)
 
-    game = user_game_data.get_game_ref()  # type: RescueSimulatorV2
+    game = user_game_data.get_game_ref()  # type: ToolDeliverySimulator
     user = user_game_data.data[Exp1UserData.USER]
     user_id = user.userid
 
@@ -83,7 +74,7 @@ class ToolDeliveryGamePage(ToolDeliveryGamePageBase):
     best_score = user_data.data[Exp1UserData.USER].best_c
 
     text_score = "Time Taken: " + str(time_taken) + "\n"
-    text_score += "People Rescued: " + str(score) + "\n"
+    text_score += "Score: " + str(score) + "\n"
     text_score += "(Your Best: " + str(best_score) + ")"
 
     return text_score
@@ -98,14 +89,5 @@ class ToolDeliveryUserRandom(ToolDeliveryGamePage):
   def init_user_data(self, user_game_data: Exp1UserData):
     super().init_user_data(user_game_data)
 
-    agent1 = InteractiveAgent()
-    init_states = ([1] * len(self._GAME_MAP["work_locations"]),
-                   self._GAME_MAP["a1_init"], self._GAME_MAP["a2_init"])
-    agent2 = AIAgent_Rescue_PartialObs(init_states, self._AGENT2,
-                                       self._TEAMMATE_POLICY)
-
     game = user_game_data.get_game_ref()
-    game.set_autonomous_agent(agent1, agent2)
-    user_game_data.data[Exp1UserData.SELECT] = True
     user_game_data.data[Exp1UserData.SHOW_LATENT] = True
-    user_game_data.data[Exp1UserData.PARTIAL_OBS] = self._PARTIAL_OBS

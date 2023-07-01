@@ -17,7 +17,7 @@ class ToolDeliveryApp(AppInterface):
     self.y_grid = self.game.grid_height
 
   def _init_gui(self):
-    self.main_window.title("Box Push")
+    self.main_window.title("Tool Delivery")
     self.canvas_width = 600
     self.canvas_height = 300
     return super()._init_gui()

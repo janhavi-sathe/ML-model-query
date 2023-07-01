@@ -6,6 +6,7 @@ import numpy as np
 from ai_coach_domain.box_push import conv_box_idx_2_state, BoxState
 from ai_coach_domain.rescue import (Place, Route, Location, E_Type, PlaceName,
                                     Work, is_work_done)
+import ai_coach_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
 import web_experiment.exp_common.canvas_objects as co
 
 
@@ -289,9 +290,9 @@ def boxpush_game_scene(
 
 
 def boxpush_game_scene_names(
-    game_env: Mapping[str, Any],
-    is_movers: bool,
-    cb_is_visible: Callable[[str], bool] = None) -> List:
+        game_env: Mapping[str, Any],
+        is_movers: bool,
+        cb_is_visible: Callable[[str], bool] = None) -> List:
 
   drawing_names = []
   for idx, _ in enumerate(game_env["boxes"]):
@@ -358,217 +359,572 @@ def location_2_coord(loc: Location, places: Sequence[Place],
     return route.coords[idx]
 
 
-def rescue_game_scene(
-    game_env: Mapping[str, Any],
-    game_lwth: Tuple[int, int, int, int],
-    include_background: bool = True,
-    cb_is_visible: Callable[[co.DrawingObject], bool] = None
-) -> List[co.DrawingObject]:
-  game_left, game_top, game_width, game_height = game_lwth
+################################################################################
+# NOTE: test codes by Arnav
+TEST_ARNAV = True
+if TEST_ARNAV:
+  def rescue_game_scene(
+      game_env: Mapping[str, Any],
+      game_lwth: Tuple[int, int, int, int],
+      include_background: bool = True,
+      cb_is_visible: Callable[[co.DrawingObject], bool] = None
+  ) -> List[co.DrawingObject]:
+    game_left, game_top, game_width, game_height = game_lwth
 
+    def coord_2_canvas(coord_x, coord_y):
+      x = int(game_left + coord_x * game_width)
+      y = int(game_top + coord_y * game_height)
+      return (x, y)
+
+    def size_2_canvas(width, height):
+      w = int(width * game_width)
+      h = int(height * game_height)
+      return (w, h)
+
+    # place_w = 0.12
+    # place_h = 0.12
+
+    places = game_env["places"]  # type: Sequence[Place]
+    routes = game_env["routes"]  # type: Sequence[Route]
+    game_objs = []
+
+    def add_obj(obj):
+      if cb_is_visible is None or cb_is_visible(obj):
+        game_objs.append(obj)
+
+    obj = co.Circle("hi", (100, 100), 30, fill_color="green", alpha=0.8)
+    add_obj(obj)
+
+    return game_objs
+
+  def rescue_game_scene_names(
+          game_env: Mapping[str, Any],
+          cb_is_visible: Callable[[str], bool] = None) -> List:
+
+    drawing_names = []
+
+    def add_obj_name(obj_name):
+      if cb_is_visible is None or cb_is_visible(obj_name):
+        drawing_names.append(obj_name)
+
+    add_obj_name("hi")
+
+    return drawing_names
+else:
+  def rescue_game_scene(
+      game_env: Mapping[str, Any],
+      game_lwth: Tuple[int, int, int, int],
+      include_background: bool = True,
+      cb_is_visible: Callable[[co.DrawingObject], bool] = None
+  ) -> List[co.DrawingObject]:
+    game_left, game_top, game_width, game_height = game_lwth
+
+    def coord_2_canvas(coord_x, coord_y):
+      x = int(game_left + coord_x * game_width)
+      y = int(game_top + coord_y * game_height)
+      return (x, y)
+
+    def size_2_canvas(width, height):
+      w = int(width * game_width)
+      h = int(height * game_height)
+      return (w, h)
+
+    # place_w = 0.12
+    # place_h = 0.12
+
+    places = game_env["places"]  # type: Sequence[Place]
+    routes = game_env["routes"]  # type: Sequence[Route]
+    game_objs = []
+
+    def add_obj(obj):
+      if cb_is_visible is None or cb_is_visible(obj):
+        game_objs.append(obj)
+
+    font_size = 15
+    if include_background:
+      river_coords = [
+          coord_2_canvas(0.68, 1),
+          coord_2_canvas(0.75, 0.9),
+          coord_2_canvas(0.77, 0.83),
+          coord_2_canvas(0.85, 0.77),
+          coord_2_canvas(1, 0.7)
+      ]
+      obj = co.Curve(co.IMG_BACKGROUND, river_coords, 30, "blue")
+      add_obj(obj)
+
+      for idx, route in enumerate(routes):
+        list_coord = []
+        list_coord.append(coord_2_canvas(*places[route.start].coord))
+        for coord in route.coords:
+          list_coord.append(coord_2_canvas(*coord))
+        list_coord.append(coord_2_canvas(*places[route.end].coord))
+
+        obj = co.Curve(co.IMG_ROUTE + str(idx), list_coord, 10, "grey")
+        add_obj(obj)
+
+      def add_place(place: Place, offset, size, img_name):
+        name = place.name
+        building_pos = np.array(place.coord) + np.array(offset)
+        canvas_pt = coord_2_canvas(*place.coord)
+
+        wid = size[0]
+        hei = size[1]
+        size_cnvs = size_2_canvas(wid, hei)
+        game_pos = coord_2_canvas(building_pos[0] - wid / 2,
+                                  building_pos[1] - hei / 2)
+        text_width = size_cnvs[0] * 2
+        text_pos = (int(game_pos[0] + 0.5 * size_cnvs[0] - 0.5 * text_width),
+                    int(game_pos[1] - font_size))
+        obj = co.Circle("ground" + name, canvas_pt,
+                        size_2_canvas(0.03, 0)[0], "grey")
+        add_obj(obj)
+        obj = co.GameObject(name, game_pos, size_cnvs, 0, img_name)
+        add_obj(obj)
+        obj = co.TextObject("text" + name, text_pos, text_width, font_size, name,
+                            "center")
+        add_obj(obj)
+
+        p_wid = 0.025
+        p_hei = p_wid * 2.5
+        p_size_cnvs = size_2_canvas(p_wid, p_hei)
+        for pidx in range(place.helps):
+          if pidx < 2:
+            p_x = game_pos[0] - p_size_cnvs[0] * (pidx + 1)
+            p_y = game_pos[1] + size_cnvs[1] - p_size_cnvs[1]
+          else:
+            p_x = game_pos[0] - p_size_cnvs[0] * (pidx - 1)
+            p_y = game_pos[1] + size_cnvs[1] - 2 * p_size_cnvs[1]
+          obj = co.GameObject("human" + name + str(pidx), (p_x, p_y), p_size_cnvs,
+                              0, co.IMG_HUMAN)
+          add_obj(obj)
+
+      for idx in [0, 1, 2, 4, 5]:
+        place_name = places[idx].name
+        offset = RESCUE_PLACE_DRAW_INFO[place_name].offset
+        size = RESCUE_PLACE_DRAW_INFO[place_name].size
+        img_name = RESCUE_PLACE_DRAW_INFO[place_name].img_name
+        add_place(places[idx], offset, size, img_name)
+
+    work_locations = game_env["work_locations"]  # type: Sequence[Location]
+    work_states = game_env["work_states"]
+    work_info = game_env["work_info"]  # type: Sequence[Work]
+
+    pos_a1 = location_2_coord(game_env["a1_pos"], places, routes)
+    pos_a2 = location_2_coord(game_env["a2_pos"], places, routes)
+    wid_a = 0.085
+    hei_a = 0.085
+    offset_x_a1 = 0
+    offset_y_a1 = 0
+    offset_x_a2 = 0
+    offset_y_a2 = 0
+    for idx, wstate in enumerate(work_states):
+      if wstate != 0:
+        loc = work_locations[idx]
+        pos = location_2_coord(loc, places, routes)
+        if pos == pos_a1:
+          offset_x_a1 = -wid_a * 0.7 / 2
+          offset_y_a1 = hei_a * 0.5 / 2
+        if pos == pos_a2:
+          offset_x_a2 = wid_a * 0.7 / 2
+          offset_y_a2 = -hei_a * 0.5 / 2
+
+        wid = 0.06
+        hei = 0.06
+        offset_x = 0
+        offset_y = 0
+        game_pos = coord_2_canvas(pos[0] + offset_x - wid / 2,
+                                  pos[1] + offset_y - hei / 2)
+        size_cnvs = size_2_canvas(wid, hei)
+        obj = co.GameObject(co.IMG_WORK + str(idx), game_pos, size_cnvs, 0,
+                            co.IMG_WORK)
+        add_obj(obj)
+      else:
+        if work_locations[idx].type == E_Type.Place:
+          place = places[work_locations[idx].id]
+          if place.name in [PlaceName.Bridge_1, PlaceName.Bridge_2]:
+            offset = RESCUE_PLACE_DRAW_INFO[place.name].offset
+            size = RESCUE_PLACE_DRAW_INFO[place.name].size
+            angle = RESCUE_PLACE_DRAW_INFO[place.name].angle
+            img_name = RESCUE_PLACE_DRAW_INFO[place.name].img_name
+            building_pos = np.array(place.coord) + np.array(offset)
+            wid, hei = size
+            size_cnvs = size_2_canvas(wid, hei)
+            game_pos = coord_2_canvas(building_pos[0] - wid / 2,
+                                      building_pos[1] - hei / 2)
+            obj = co.GameObject(place.name, game_pos,
+                                size_cnvs, angle, img_name)
+            add_obj(obj)
+
+    if pos_a1 == pos_a2 and offset_x_a1 == 0:
+      offset_x_a1 = -wid_a * 0.7 / 2
+      offset_y_a1 = hei_a * 0.5 / 2
+      offset_x_a2 = wid_a * 0.7 / 2
+      offset_y_a2 = -hei_a * 0.5 / 2
+
+    game_pos_a1 = coord_2_canvas(pos_a1[0] + offset_x_a1 - wid_a / 2,
+                                 pos_a1[1] + offset_y_a1 - hei_a / 2)
+    size_a1 = size_2_canvas(wid_a, hei_a)
+
+    game_pos_a2 = coord_2_canvas(pos_a2[0] + offset_x_a2 - wid_a / 2,
+                                 pos_a2[1] + offset_y_a2 - hei_a / 2)
+    size_a2 = size_2_canvas(wid_a, hei_a)
+
+    obj = co.GameObject(co.IMG_POLICE_CAR, game_pos_a1, size_a1, 0,
+                        co.IMG_POLICE_CAR)
+    add_obj(obj)
+    obj = co.GameObject(co.IMG_FIRE_ENGINE, game_pos_a2, size_a2, 0,
+                        co.IMG_FIRE_ENGINE)
+    add_obj(obj)
+
+    return game_objs
+
+  def rescue_game_scene_names(
+          game_env: Mapping[str, Any],
+          cb_is_visible: Callable[[str], bool] = None) -> List:
+
+    drawing_names = []
+
+    def add_obj_name(obj_name):
+      if cb_is_visible is None or cb_is_visible(obj_name):
+        drawing_names.append(obj_name)
+
+    add_obj_name(co.IMG_BACKGROUND)
+
+    routes = game_env["routes"]  # type: Sequence[Route]
+    for idx, _ in enumerate(routes):
+      add_obj_name(co.IMG_ROUTE + str(idx))
+
+    work_locations = game_env["work_locations"]  # type: Sequence[Location]
+    work_states = game_env["work_states"]
+    places = game_env["places"]  # type: Sequence[Place]
+    for idx, wstate in enumerate(work_states):
+      if wstate == 0:
+        if work_locations[idx].type == E_Type.Place:
+          place = places[work_locations[idx].id]
+          if place.name in [PlaceName.Bridge_1, PlaceName.Bridge_2]:
+            add_obj_name(place.name)
+
+    for idx in [0, 1, 2, 4, 5]:
+      add_obj_name("ground" + places[idx].name)
+      add_obj_name(places[idx].name)
+      add_obj_name("text" + places[idx].name)
+
+    for idx, wstate in enumerate(work_states):
+      if wstate != 0:
+        add_obj_name(co.IMG_WORK + str(idx))
+
+    work_info = game_env["work_info"]  # type: Sequence[Work]
+    for idx, _ in enumerate(work_states):
+      if not is_work_done(idx, work_states, work_info[idx].coupled_works):
+        place = places[work_info[idx].rescue_place]
+        num_help = place.helps
+        for pidx in range(num_help):
+          add_obj_name("human" + place.name + str(pidx))
+
+    add_obj_name(co.IMG_POLICE_CAR)
+    add_obj_name(co.IMG_FIRE_ENGINE)
+
+    return drawing_names
+
+
+def tooldelivery_game_scene(game_env: Mapping[str, Any],
+                            game_ltwh: Tuple[int, int, int, int],
+                            include_background: bool = True,
+                            cb_is_visible: Callable[[
+                                co.DrawingObject], bool] = None
+                            ) -> List[co.DrawingObject]:
+  game_left, game_top, game_width, game_height = game_ltwh
+
+  # the / 10 and / 5 are hardcoded as 10 x units and 5 y units made up the canvas in the standalone app
   def coord_2_canvas(coord_x, coord_y):
-    x = int(game_left + coord_x * game_width)
-    y = int(game_top + coord_y * game_height)
+    x = int(game_left + coord_x / 10 * game_width)
+    y = int(game_top + coord_y / 5 * game_height)
     return (x, y)
 
   def size_2_canvas(width, height):
-    w = int(width * game_width)
-    h = int(height * game_height)
+    w = int(width / 10 * game_width)
+    h = int(height / 5 * game_height)
     return (w, h)
 
   # place_w = 0.12
   # place_h = 0.12
 
-  places = game_env["places"]  # type: Sequence[Place]
-  routes = game_env["routes"]  # type: Sequence[Route]
   game_objs = []
 
-  def add_obj(obj):
+  # game_objs.append(co.Rectangle("Background", (game_left, game_top), (game_width, game_height), "blue", "green", 0.5))
+
+  if include_background:
+    for idx, coord in enumerate(game_env["Walls"]):    
+      x, y = coord
+      obj = co.LineSegment(f"Wall{idx}", coord_2_canvas(x, y), coord_2_canvas(x, y + 1), 1, "black")
+      if cb_is_visible is None or cb_is_visible(obj):
+        game_objs.append(obj)
+
+  def draw_pos_size_obj(pos_size, obj_name):
+    x, y, w, h = pos_size
+
+    obj = co.GameObject(obj_name, coord_2_canvas(x, y),
+                        size_2_canvas(w, h), 0, obj_name)
     if cb_is_visible is None or cb_is_visible(obj):
       game_objs.append(obj)
 
-  font_size = 15
-  if include_background:
-    river_coords = [
-        coord_2_canvas(0.68, 1),
-        coord_2_canvas(0.75, 0.9),
-        coord_2_canvas(0.77, 0.83),
-        coord_2_canvas(0.85, 0.77),
-        coord_2_canvas(1, 0.7)
-    ]
-    obj = co.Curve(co.IMG_BACKGROUND, river_coords, 30, "blue")
-    add_obj(obj)
+  SN_pos_size = game_env["SN_pos_size"]
+  AS_pos_size = game_env["AS_pos_size"]
+  Table_pos_size = game_env["Table_pos_size"]
+  Patient_pos_size = game_env["Patient_pos_size"]
+  Perfusionist_pos_size = game_env["Perfusionist_pos_size"]
+  Anesthesiologist_pos_size = game_env["Anesthesiologist_pos_size"]
+  Cabinet_pos_size = game_env["Cabinet_pos_size"]
+  Storage_pos_size = game_env["Storage_pos_size"]
+  Handover_pos_size = game_env["Handover_pos_size"]
+  draw_pos_size_obj(SN_pos_size, co.IMG_SCRUB)
+  draw_pos_size_obj(AS_pos_size, co.IMG_SURGEON)
+  draw_pos_size_obj(Table_pos_size, co.IMG_TABLE)
+  draw_pos_size_obj(Patient_pos_size, co.IMG_PATIENT)
+  draw_pos_size_obj(Perfusionist_pos_size, co.IMG_PERF)
+  draw_pos_size_obj(Anesthesiologist_pos_size, co.IMG_ANES)
+  draw_pos_size_obj(Cabinet_pos_size, co.IMG_CABINET)
+  draw_pos_size_obj(Storage_pos_size, co.IMG_STORAGE)
 
-    for idx, route in enumerate(routes):
-      list_coord = []
-      list_coord.append(coord_2_canvas(*places[route.start].coord))
-      for coord in route.coords:
-        list_coord.append(coord_2_canvas(*coord))
-      list_coord.append(coord_2_canvas(*places[route.end].coord))
+  Scalpel_stored = game_env["Scalpel_stored"]
+  Scalpel_prepared = game_env["Scalpel_prepared"]
+  Suture_stored = game_env["Suture_stored"]
+  Suture_prepared = game_env["Suture_prepared"]
+  Patient_progress = game_env["Patient_progress"]
+  CN_pos = game_env["CN_pos"]
+  Asked = game_env["Asked"]
 
-      obj = co.Curve(co.IMG_ROUTE + str(idx), list_coord, 10, "grey")
-      add_obj(obj)
-
-    def add_place(place: Place, offset, size, img_name):
-      name = place.name
-      building_pos = np.array(place.coord) + np.array(offset)
-      canvas_pt = coord_2_canvas(*place.coord)
-
-      wid = size[0]
-      hei = size[1]
-      size_cnvs = size_2_canvas(wid, hei)
-      game_pos = coord_2_canvas(building_pos[0] - wid / 2,
-                                building_pos[1] - hei / 2)
-      text_width = size_cnvs[0] * 2
-      text_pos = (int(game_pos[0] + 0.5 * size_cnvs[0] - 0.5 * text_width),
-                  int(game_pos[1] - font_size))
-      obj = co.Circle("ground" + name, canvas_pt,
-                      size_2_canvas(0.03, 0)[0], "grey")
-      add_obj(obj)
-      obj = co.GameObject(name, game_pos, size_cnvs, 0, img_name)
-      add_obj(obj)
-      obj = co.TextObject("text" + name, text_pos, text_width, font_size, name,
-                          "center")
-      add_obj(obj)
-
-      p_wid = 0.025
-      p_hei = p_wid * 2.5
-      p_size_cnvs = size_2_canvas(p_wid, p_hei)
-      for pidx in range(place.helps):
-        if pidx < 2:
-          p_x = game_pos[0] - p_size_cnvs[0] * (pidx + 1)
-          p_y = game_pos[1] + size_cnvs[1] - p_size_cnvs[1]
-        else:
-          p_x = game_pos[0] - p_size_cnvs[0] * (pidx - 1)
-          p_y = game_pos[1] + size_cnvs[1] - 2 * p_size_cnvs[1]
-        obj = co.GameObject("human" + name + str(pidx), (p_x, p_y), p_size_cnvs,
-                            0, co.IMG_HUMAN)
-        add_obj(obj)
-
-    for idx in [0, 1, 2, 4, 5]:
-      place_name = places[idx].name
-      offset = RESCUE_PLACE_DRAW_INFO[place_name].offset
-      size = RESCUE_PLACE_DRAW_INFO[place_name].size
-      img_name = RESCUE_PLACE_DRAW_INFO[place_name].img_name
-      add_place(places[idx], offset, size, img_name)
-
-  work_locations = game_env["work_locations"]  # type: Sequence[Location]
-  work_states = game_env["work_states"]
-  work_info = game_env["work_info"]  # type: Sequence[Work]
-
-  pos_a1 = location_2_coord(game_env["a1_pos"], places, routes)
-  pos_a2 = location_2_coord(game_env["a2_pos"], places, routes)
-  wid_a = 0.085
-  hei_a = 0.085
-  offset_x_a1 = 0
-  offset_y_a1 = 0
-  offset_x_a2 = 0
-  offset_y_a2 = 0
-  for idx, wstate in enumerate(work_states):
-    if wstate != 0:
-      loc = work_locations[idx]
-      pos = location_2_coord(loc, places, routes)
-      if pos == pos_a1:
-        offset_x_a1 = -wid_a * 0.7 / 2
-        offset_y_a1 = hei_a * 0.5 / 2
-      if pos == pos_a2:
-        offset_x_a2 = wid_a * 0.7 / 2
-        offset_y_a2 = -hei_a * 0.5 / 2
-
-      wid = 0.06
-      hei = 0.06
-      offset_x = 0
-      offset_y = 0
-      game_pos = coord_2_canvas(pos[0] + offset_x - wid / 2,
-                                pos[1] + offset_y - hei / 2)
-      size_cnvs = size_2_canvas(wid, hei)
-      obj = co.GameObject(co.IMG_WORK + str(idx), game_pos, size_cnvs, 0,
-                          co.IMG_WORK)
-      add_obj(obj)
+  def get_tool_pos_size(s_tool, x_off, y_off):
+    tool_w = 0.5
+    tool_h = 0.5
+    if s_tool == T3SA.ToolLoc.AS:
+      return (AS_pos_size[0] + x_off, AS_pos_size[1] + y_off, tool_w, tool_h)
+    elif s_tool == T3SA.ToolLoc.SN:
+      return (Table_pos_size[0] + x_off, Table_pos_size[1] + y_off, tool_w,
+              tool_h)
+    elif s_tool == T3SA.ToolLoc.CN:
+      return (CN_pos[0] + x_off, CN_pos[1] + y_off, tool_w, tool_h)
+    elif s_tool == T3SA.ToolLoc.STORAGE:
+      return (Storage_pos_size[0] + x_off, Storage_pos_size[1] + y_off,
+              tool_w, tool_h)
+    elif s_tool == T3SA.ToolLoc.CABINET:
+      return (Cabinet_pos_size[0] + x_off, Cabinet_pos_size[1] + y_off,
+              tool_w, tool_h)
+    elif s_tool == T3SA.ToolLoc.FLOOR:
+      return (6 + x_off, 3 + y_off, tool_w, tool_h)
     else:
-      if work_locations[idx].type == E_Type.Place:
-        place = places[work_locations[idx].id]
-        if place.name in [PlaceName.Bridge_1, PlaceName.Bridge_2]:
-          offset = RESCUE_PLACE_DRAW_INFO[place.name].offset
-          size = RESCUE_PLACE_DRAW_INFO[place.name].size
-          angle = RESCUE_PLACE_DRAW_INFO[place.name].angle
-          img_name = RESCUE_PLACE_DRAW_INFO[place.name].img_name
-          building_pos = np.array(place.coord) + np.array(offset)
-          wid, hei = size
-          size_cnvs = size_2_canvas(wid, hei)
-          game_pos = coord_2_canvas(building_pos[0] - wid / 2,
-                                    building_pos[1] - hei / 2)
-          obj = co.GameObject(place.name, game_pos, size_cnvs, angle, img_name)
-          add_obj(obj)
+      raise NotImplementedError
 
-  if pos_a1 == pos_a2 and offset_x_a1 == 0:
-    offset_x_a1 = -wid_a * 0.7 / 2
-    offset_y_a1 = hei_a * 0.5 / 2
-    offset_x_a2 = wid_a * 0.7 / 2
-    offset_y_a2 = -hei_a * 0.5 / 2
-
-  game_pos_a1 = coord_2_canvas(pos_a1[0] + offset_x_a1 - wid_a / 2,
-                               pos_a1[1] + offset_y_a1 - hei_a / 2)
-  size_a1 = size_2_canvas(wid_a, hei_a)
-
-  game_pos_a2 = coord_2_canvas(pos_a2[0] + offset_x_a2 - wid_a / 2,
-                               pos_a2[1] + offset_y_a2 - hei_a / 2)
-  size_a2 = size_2_canvas(wid_a, hei_a)
-
-  obj = co.GameObject(co.IMG_POLICE_CAR, game_pos_a1, size_a1, 0,
-                      co.IMG_POLICE_CAR)
-  add_obj(obj)
-  obj = co.GameObject(co.IMG_FIRE_ENGINE, game_pos_a2, size_a2, 0,
-                      co.IMG_FIRE_ENGINE)
-  add_obj(obj)
-
+  draw_pos_size_obj((*CN_pos, 1, 1), co.IMG_CIRCULATING)
+  draw_pos_size_obj(get_tool_pos_size(Scalpel_stored, 0.9, 0.1),
+                    co.IMG_SCALPEL_STORED)
+  draw_pos_size_obj(get_tool_pos_size(Scalpel_prepared, 1.0, 0.1),
+                    co.IMG_SCALPEL_PREPARED)
+  draw_pos_size_obj(get_tool_pos_size(Suture_stored, 0.9, 0.1),
+                    co.IMG_SUTURE_STORED)
+  draw_pos_size_obj(get_tool_pos_size(Suture_prepared, 1.0, 0.1),
+                    co.IMG_SUTURE_PREPARED)
+  
   return game_objs
 
+# game_objs = []
+#   if include_background:
+#     for idx, coord in enumerate(game_env["boxes"]):
+#       game_pos = coord_2_canvas(coord[0] + 0.5, coord[1] + 0.7)
+#       size = size_2_canvas(0.4, 0.2)
+#       obj = co.Ellipse(co.BOX_ORIGIN + str(idx), game_pos, size, "grey")
+#       if cb_is_visible is None or cb_is_visible(obj):
+#         game_objs.append(obj)
 
-def rescue_game_scene_names(
-    game_env: Mapping[str, Any],
-    cb_is_visible: Callable[[str], bool] = None) -> List:
+#     for idx, coord in enumerate(game_env["walls"]):
+#       wid = 1
+#       hei = 1
+#       left = coord[0] + 0.5 - 0.5 * wid
+#       top = coord[1] + 0.5 - 0.5 * hei
+#       angle = 0 if game_env["wall_dir"][idx] == 0 else 0.5 * np.pi
+#       obj = co.GameObject(co.IMG_WALL + str(idx), coord_2_canvas(left, top),
+#                           size_2_canvas(wid, hei), angle, co.IMG_WALL)
+#       if cb_is_visible is None or cb_is_visible(obj):
+#         game_objs.append(obj)
 
+#     for idx, coord in enumerate(game_env["goals"]):
+#       hei = 1
+#       wid = 1
+#       left = coord[0] + 0.5 - 0.5 * wid
+#       top = coord[1] + 0.5 - 0.5 * hei
+#       obj = co.GameObject(co.IMG_GOAL + str(idx), coord_2_canvas(left, top),
+#                           size_2_canvas(wid, hei), 0, co.IMG_GOAL)
+#       if cb_is_visible is None or cb_is_visible(obj):
+#         game_objs.append(obj)
+
+#   num_drops = len(game_env["drops"])
+#   num_goals = len(game_env["goals"])
+#   a1_hold_box = -1
+#   a2_hold_box = -1
+#   for idx, bidx in enumerate(game_env["box_states"]):
+#     state = conv_box_idx_2_state(bidx, num_drops, num_goals)
+#     obj = None
+#     if state[0] == BoxState.Original:
+#       coord = game_env["boxes"][idx]
+#       wid = 0.541
+#       hei = 0.60
+#       left = coord[0] + 0.5 - 0.5 * wid
+#       top = coord[1] + 0.5 - 0.5 * hei
+#       img_name = co.IMG_BOX if is_movers else co.IMG_TRASH_BAG
+#       obj = co.GameObject(img_name + str(idx), coord_2_canvas(left, top),
+#                           size_2_canvas(wid, hei), 0, img_name)
+#     elif state[0] == BoxState.WithAgent1:  # with a1
+#       coord = game_env["a1_pos"]
+#       offset = 0
+#       if game_env["a2_pos"] == coord:
+#         offset = -0.2
+#       hei = 1
+#       wid = 0.385
+#       left = coord[0] + 0.5 + offset - 0.5 * wid
+#       top = coord[1] + 0.5 - 0.5 * hei
+#       obj = co.GameObject(co.IMG_MAN_BAG, coord_2_canvas(left, top),
+#                           size_2_canvas(wid, hei), 0, co.IMG_MAN_BAG)
+#       a1_hold_box = idx
+#     elif state[0] == BoxState.WithAgent2:  # with a2
+#       coord = game_env["a2_pos"]
+#       offset = 0
+#       if game_env["a1_pos"] == coord:
+#         offset = -0.2
+#       hei = 0.8
+#       wid = 0.476
+#       left = coord[0] + 0.5 + offset - 0.5 * wid
+#       top = coord[1] + 0.5 - 0.5 * hei
+#       obj = co.GameObject(co.IMG_ROBOT_BAG, coord_2_canvas(left, top),
+#                           size_2_canvas(wid, hei), 0, co.IMG_ROBOT_BAG)
+#       a2_hold_box = idx
+#     elif state[0] == BoxState.WithBoth:  # with both
+#       coord = game_env["a1_pos"]
+#       hei = 1
+#       wid = 0.712
+#       left = coord[0] + 0.5 - 0.5 * wid
+#       top = coord[1] + 0.5 - 0.5 * hei
+#       obj = co.GameObject(co.IMG_BOTH_BOX, coord_2_canvas(left, top),
+#                           size_2_canvas(wid, hei), 0, co.IMG_BOTH_BOX)
+#       a1_hold_box = idx
+#       a2_hold_box = idx
+
+#     if obj is not None:
+#       if cb_is_visible is None or cb_is_visible(obj):
+#         game_objs.append(obj)
+
+#   if a1_hold_box < 0:
+#     coord = game_env["a1_pos"]
+#     offset = 0
+#     if coord == game_env["a2_pos"]:
+#       offset = 0.2 if a2_hold_box >= 0 else -0.2
+#     hei = 1
+#     wid = 0.23
+#     left = coord[0] + 0.5 + offset - 0.5 * wid
+#     top = coord[1] + 0.5 - 0.5 * hei
+#     img_name = co.IMG_WOMAN if is_movers else co.IMG_MAN
+#     obj = co.GameObject(img_name, coord_2_canvas(left, top),
+#                         size_2_canvas(wid, hei), 0, img_name)
+#     if cb_is_visible is None or cb_is_visible(obj):
+#       game_objs.append(obj)
+
+#   if a2_hold_box < 0:
+#     coord = game_env["a2_pos"]
+#     offset = 0
+#     if coord == game_env["a1_pos"]:
+#       offset = 0.2
+#     hei = 0.8
+#     wid = 0.422
+#     left = coord[0] + 0.5 + offset - 0.5 * wid
+#     top = coord[1] + 0.5 - 0.5 * hei
+#     obj = co.GameObject(co.IMG_ROBOT, coord_2_canvas(left, top),
+#                         size_2_canvas(wid, hei), 0, co.IMG_ROBOT)
+#     if cb_is_visible is None or cb_is_visible(obj):
+#       game_objs.append(obj)
+
+#   return game_objs
+
+def tooldelivery_game_scene_names(game_env: Mapping[str, Any],
+                            cb_is_visible: Callable[[
+                                co.DrawingObject], bool] = None
+                            ) -> List:
   drawing_names = []
+  # drawing_names.append("Background")
 
-  def add_obj_name(obj_name):
-    if cb_is_visible is None or cb_is_visible(obj_name):
-      drawing_names.append(obj_name)
+  for idx, _ in enumerate(game_env["Walls"]):
+    img_name = f"Wall{idx}"
+    if cb_is_visible is None or cb_is_visible(img_name):
+      drawing_names.append(img_name)
 
-  add_obj_name(co.IMG_BACKGROUND)
+  drawing_names.append(co.IMG_SCRUB)
+  drawing_names.append(co.IMG_SURGEON)
+  drawing_names.append(co.IMG_PATIENT)
+  drawing_names.append(co.IMG_PERF)
+  drawing_names.append(co.IMG_ANES)
+  drawing_names.append(co.IMG_CABINET)
+  drawing_names.append(co.IMG_STORAGE)
 
-  routes = game_env["routes"]  # type: Sequence[Route]
-  for idx, _ in enumerate(routes):
-    add_obj_name(co.IMG_ROUTE + str(idx))
-
-  work_locations = game_env["work_locations"]  # type: Sequence[Location]
-  work_states = game_env["work_states"]
-  places = game_env["places"]  # type: Sequence[Place]
-  for idx, wstate in enumerate(work_states):
-    if wstate == 0:
-      if work_locations[idx].type == E_Type.Place:
-        place = places[work_locations[idx].id]
-        if place.name in [PlaceName.Bridge_1, PlaceName.Bridge_2]:
-          add_obj_name(place.name)
-
-  for idx in [0, 1, 2, 4, 5]:
-    add_obj_name("ground" + places[idx].name)
-    add_obj_name(places[idx].name)
-    add_obj_name("text" + places[idx].name)
-
-  for idx, wstate in enumerate(work_states):
-    if wstate != 0:
-      add_obj_name(co.IMG_WORK + str(idx))
-
-  work_info = game_env["work_info"]  # type: Sequence[Work]
-  for idx, _ in enumerate(work_states):
-    if not is_work_done(idx, work_states, work_info[idx].coupled_works):
-      place = places[work_info[idx].rescue_place]
-      num_help = place.helps
-      for pidx in range(num_help):
-        add_obj_name("human" + place.name + str(pidx))
-
-  add_obj_name(co.IMG_POLICE_CAR)
-  add_obj_name(co.IMG_FIRE_ENGINE)
+  drawing_names.append(co.IMG_SCALPEL_STORED)
+  drawing_names.append(co.IMG_SCALPEL_PREPARED)
+  drawing_names.append(co.IMG_SUTURE_STORED)
+  drawing_names.append(co.IMG_SUTURE_PREPARED)
+  drawing_names.append(co.IMG_CIRCULATING)
 
   return drawing_names
+
+# def boxpush_game_scene_names(
+#         game_env: Mapping[str, Any],
+#         is_movers: bool,
+#         cb_is_visible: Callable[[str], bool] = None) -> List:
+
+#   drawing_names = []
+#   for idx, _ in enumerate(game_env["boxes"]):
+#     img_name = co.BOX_ORIGIN + str(idx)
+#     if cb_is_visible is None or cb_is_visible(img_name):
+#       drawing_names.append(img_name)
+
+#   for idx, _ in enumerate(game_env["walls"]):
+#     img_name = co.IMG_WALL + str(idx)
+#     if cb_is_visible is None or cb_is_visible(img_name):
+#       drawing_names.append(img_name)
+
+#   for idx, _ in enumerate(game_env["goals"]):
+#     img_name = co.IMG_GOAL + str(idx)
+#     if cb_is_visible is None or cb_is_visible(img_name):
+#       drawing_names.append(img_name)
+
+#   num_drops = len(game_env["drops"])
+#   num_goals = len(game_env["goals"])
+#   a1_hold_box = -1
+#   a2_hold_box = -1
+#   for idx, bidx in enumerate(game_env["box_states"]):
+#     state = conv_box_idx_2_state(bidx, num_drops, num_goals)
+#     img_name = None
+#     if state[0] == BoxState.Original:
+#       img_type = co.IMG_BOX if is_movers else co.IMG_TRASH_BAG
+#       img_name = img_type + str(idx)
+#     elif state[0] == BoxState.WithAgent1:  # with a1
+#       img_name = co.IMG_MAN_BAG
+#       a1_hold_box = idx
+#     elif state[0] == BoxState.WithAgent2:  # with a2
+#       img_name = co.IMG_ROBOT_BAG
+#       a2_hold_box = idx
+#     elif state[0] == BoxState.WithBoth:  # with both
+#       img_name = co.IMG_BOTH_BOX
+#       a1_hold_box = idx
+#       a2_hold_box = idx
+
+#     if img_name is not None:
+#       if cb_is_visible is None or cb_is_visible(img_name):
+#         drawing_names.append(img_name)
+
+#   if a1_hold_box < 0:
+#     img_name = co.IMG_WOMAN if is_movers else co.IMG_MAN
+#     if cb_is_visible is None or cb_is_visible(img_name):
+#       drawing_names.append(img_name)
+
+#   if a2_hold_box < 0:
+#     img_name = co.IMG_ROBOT
+#     if cb_is_visible is None or cb_is_visible(img_name):
+#       drawing_names.append(img_name)
+
+#   return drawing_names

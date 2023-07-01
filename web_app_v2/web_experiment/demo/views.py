@@ -11,7 +11,7 @@ DEMO_TEMPLATE = {
     E_SessionName.Rescue_partial_dcol: 'session_b_test.html',
     E_SessionName.Blackout_full_dcol: 'session_b_test.html',
     E_SessionName.Blackout_partial_dcol: 'session_b_test.html',
-    E_SessionName.ToolDelivery: 'session_b_test.html',
+    E_SessionName.ToolDelivery: 'session_d_test.html',
 }
 
 for e_session in E_SessionName:

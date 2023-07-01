@@ -11,6 +11,7 @@ class ToolDeliverySimulator(Simulator):
   CN = 0
   SN = 1
   AS = 2
+  score = 0
 
   def __init__(self) -> None:
     super().__init__(0)
@@ -44,6 +45,7 @@ class ToolDeliverySimulator(Simulator):
         "Walls": self.mmdp.walls
     }
 
+  def init_game(self):
     self.reset_game()
 
   def get_initial_distribution(self):
@@ -203,6 +205,8 @@ class ToolDeliverySimulator(Simulator):
     env_info["Patient_progress"] = s_patient
     env_info["CN_pos"] = s_pos
     env_info["Asked"] = s_ask
+    env_info["current_step"] = self.current_step
+    env_info["score"] = self.score
 
     return env_info
 
