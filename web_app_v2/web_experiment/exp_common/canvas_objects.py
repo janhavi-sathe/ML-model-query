@@ -9,15 +9,16 @@ BTN_DOWN = "Down"
 BTN_LEFT = "Left"
 BTN_RIGHT = "Right"
 BTN_STAY = "Stay"
-BTN_PICK_UP = "Pick Up"
+BTN_PICKUP = "Pick Up"
 BTN_DROP = "Drop"
+BTN_HANDOVER = "Handover"
 BTN_NEXT = "Next"
 BTN_PREV = "Prev"
 BTN_SELECT = "Select Destination"
 BTN_START = "Start"
 
 ACTION_BUTTONS = [
-    BTN_UP, BTN_DOWN, BTN_LEFT, BTN_RIGHT, BTN_STAY, BTN_PICK_UP, BTN_DROP
+    BTN_UP, BTN_DOWN, BTN_LEFT, BTN_RIGHT, BTN_STAY, BTN_PICKUP, BTN_DROP, BTN_HANDOVER
 ]
 
 JOYSTICK_BUTTONS = [BTN_UP, BTN_DOWN, BTN_LEFT, BTN_RIGHT, BTN_STAY]
@@ -409,8 +410,9 @@ class JoystickUp(JoystickObject):
                pos: Sequence[int],
                width: int,
                fill_color: str = "black",
-               disable: bool = False):
-    super().__init__(BTN_UP, pos, width, fill_color, disable)
+               disable: bool = False,
+               name: str = BTN_UP):
+    super().__init__(name, pos, width, fill_color, disable)
     self.obj_type = "JoystickUp"
 
 
@@ -420,8 +422,9 @@ class JoystickDown(JoystickObject):
                pos: Sequence[int],
                width: int,
                fill_color: str = "black",
-               disable: bool = False):
-    super().__init__(BTN_DOWN, pos, width, fill_color, disable)
+               disable: bool = False,
+               name: str = BTN_DOWN):
+    super().__init__(name, pos, width, fill_color, disable)
     self.obj_type = "JoystickDown"
 
 
@@ -431,8 +434,9 @@ class JoystickLeft(JoystickObject):
                pos: Sequence[int],
                width: int,
                fill_color: str = "black",
-               disable: bool = False):
-    super().__init__(BTN_LEFT, pos, width, fill_color, disable)
+               disable: bool = False,
+               name: str = BTN_LEFT):
+    super().__init__(name, pos, width, fill_color, disable)
     self.obj_type = "JoystickLeft"
 
 
@@ -442,8 +446,9 @@ class JoystickRight(JoystickObject):
                pos: Sequence[int],
                width: int,
                fill_color: str = "black",
-               disable: bool = False):
-    super().__init__(BTN_RIGHT, pos, width, fill_color, disable)
+               disable: bool = False,
+               name: str = BTN_RIGHT):
+    super().__init__(name, pos, width, fill_color, disable)
     self.obj_type = "JoystickRight"
 
 
@@ -453,8 +458,9 @@ class JoystickStay(JoystickObject):
                pos: Sequence[int],
                width: int,
                fill_color: str = "black",
-               disable: bool = False):
-    super().__init__(BTN_STAY, pos, width, fill_color, disable)
+               disable: bool = False,
+               name: str = BTN_STAY):
+    super().__init__(name, pos, width, fill_color, disable)
     self.obj_type = "JoystickStay"
 
 

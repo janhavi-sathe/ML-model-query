@@ -5,7 +5,7 @@ import numpy as np
 from ai_coach_domain.tooldelivery.environment import RequestEnvironment
 from ai_coach_domain.tooldelivery.tooldelivery_v3_mdp import ToolDeliveryMDP_V3
 from ai_coach_domain.tooldelivery.tooldelivery_v3_policy import ToolDeliveryPolicy_V3
-import ai_coach_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
+from ai_coach_domain.tooldelivery.tooldelivery_v3_state_action import ActionCN, ActionSN, ActionAS, ToolLoc 
 from ai_coach_domain.tooldelivery.simulator import ToolDeliverySimulator
 
 from ai_coach_domain.agent import InteractiveAgent
@@ -18,7 +18,31 @@ from web_experiment.exp_common.helper import (get_file_name,
                                               store_user_label_locally)
 
 class ToolDeliveryGamePageBase(ExperimentPageBase):
-  ACTION_BUTTONS = ["next"]
+  CN_STAY = ActionCN.STAY.name
+  CN_UP = ActionCN.MOVE_UP.name
+  CN_DOWN = ActionCN.MOVE_DOWN.name
+  CN_LEFT = ActionCN.MOVE_LEFT.name
+  CN_RIGHT = ActionCN.MOVE_RIGHT.name
+  CN_PICKUP = ActionCN.PICKUP.name
+  CN_HANDOVER = ActionCN.HANDOVER.name
+
+  SN_STAY = ActionSN.STAY.name
+  SN_HO_SCALPEL = ActionSN.HO_SCALPEL.name
+  SN_HO_SUTURE = ActionSN.HO_SUTURE.name
+  SN_ASKTOOL = ActionSN.ASKTOOL.name
+  SN_SCALPEL_RELATED = ActionSN.SCALPEL_RELATED.name
+  SN_SUTURE_RELATED = ActionSN.SUTURE_RELATED.name
+
+  AS_STAY = ActionAS.STAY.name
+  AS_HO_SCALPEL = ActionAS.HO_SCALPEL.name
+  AS_USE_SCALPEL = ActionAS.USE_SCALPEL.name
+  AS_USE_SUTURE = ActionAS.USE_SUTURE.name
+
+  ACTION_BUTTONS = [CN_STAY, CN_UP, CN_DOWN, CN_LEFT, CN_RIGHT, CN_PICKUP, CN_HANDOVER,
+                    # SN_STAY, SN_HO_SCALPEL, SN_HO_SUTURE, SN_ASKTOOL, SN_SCALPEL_RELATED, SN_SUTURE_RELATED,
+                    # AS_STAY, AS_HO_SCALPEL, AS_USE_SCALPEL, AS_USE_SUTURE
+                    ]
+  # ACTION_BUTTONS = ["next"]
 
   def __init__(self,
                manual_latent_selection,
@@ -76,7 +100,7 @@ class ToolDeliveryGamePageBase(ExperimentPageBase):
       drawing info
     '''
 
-    if clicked_btn == self.ACTION_BUTTONS[0]:
+    if clicked_btn in self.ACTION_BUTTONS:
       _, _, _, done = self.action_event(user_game_data, clicked_btn)
       if done:
         self._on_game_finished(user_game_data)
@@ -85,7 +109,7 @@ class ToolDeliveryGamePageBase(ExperimentPageBase):
     return super().button_clicked(user_game_data, clicked_btn)
 
   def _get_instruction(self, user_game_data: Exp1UserData):
-    return ("Click the button to progress through the simulation.")
+    return ("Control the CN with the buttons to progress through the simulation.")
 
   def _get_drawing_order(self, user_game_data: Exp1UserData):
     dict_game = user_game_data.get_game_ref().get_env_info()
@@ -128,38 +152,85 @@ class ToolDeliveryGamePageBase(ExperimentPageBase):
 
   def _get_action_btn_disable_state(self, user_data: Exp1UserData,
                                     game_env: Mapping[Any, Any]):
-    return False, False, False
+    game = user_data.get_game_ref()
+    game_env = game.get_env_info()
+
+    game_done = user_data.data[Exp1UserData.GAME_DONE]
+
+    if game_done:
+      return True, True, True, True, True, True, True
+
+    pickup_ok = True
+    handover_ok = True
+    cn_pos = game_env["CN_pos"]
+    cabinet_loc = (game_env["Cabinet_pos_size"][0], game_env["Cabinet_pos_size"][1])
+    storage_loc = (game_env["Storage_pos_size"][0], game_env["Storage_pos_size"][1])
+    handover_loc = (game_env["Handover_pos_size"][0], game_env["Handover_pos_size"][1])
+    list_spare_tool_loc = [game_env["Scalpel_stored"], game_env["Suture_stored"]]
+    
+    if cn_pos not in [cabinet_loc, storage_loc]:
+      pickup_ok = False
+    if cn_pos != handover_loc:
+      handover_ok = False
+    if cn_pos == cabinet_loc and ToolLoc.CABINET not in list_spare_tool_loc:
+      pickup_ok = False
+    if cn_pos == storage_loc and ToolLoc.STORAGE not in list_spare_tool_loc:
+      pickup_ok = False
+    if ToolLoc.CN not in list_spare_tool_loc:
+      handover_ok = False
+    
+    print(cn_pos, cabinet_loc, storage_loc, handover_loc, list_spare_tool_loc, cn_pos in [cabinet_loc, storage_loc])
+    print(ToolLoc.CABINET in list_spare_tool_loc, pickup_ok, handover_ok)
+    return False, False, not pickup_ok, not handover_ok
 
   def _get_btn_actions(
       self,
       game_env: Mapping[Any, Any],
       disable_move: bool = False,
       disable_stay: bool = False,
-      disable_rescue: bool = False) -> Sequence[co.DrawingObject]:
+      disable_pickup: bool = False,
+      disable_handover: bool = False) -> Sequence[co.DrawingObject]:
 
-    x_ctrl_cen = int(self.GAME_RIGHT + (co.CANVAS_WIDTH - self.GAME_RIGHT) / 2)
+    game_width = self.GAME_WIDTH
+    game_right = self.GAME_RIGHT
+    ctrl_btn_w = int(game_width / 12)
+    ctrl_btn_w_half = int(game_width / 24)
+    x_ctrl_cen = int(game_right + (co.CANVAS_WIDTH - game_right) / 2)
     y_ctrl_cen = int(co.CANVAS_HEIGHT * 0.65)
-    x_joy_cen = int(x_ctrl_cen - 75)
-    ctrl_origin = np.array([x_joy_cen, y_ctrl_cen])
+    x_joy_cen = int(x_ctrl_cen - ctrl_btn_w * 1.5)
+    btn_stay = co.JoystickStay((x_joy_cen, y_ctrl_cen),
+                              ctrl_btn_w,
+                              disable=disable_stay, name=self.CN_STAY)
+    btn_up = co.JoystickUp((x_joy_cen, y_ctrl_cen - ctrl_btn_w_half),
+                          ctrl_btn_w,
+                          disable=disable_move, name=self.CN_UP)
+    btn_right = co.JoystickRight((x_joy_cen + ctrl_btn_w_half, y_ctrl_cen),
+                                ctrl_btn_w,
+                                disable=disable_move, name=self.CN_RIGHT)
+    btn_down = co.JoystickDown((x_joy_cen, y_ctrl_cen + ctrl_btn_w_half),
+                              ctrl_btn_w,
+                              disable=disable_move, name=self.CN_DOWN)
+    btn_left = co.JoystickLeft((x_joy_cen - ctrl_btn_w_half, y_ctrl_cen),
+                              ctrl_btn_w,
+                              disable=disable_move, name=self.CN_LEFT)
+    
+    font_size = 20
+    btn_pickup = co.ButtonRect(
+        self.CN_PICKUP,
+        (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen - int(ctrl_btn_w * 0.6)),
+        (ctrl_btn_w * 2, ctrl_btn_w),
+        font_size,
+        "Pick Up",
+        disable=disable_pickup)
+    btn_handover = co.ButtonRect(
+        self.CN_HANDOVER,
+        (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen + int(ctrl_btn_w * 0.6)),
+        (ctrl_btn_w * 2, ctrl_btn_w),
+        font_size,
+        "Handover",
+        disable=disable_handover)
 
-    arrow_width = 30
-    font_size = 18
-
-    list_buttons = []
-
-    offset = 30
-
-    for dir in [np.array([1, 0])]:
-      origin = ctrl_origin + dir * offset
-      origin = (int(origin[0]), int(origin[1]))
-      direction = (int(dir[0]), int(dir[1]))
-      btn_obj = co.ThickArrow(self.ACTION_BUTTONS[0],
-                                  origin,
-                                  direction,
-                                  arrow_width,
-                                  disable=disable_move)
-      list_buttons.append(btn_obj)
-
+    list_buttons = [btn_stay, btn_up, btn_right, btn_down, btn_left, btn_pickup, btn_handover]
     return list_buttons
 
   def _on_action_taken(self, user_game_data: Exp1UserData,
@@ -221,7 +292,30 @@ class ToolDeliveryGamePageBase(ExperimentPageBase):
     '''
     user_game_data: NOTE - values will be updated
     '''
+    action = None
+    if clicked_btn == self.CN_STAY:
+      action = ActionCN.STAY
+    elif clicked_btn == self.CN_UP:
+      action = ActionCN.MOVE_UP
+    elif clicked_btn == self.CN_DOWN:
+      action = ActionCN.MOVE_DOWN
+    elif clicked_btn == self.CN_LEFT:
+      action = ActionCN.MOVE_LEFT
+    elif clicked_btn == self.CN_RIGHT:
+      action = ActionCN.MOVE_RIGHT
+    elif clicked_btn == self.CN_PICKUP:
+      action = ActionCN.PICKUP
+    elif clicked_btn == self.CN_HANDOVER:
+      action = ActionCN.HANDOVER
+    
     game = user_game_data.get_game_ref()
+    # should not happen
+    assert action is not None
+    assert not game.is_finished()
+
+    game.event_input(self._CN, action, None)
+    game.event_input(self._SN, ActionSN.STAY, None)
+    game.event_input(self._AS, ActionAS.STAY, None)
 
     # take actions
     map_agent2action = game.get_joint_action()
