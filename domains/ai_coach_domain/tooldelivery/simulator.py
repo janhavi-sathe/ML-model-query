@@ -167,6 +167,10 @@ class ToolDeliverySimulator(Simulator):
     else:
       dict_agent_action[self.AS] = get_action_impl(self.AS)
 
+    self.CN_action = None
+    self.SN_action = None
+    self.AS_action = None
+
     return dict_agent_action
 
   def reset_game(self):
