@@ -1,4 +1,4 @@
-from typing import Sequence, Tuple, Any
+from typing import Sequence, Tuple, Any, Union
 import ai_coach_domain.tool_handover.define as tho
 from copy import deepcopy
 
@@ -6,8 +6,9 @@ from copy import deepcopy
 def tool_handover_transition(
     patient_state: tho.PatientState, surgeon_sight: tho.SurgeonSight,
     surgical_step: tho.SurgicalStep, nurse_hand: tho.Tool_Location,
-    list_tool_types: Sequence[tho.Tool_Type],
+    tool_for_now: Union[None, tho.Tool_Type],
     list_tool_locations: Sequence[tho.Tool_Location],
+    list_tool_types: Sequence[tho.Tool_Type],
     surgeon_action: Tuple[tho.SurgeonAction,
                           Any], nurse_action: Tuple[tho.NurseAction, Any]):
 
@@ -16,7 +17,7 @@ def tool_handover_transition(
   # terminal state
   if surgical_step == tho.SURGICAL_STEP_TERMINAL:
     return [(1.0, patient_state, surgeon_sight, surgical_step, nurse_hand,
-             list_tool_locations)]
+             tool_for_now, list_tool_locations)]
 
   P_STABLE2BAD = 0.3
   P_BAD2STABLE = 0.3
@@ -43,15 +44,30 @@ def tool_handover_transition(
   else:
     dist_surgeon_sight.append((1.0, surgeon_sight))
 
+  # get tool at location
+  def get_tool_idx(location, tool_locations):
+    for idx in range(len(tool_locations)):
+      if tool_locations[idx] == location:
+        return idx
+    return None
+
   # surgical step changes when surgeon perform next_step action
   # TODO: if surgeon is not holding the correct tool, make the task not proceed to next step.
   # TODO: correct tools depend on patient state and surgical step
   P_PROCEED = 0.3
+  tidx_with_surgeon = get_tool_idx(tho.Tool_Location.Surgeon,
+                                   list_tool_locations)
+  if tidx_with_surgeon is None:
+    surgeon_tool = None
+  else:
+    surgeon_tool = list_tool_types[tidx_with_surgeon]
+
   dist_surgical_step = []
-  if surgeon_action[0] == tho.SurgeonAction.Next_Step:
+  if (surgeon_action[0] == tho.SurgeonAction.Next_Step
+      and surgeon_tool == tool_for_now):
     if surgical_step.value < len(tho.SurgicalStep):
       next_surgical_step = tho.SURGICAL_STEP_TERMINAL
-      if surgical_step.value == len(tho.SurgicalStep) - 1:
+      if surgical_step.value < len(tho.SurgicalStep) - 1:
         next_surgical_step = tho.SurgicalStep(surgical_step.value + 1)
 
       dist_surgical_step.append((P_PROCEED, next_surgical_step))
@@ -69,13 +85,6 @@ def tool_handover_transition(
     dist_nurse_hand.append((1 - P_HANDMOVE, nurse_hand))
   else:
     dist_nurse_hand.append((1.0, nurse_hand))
-
-  # get tool at location
-  def get_tool_idx(location, tool_locations):
-    for idx in range(len(tool_locations)):
-      if tool_locations[idx] == location:
-        return idx
-    return None
 
   # tool state changes according to nurse pick-up, nurse drop and surgeon handover actions
   P_TOOLMOVE = 1.0
@@ -110,7 +119,15 @@ def tool_handover_transition(
           for p_tool, s_tool in dist_tool_state:
             prop = p_pat * p_sight * p_step * p_hand * p_tool
             if prop > 0:
+              # the tool for now is different depending on s_pat and s_step
+              if s_step == tho.SURGICAL_STEP_TERMINAL:
+                idx_tool = 0
+              else:
+                idx_tool = s_step.value * len(tho.PatientState) + s_pat.value
+                idx_tool = idx_tool % len(tho.TOOL_FOR_CUR_STEP)
+              s_tool_fornow = tho.TOOL_FOR_CUR_STEP[idx_tool]
+
               list_p_state.append(
-                  (prop, s_pat, s_sight, s_step, s_hand, s_tool))
+                  (prop, s_pat, s_sight, s_step, s_hand, s_tool_fornow, s_tool))
 
   return list_p_state

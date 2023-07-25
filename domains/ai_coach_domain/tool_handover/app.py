@@ -26,6 +26,7 @@ class ToolHandoverApp(AppInterface):
     self.patient_position = (190, 120, 200, 80)
     self.table_position = (60, 110, 120, 120)
     self.label_text = (270, 20)
+    self.label_text2 = (270, 35)
 
     self.tool_sz = 30
     self.table_part1 = (self.table_position[0] - 20,
@@ -68,6 +69,17 @@ class ToolHandoverApp(AppInterface):
       agent_id = ToolHandoverSimulator.Nurse
       action = (tho.NurseAction.Move_hand, tho.Tool_Location.Surgeon)
 
+    # surgeon action
+    if key_sym == "j":
+      agent_id = ToolHandoverSimulator.Surgeon
+      action = (tho.SurgeonAction.Change_View, None)
+    elif key_sym == "h":
+      agent_id = ToolHandoverSimulator.Surgeon
+      action = (tho.SurgeonAction.Handover, None)
+    elif key_sym == "n":
+      agent_id = ToolHandoverSimulator.Surgeon
+      action = (tho.SurgeonAction.Next_Step, None)
+
     return (agent_id, action, value)
 
   def _conv_mouse_to_agent_event(
@@ -89,6 +101,7 @@ class ToolHandoverApp(AppInterface):
     surgeon_sight = data["surgeon_sight"]
     surgical_step = data["surgical_step"]
     nurse_hand = data["nurse_hand"]
+    tool_fornow = data["tool_fornow"]
     tool_locations = data["tool_locations"]
     current_step = data["current_step"]
 
@@ -179,6 +192,12 @@ class ToolHandoverApp(AppInterface):
     self.create_line(*arm_st, *mid_coord, "red", 3)
     self.create_line(*mid_coord, *hand_coord, "red", 3)
     self.create_circle(*hand_coord, hand_sz, "red")
+
+    # tool for now
+    text_tool = "None"
+    if tool_fornow is not None:
+      text_tool = tool_fornow.name
+    self.create_text(*self.label_text2, text_tool)
 
 
 if __name__ == "__main__":

@@ -221,6 +221,9 @@ class ToolDeliverySimulator(Simulator):
     pass
 
   def is_finished(self) -> bool:
+    if super().is_finished():
+      return True
+
     state_vector = self.mmdp.np_idx_to_state[self.state_idx]
     sScal_p, sSut_p, sScal_s, sSut_s, sPat, sPos, sAsk = state_vector
 
