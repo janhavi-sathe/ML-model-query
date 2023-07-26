@@ -15,7 +15,7 @@ class ToolHandoverSimulator(Simulator):
 
     self.list_tool_types = list(tho.Tool_Type)
     self.mmdp = MDP_ToolHandover(self.list_tool_types)
-    self.max_steps = 50
+    self.max_steps = 150
 
   def init_game(self):
     self.reset_game()
@@ -28,6 +28,7 @@ class ToolHandoverSimulator(Simulator):
     self.surgeon_sight = tho.SurgeonSight.Patient
     self.surgical_step = tho.SurgicalStep.Step_0
     self.nurse_hand = tho.Tool_Location.Surgeon
+    self.tool_fornow = tho.TOOL_FOR_CUR_STEP[0]
 
     self.tool_locations = [
         tho.Tool_Location.Table_1, tho.Tool_Location.Table_2,
@@ -46,14 +47,14 @@ class ToolHandoverSimulator(Simulator):
     action_idx = self.mmdp.conv_sim_actions_to_mdp_aidx(tup_actions)
 
     tup_state = (self.patient_state, self.surgeon_sight, self.surgical_step,
-                 self.nurse_hand, self.tool_locations)
+                 self.nurse_hand, self.tool_fornow, self.tool_locations)
     state_idx = self.mmdp.conv_sim_states_to_mdp_sidx(tup_state)
 
     self.history.append((tup_state, tup_actions, None))
 
     next_state_idx = self.mmdp.transition(state_idx, action_idx)
     (self.patient_state, self.surgeon_sight, self.surgical_step,
-     self.nurse_hand, self.tool_locations
+     self.nurse_hand, self.tool_fornow, self.tool_locations
      ) = self.mmdp.conv_mdp_sidx_to_sim_states(next_state_idx)
     self.current_step += 1
 
@@ -84,8 +85,11 @@ class ToolHandoverSimulator(Simulator):
     return dict_agent_action
 
   def is_finished(self) -> bool:
+    if super().is_finished():
+      return True
+
     tup_state = (self.patient_state, self.surgeon_sight, self.surgical_step,
-                 self.nurse_hand, self.tool_locations)
+                 self.nurse_hand, self.tool_fornow, self.tool_locations)
 
     state_idx = self.mmdp.conv_sim_states_to_mdp_sidx(tup_state)
     return self.mmdp.is_terminal(state_idx)
@@ -99,6 +103,7 @@ class ToolHandoverSimulator(Simulator):
     env_info["surgeon_sight"] = self.surgeon_sight
     env_info["surgical_step"] = self.surgical_step
     env_info["nurse_hand"] = self.nurse_hand
+    env_info["tool_fornow"] = self.tool_fornow
     env_info["tool_locations"] = self.tool_locations
     env_info["current_step"] = self.current_step
 

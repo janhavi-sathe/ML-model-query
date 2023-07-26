@@ -43,6 +43,8 @@ NURSE_HAND_POSITIONS = [
     Tool_Location(idx) for idx in range(1, len(Tool_Location))
 ]
 
+TOOL_FOR_CUR_STEP = [None] + list(Tool_Type)
+
 
 # mental state: no_need_tool / tool1_in_need / tool2_in_need / ...
 class MentalState(Enum):

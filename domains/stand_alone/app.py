@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter.filedialog import askopenfilename
 from ai_coach_domain.simulator import Simulator
 from PIL import Image, ImageTk
+import threading
 
 
 # TODO: game configuration ui / logic
@@ -24,6 +25,7 @@ class AppInterface(abc.ABC):
     self._trajectory = None
     self._current_step = 0
     self.cached_images = {}
+    self._key_timer = None
 
   def run(self):
     self.main_window.mainloop()
@@ -156,26 +158,44 @@ class AppInterface(abc.ABC):
       cursor_pos: Tuple[float, float]) -> Tuple[Hashable, Hashable, Hashable]:
     return None, None, None
 
+  def _process_key_event_in_game(self):
+    action_map = self.game.get_joint_action()
+    self.game.take_a_step(action_map)
+
+    if not self.game.is_finished():
+      # update canvas
+      self._update_ctrl_ui()
+      self._update_canvas_scene()
+      self._update_canvas_overlay()
+      # pop-up for latent?
+    else:
+      self._on_game_end()
+
   def _on_key_pressed(self, key_event):
     if not self._started:
       return
 
     agent, e_type, e_value = self._conv_key_to_agent_event(key_event.keysym)
     self.game.event_input(agent, e_type, e_value)
-    if self._event_based:
-      action_map = self.game.get_joint_action()
-      self.game.take_a_step(action_map)
 
-      if not self.game.is_finished():
-        # update canvas
-        self._update_ctrl_ui()
-        self._update_canvas_scene()
-        self._update_canvas_overlay()
-        # pop-up for latent?
-      else:
-        self._on_game_end()
-    else:
-      pass
+    if self._key_timer is None or not self._key_timer.is_alive():
+      self._key_timer = threading.Timer(0.03, self._process_key_event_in_game)
+      self._key_timer.start()
+
+    # if self._event_based:
+    #   action_map = self.game.get_joint_action()
+    #   self.game.take_a_step(action_map)
+
+    #   if not self.game.is_finished():
+    #     # update canvas
+    #     self._update_ctrl_ui()
+    #     self._update_canvas_scene()
+    #     self._update_canvas_overlay()
+    #     # pop-up for latent?
+    #   else:
+    #     self._on_game_end()
+    # else:
+    #   pass
 
   def _on_mouse_l_btn_clicked(self, event):
     if not self._started:

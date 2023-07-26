@@ -17,11 +17,13 @@ class MDP_ToolHandover(LatentMDP):
     self.statespace_surgeon_sight = StateSpace(tho.SurgeonSight)
     self.statespace_surgical_step = StateSpace(tho.SurgicalStep)
     self.statespace_nurse_hand = StateSpace(tho.NURSE_HAND_POSITIONS)
+    self.statespace_tool_for_now = StateSpace(tho.TOOL_FOR_CUR_STEP)
     self.dict_factored_statespace = {
         0: self.statespace_patient_state,
         1: self.statespace_surgeon_sight,
         2: self.statespace_surgical_step,
-        3: self.statespace_nurse_hand
+        3: self.statespace_nurse_hand,
+        4: self.statespace_tool_for_now
     }
 
     self.idx_tool_start = len(self.dict_factored_statespace)
@@ -44,18 +46,16 @@ class MDP_ToolHandover(LatentMDP):
     self.latent_space = tho.MENTAL_STATESPACE
 
   def conv_sim_states_to_mdp_sidx(self, tup_states):
-    pat_state, sight, step, hand, tools = tup_states
-
     # terminal state
-    if step == tho.SURGICAL_STEP_TERMINAL:
+    if tup_states[2] == tho.SURGICAL_STEP_TERMINAL:
       return self.conv_dummy_state_to_idx(tho.SURGICAL_STEP_TERMINAL)
 
-    pat_sidx = self.statespace_patient_state.state_to_idx[pat_state]
-    sight_sidx = self.statespace_surgeon_sight.state_to_idx[sight]
-    step_sidx = self.statespace_surgical_step.state_to_idx[step]
-    hand_sidx = self.statespace_nurse_hand.state_to_idx[hand]
+    list_sidx = []
+    for idx in range(self.idx_tool_start):
+      list_sidx.append(
+          self.dict_factored_statespace[idx].state_to_idx[tup_states[idx]])
 
-    list_sidx = [pat_sidx, sight_sidx, step_sidx, hand_sidx]
+    tools = tup_states[self.idx_tool_start]
     for idx in range(len(tools)):
       list_sidx.append(
           self.dict_factored_statespace[self.idx_tool_start +
@@ -65,20 +65,24 @@ class MDP_ToolHandover(LatentMDP):
 
   def conv_mdp_sidx_to_sim_states(self, state_idx):
     if self.is_dummy_state(state_idx):
-      return None, None, self.conv_idx_to_dummy_state(state_idx), None, None
+      list_dummy = [None] * (self.idx_tool_start + 1)
+      list_dummy[2] = self.conv_idx_to_dummy_state(state_idx)
+      return tuple(list_dummy)
 
     state_vec = self.conv_idx_to_state(state_idx)
-    pat = self.statespace_patient_state.idx_to_state[state_vec[0]]
-    sight = self.statespace_surgeon_sight.idx_to_state[state_vec[1]]
-    step = self.statespace_surgical_step.idx_to_state[state_vec[2]]
-    hand = self.statespace_nurse_hand.idx_to_state[state_vec[3]]
+    list_states = []
+    for idx in range(self.idx_tool_start):
+      list_states.append(
+          self.dict_factored_statespace[idx].idx_to_state[state_vec[idx]])
 
     tools = []
     for idx in range(self.idx_tool_start, len(state_vec)):
       tools.append(
           self.dict_factored_statespace[idx].idx_to_state[state_vec[idx]])
 
-    return pat, sight, step, hand, tools
+    list_states.append(tools)
+
+    return tuple(list_states)
 
   def conv_sim_actions_to_mdp_aidx(self, tuple_actions):
     list_aidx = []
@@ -100,17 +104,16 @@ class MDP_ToolHandover(LatentMDP):
     if self.is_terminal(state_idx):
       return np.array([[1.0, state_idx]])
 
-    pat, sight, step, hand, tools = self.conv_mdp_sidx_to_sim_states(state_idx)
+    tup_states = self.conv_mdp_sidx_to_sim_states(state_idx)
     surgeon_act, nurse_act = self.conv_mdp_aidx_to_sim_actions(action_idx)
-    list_p_next_env = tool_handover_transition(pat, sight, step, hand,
-                                               self.list_tool_types, tools,
+    list_p_next_env = tool_handover_transition(*tup_states,
+                                               self.list_tool_types,
                                                surgeon_act, nurse_act)
 
     map_next_state = {}
-    for prop, s_pat, s_sight, s_step, s_hand, s_tool in list_p_next_env:
-      sidx_n = self.conv_sim_states_to_mdp_sidx(
-          [s_pat, s_sight, s_step, s_hand, s_tool])
-      map_next_state[sidx_n] = map_next_state.get(sidx_n, 0) + prop
+    for item in list_p_next_env:
+      sidx_n = self.conv_sim_states_to_mdp_sidx(item[1:])
+      map_next_state[sidx_n] = map_next_state.get(sidx_n, 0) + item[0]
 
     list_next_p_state = []
     for key in map_next_state:
@@ -126,9 +129,9 @@ class MDP_ToolHandover(LatentMDP):
     if self.is_terminal(state_idx):
       return []
 
-    pat, sight, step, hand, tools = self.conv_mdp_sidx_to_sim_states(state_idx)
+    tup_states = self.conv_mdp_sidx_to_sim_states(state_idx)
     # if surgeon is looking at patient, they can't indicate a tool.
-    if sight == tho.SurgeonSight.Patient:
+    if tup_states[1] == tho.SurgeonSight.Patient:
       possible_actions = []
       for aidx in range(self.num_actions):
         surgeon_action, nurse_action = self.conv_mdp_aidx_to_sim_actions(aidx)
