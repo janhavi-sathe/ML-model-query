@@ -74,6 +74,16 @@ IMG_STORAGE = "storage"
 IMG_SURGEON = "surgeon"
 IMG_TABLE = "table"
 
+# images for toolhandover domain
+IMG_NURSE = "nurse"
+IMG_SURGEON = "surgeon"
+IMG_TABLE = "table"
+IMG_PATIENT = "patient"
+IMG_FORCEPS = "forceps"
+IMG_SCALPEL = "scalpel"
+IMG_SCISSORS = "scissors"
+IMG_SUTURE = "suture"
+
 ################################################################################
 # Classes here should always match with corresponding javascript classes
 ################################################################################

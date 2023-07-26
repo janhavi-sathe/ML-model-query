@@ -4,7 +4,7 @@ from web_experiment.define import EDomainType
 from web_experiment.exp_common.page_base import ExperimentPageBase
 import web_experiment.exp_common.page_exp1_common as pgc
 from web_experiment.demo.pages import (BoxPushV2Demo, RescueDemo, RescueV2Demo,
-                                       ToolDeliveryDemo)
+                                       ToolDeliveryDemo, ToolHandoverDemo)
 
 
 class E_SessionName(Enum):
@@ -17,6 +17,7 @@ class E_SessionName(Enum):
   Blackout_full_dcol = 6
   Blackout_partial_dcol = 7
   ToolDelivery = 8
+  ToolHandover = 9
 
 
 SESSION_TITLE = {
@@ -29,6 +30,7 @@ SESSION_TITLE = {
     E_SessionName.Blackout_full_dcol: 'Blackout - Fully Observable',
     E_SessionName.Blackout_partial_dcol: 'Blackout - Partially Observable',
     E_SessionName.ToolDelivery: 'ToolDelivery',
+    E_SessionName.ToolHandover: 'ToolHandover'
 }
 
 PAGE_LIST_MOVERS_FULL_OBS = [
@@ -73,6 +75,11 @@ PAGE_LIST_TOOLDELIVERY = [
     ToolDeliveryDemo(False),
 ]
 
+PAGE_LIST_TOOLHANDOVER = [
+    pgc.CanvasPageStart(EDomainType.ToolHandover),
+    ToolHandoverDemo(False),
+]
+
 GAMEPAGES = {
     E_SessionName.Movers_full_dcol: PAGE_LIST_MOVERS_FULL_OBS,
     E_SessionName.Movers_partial_dcol: PAGE_LIST_MOVERS,
@@ -83,4 +90,5 @@ GAMEPAGES = {
     E_SessionName.Blackout_full_dcol: PAGE_LIST_BLACKOUT_FULL_OBS,
     E_SessionName.Blackout_partial_dcol: PAGE_LIST_BLACKOUT,
     E_SessionName.ToolDelivery: PAGE_LIST_TOOLDELIVERY,
+    E_SessionName.ToolHandover: PAGE_LIST_TOOLHANDOVER
 }  # type: Mapping[E_SessionName, Sequence[ExperimentPageBase]]

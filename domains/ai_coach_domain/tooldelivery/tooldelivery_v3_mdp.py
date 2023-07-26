@@ -93,6 +93,7 @@ class ToolDeliveryMDP_V3(MDP):
     self._raise_exception_if_illegal_T(sScal_p, sSut_p, sScal_s, sSut_s, sPat,
                                        sCNPos, sAsk, aCN, aSN, aAS)
 
+    # get distributions of next state for scalpel and suture
     np_next_p_sScal_p = self._T_sTool(tool_nm=T3SA.ToolNames.SCALPEL_P,
                                       sTool=sScal_p,
                                       sCNPos=sCNPos,
@@ -154,6 +155,7 @@ class ToolDeliveryMDP_V3(MDP):
 
     return np_next_p_state_idx
 
+  # get distribution of next patient state based on current state and action
   def _T_sPatient(self, sPat, aAS):
     state = self.sPatient_space.idx_to_state[sPat]
     action = self.aAS_space.idx_to_action[aAS]
@@ -178,6 +180,7 @@ class ToolDeliveryMDP_V3(MDP):
     # otherwise, patient status doesn't change
     return np.array([[1., sPat]])
 
+  # check if valid action given state
   def _raise_exception_if_illegal_T(self, sScal_p, sSut_p, sScal_s, sSut_s,
                                     sPatient, sCNPos, sAsked, aCN, aSN, aAS):
     coord_cn = self.sCNPos_space.idx_to_state[sCNPos]
@@ -233,6 +236,7 @@ class ToolDeliveryMDP_V3(MDP):
     if (act_as == T3SA.ActionAS.USE_SUTURE and suture_p_loc != T3SA.ToolLoc.AS):
       raise InvalidTransitionError
 
+  # for given tool get distributions
   def _T_sTool(self, tool_nm, sTool, sCNPos, aCN, aSN, aAS):
     tool_loc = self.dict_sTools_space[tool_nm].idx_to_state[sTool]
     coord_cn = self.sCNPos_space.idx_to_state[sCNPos]
@@ -278,7 +282,7 @@ class ToolDeliveryMDP_V3(MDP):
       return np.array(list_next_p_sTool)
     else:
       return np.array([[1.0, sTool]])
-
+  # get distribution for next CN pos
   def _T_sCNPos(self, sCNPos, aCN):
     coord_cn = self.sCNPos_space.idx_to_state[sCNPos]
     action_cn = self.aCN_space.idx_to_action[aCN]
@@ -320,6 +324,7 @@ class ToolDeliveryMDP_V3(MDP):
         T3SA.ActionCN.MOVE_RIGHT
     ]
 
+    # if not a move then next state will have same CN pos
     if action_cn not in cn_move_actions:
       return np.array([[1., sCNPos]])
     else:
@@ -338,6 +343,7 @@ class ToolDeliveryMDP_V3(MDP):
 
       return np.array([[1., self.sCNPos_space.state_to_idx[new_coord]]])
 
+  # get distribution for next asked state
   def _T_sAsked(self, sAsked, aSN):
     state = self.sAsked_space.idx_to_state[sAsked]
     action = self.aSN_space.idx_to_action[aSN]

@@ -27,6 +27,7 @@ class EDomainType(Enum):
   Rescue = 2
   Blackout = 3
   ToolDelivery = 4
+  ToolHandover = 5
 
 
 class EMode(Enum):

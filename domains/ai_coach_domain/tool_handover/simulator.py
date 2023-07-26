@@ -8,6 +8,7 @@ import ai_coach_domain.tool_handover.define as tho
 class ToolHandoverSimulator(Simulator):
   Surgeon = 0
   Nurse = 1
+  score = 0
 
   def __init__(self) -> None:
     super().__init__(0)

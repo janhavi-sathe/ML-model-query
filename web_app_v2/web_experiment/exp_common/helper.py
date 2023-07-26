@@ -7,6 +7,7 @@ from ai_coach_domain.box_push import conv_box_idx_2_state, BoxState
 from ai_coach_domain.rescue import (Place, Route, Location, E_Type, PlaceName,
                                     Work, is_work_done)
 import ai_coach_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
+import ai_coach_domain.tool_handover.define as tho
 import web_experiment.exp_common.canvas_objects as co
 
 
@@ -928,3 +929,217 @@ def tooldelivery_game_scene_names(game_env: Mapping[str, Any],
 #       drawing_names.append(img_name)
 
 #   return drawing_names
+
+# TOOL HANDOVER HELPERS
+def toolhandover_game_scene(game_env: Mapping[str, Any],
+                            game_ltwh: Tuple[int, int, int, int],
+                            include_background: bool = True,
+                            cb_is_visible: Callable[[
+                                co.DrawingObject], bool] = None
+                            ) -> List[co.DrawingObject]:
+  game_left, game_top, game_width, game_height = game_ltwh
+
+  # the / 10 and / 5 are hardcoded as 10 x units and 5 y units made up the canvas in the standalone app
+  def coord_2_canvas(coord_x, coord_y):
+    # x = int(game_left + coord_x / 10 * game_width)
+    # y = int(game_top + coord_y / 5 * game_height)
+    x = int(game_left + coord_x)
+    y = int(game_top + coord_y)
+    return (x, y)
+
+  def size_2_canvas(width, height):
+    # w = int(width / 10 * game_width)
+    # h = int(height / 5 * game_height)
+    w = width
+    h = height
+    return (w, h)
+
+  # place_w = 0.12
+  # place_h = 0.12
+
+  game_objs = []
+
+  # game_objs.append(co.Rectangle("Background", (game_left, game_top), (game_width, game_height), "blue", "green", 0.5))
+
+  def draw_pos_size_obj(pos_size, obj_name):
+    x, y, w, h = pos_size
+
+    obj = co.GameObject(obj_name, (x, y),
+                        (w, h), 0, obj_name)
+    if cb_is_visible is None or cb_is_visible(obj):
+      game_objs.append(obj)
+
+  icon_sz = 80
+  nurse_position = (150, 60, icon_sz, icon_sz)
+  surgeon_position = (220, 60, icon_sz, icon_sz)
+  patient_position = (190, 120, 200, 80)
+  table_position = (60, 110, 120, 120)
+  label_text = (270, 20)
+
+  tool_sz = 30
+  table_part1 = (table_position[0] - 20,
+                        table_position[1] - 35, tool_sz, tool_sz)
+  table_part2 = (table_position[0] + 20,
+                        table_position[1] - 35, tool_sz, tool_sz)
+  table_part3 = (table_position[0] - 20,
+                        table_position[1] - 10, tool_sz, tool_sz)
+  table_part4 = (table_position[0] + 20,
+                        table_position[1] - 10, tool_sz, tool_sz)
+
+  tool_types = game_env["tool_types"]
+  patient_state = game_env["patient_state"]
+  surgeon_sight = game_env["surgeon_sight"]
+  surgical_step = game_env["surgical_step"]
+  nurse_hand = game_env["nurse_hand"]
+  tool_locations = game_env["tool_locations"]
+  current_step = game_env["current_step"]
+
+  # background
+  draw_pos_size_obj(nurse_position, co.IMG_NURSE)
+  draw_pos_size_obj(surgeon_position, co.IMG_SURGEON)
+  draw_pos_size_obj(patient_position, co.IMG_PATIENT)
+  draw_pos_size_obj(table_position, co.IMG_TABLE)
+
+  # tools
+  for idx, ttype in enumerate(tool_types):
+    if ttype == tho.Tool_Type.Tool_1:
+      image_file = "scalpel.png"
+    elif ttype == tho.Tool_Type.Tool_2:
+      image_file = "suture.png"
+    elif ttype == tho.Tool_Type.Tool_3:
+      image_file = "forceps.png"
+    elif ttype == tho.Tool_Type.Tool_4:
+      image_file = "scissors.png"
+
+    if tool_locations[idx] == tho.Tool_Location.Nurse:
+      img_pos = (nurse_position[0] + 20, nurse_position[1] - 20,
+                  tool_sz, tool_sz)
+    elif tool_locations[idx] == tho.Tool_Location.Surgeon:
+      img_pos = (surgeon_position[0] + 20, surgeon_position[1] - 20,
+                  tool_sz, tool_sz)
+    elif tool_locations[idx] == tho.Tool_Location.Table_1:
+      img_pos = table_part1
+    elif tool_locations[idx] == tho.Tool_Location.Table_2:
+      img_pos = table_part2
+    elif tool_locations[idx] == tho.Tool_Location.Table_3:
+      img_pos = table_part3
+    elif tool_locations[idx] == tho.Tool_Location.Table_4:
+      img_pos = table_part4
+
+    draw_pos_size_obj(img_pos, ttype.name)
+
+  # surgical step
+  game_objs.append(co.TextObject("surgical_step", label_text, size_2_canvas(80, 10)[0], 10, surgical_step.name))
+
+  # patient state
+  game_objs.append(co.TextObject("patient_state", patient_position, size_2_canvas(80, 10)[0], 10, patient_state.name))
+
+  # surgeon sight
+  if surgeon_sight == tho.SurgeonSight.Patient:
+    game_objs.append(co.LineSegment("sight0", (surgeon_position[0] - 5,
+                      surgeon_position[1] - 10), (patient_position[0],
+                      patient_position[1])))
+    game_objs.append(co.LineSegment("sight1", (surgeon_position[0] + 5, surgeon_position[1] - 10), (patient_position[0] + 0.3 * patient_position[2],
+        patient_position[1])))
+  else:
+    game_objs.append(co.LineSegment("sight0", (surgeon_position[0] - 5,
+                      surgeon_position[1] - 15),
+                      (table_position[0] + 0.3 * table_position[2],
+                      table_position[1] - 0.4 * table_position[3])))
+    game_objs.append(co.LineSegment("sight1", (surgeon_position[0] - 5,
+                      surgeon_position[1] - 10),
+                      (table_position[0] + 0.3 * table_position[2],
+                      table_position[1])))
+
+  # nurse hand
+  arm_st = (nurse_position[0] - 25, nurse_position[1] + 10)
+  hand_sz = 5
+  if nurse_hand == tho.Tool_Location.Surgeon:
+    hand_coord = (surgeon_position[0] - 30, surgeon_position[1])
+  elif nurse_hand == tho.Tool_Location.Table_1:
+    hand_coord = (table_part1[0] + 15, table_part1[1] - 5)
+  elif nurse_hand == tho.Tool_Location.Table_2:
+    hand_coord = (table_part2[0] + 15, table_part2[1] - 5)
+  elif nurse_hand == tho.Tool_Location.Table_3:
+    hand_coord = (table_part3[0] + 15, table_part3[1] - 5)
+  elif nurse_hand == tho.Tool_Location.Table_4:
+    hand_coord = (table_part4[0] + 15, table_part4[1] - 5)
+
+  mid_coord = (int(0.5 * (hand_coord[0] + arm_st[0])),
+                int(0.5 * (hand_coord[1] + arm_st[1])) + 10)
+
+  game_objs.append(co.LineSegment("upper arm", arm_st, mid_coord, "red", 3))
+  game_objs.append(co.LineSegment("lower arm", mid_coord, hand_coord, "red", 3))
+  game_objs.append(co.Circle("hand", hand_coord, hand_sz, "red"))
+
+  return game_objs
+
+def toolhandover_game_scene_names(game_env: Mapping[str, Any],
+                            cb_is_visible: Callable[[
+                                co.DrawingObject], bool] = None
+                            ) -> List:
+  drawing_names = []
+  # drawing_names.append("Background")
+
+  tool_types = game_env["tool_types"]
+  patient_state = game_env["patient_state"]
+  surgeon_sight = game_env["surgeon_sight"]
+  surgical_step = game_env["surgical_step"]
+  nurse_hand = game_env["nurse_hand"]
+  tool_locations = game_env["tool_locations"]
+  current_step = game_env["current_step"]
+
+  # background
+  drawing_names.append(co.IMG_NURSE)
+  drawing_names.append(co.IMG_SURGEON)
+  drawing_names.append(co.IMG_PATIENT)
+  drawing_names.append(co.IMG_TABLE)
+
+  # tools
+  for idx, ttype in enumerate(tool_types):
+    drawing_names.append(ttype.name)
+
+  # surgical step
+  drawing_names.append("surgical_step")
+  # patient state
+  drawing_names.append("patient_state")
+
+  # surgeon sight
+  drawing_names.append("sight0")
+  drawing_names.append("sight1")
+  
+  # nurse hand
+  drawing_names.append("upper arm")
+  drawing_names.append("lower arm")
+  drawing_names.append("hand")
+
+  return drawing_names
+
+# def tooldelivery_game_scene_names(game_env: Mapping[str, Any],
+#                             cb_is_visible: Callable[[
+#                                 co.DrawingObject], bool] = None
+#                             ) -> List:
+#   drawing_names = []
+#   # drawing_names.append("Background")
+
+#   for idx, _ in enumerate(game_env["Walls"]):
+#     img_name = f"Wall{idx}"
+#     if cb_is_visible is None or cb_is_visible(img_name):
+#       drawing_names.append(img_name)
+
+#   drawing_names.append(co.IMG_SCRUB)
+#   drawing_names.append(co.IMG_SURGEON)
+#   drawing_names.append(co.IMG_PATIENT)
+#   drawing_names.append(co.IMG_PERF)
+#   drawing_names.append(co.IMG_ANES)
+#   drawing_names.append(co.IMG_CABINET)
+#   drawing_names.append(co.IMG_STORAGE)
+
+#   drawing_names.append(co.IMG_SCALPEL_STORED)
+#   drawing_names.append(co.IMG_SCALPEL_PREPARED)
+#   drawing_names.append(co.IMG_SUTURE_STORED)
+#   drawing_names.append(co.IMG_SUTURE_PREPARED)
+#   drawing_names.append(co.IMG_CIRCULATING)
+
+#   return drawing_names
+

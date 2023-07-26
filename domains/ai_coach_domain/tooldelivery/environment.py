@@ -65,8 +65,11 @@ class Environment:
     # print(self.mmdp.num_agents)
     # print(len(tuple_latstates))
     list_sequence = []
+    # observed? state index
     obstate_idx = start_state_idx
+    # in original sim CN maps to one brain and SN and AS map to another shared brain
     list_lat_states = [None for dummy_i in range(self.num_brains)]
+
     for dummy_i in range(timeout):
       if self.is_terminal_state(obstate_idx):
         break
@@ -78,8 +81,10 @@ class Environment:
           list_lat_states = list(lat_states)
 
       each_agent_action = []
+      # for each agent generate random action
       for i_a in range(self.mmdp.num_agents):
         brain_idx = self.map_agent_2_brain[i_a]
+        # create probability distribution of next action vector
         np_p_action = self.policy.pi(obstate_idx, list_lat_states[brain_idx])
         action_choice = np.random.choice(np_p_action[:, 1],
                                          1,
@@ -88,11 +93,13 @@ class Environment:
             np.int32)]
         each_agent_action.append(action_vector[i_a])
 
+      # convert chosen actions to corresponding index
       action_idx = self.mmdp.np_action_to_idx[tuple(each_agent_action)]
       list_sequence.append((obstate_idx, action_idx))
       # self.print_obstate(obstate_idx)
       # self.print_action(action_idx)
 
+      # generate next state index based off of current state and action
       np_next_p_state_idx = self.mmdp.transition_model(obstate_idx, action_idx)
       state_choice = np.random.choice(np_next_p_state_idx[:, 1],
                                       1,
@@ -119,6 +126,7 @@ class Environment:
 
     return list_sequence, list_lat_states
 
+  # print actual state values from state index by accessing each factor's statespace
   def print_obstate(self, obstate_idx):
     state_vector = self.mmdp.np_idx_to_state[obstate_idx]
     num_factors = len(state_vector)
@@ -129,6 +137,7 @@ class Environment:
 
     print(*list_state, sep='; ')
 
+  # print actual action values from action index by accessing each factor's statespace
   def print_action(self, action_idx):
     if action_idx < 0:
       print("None")

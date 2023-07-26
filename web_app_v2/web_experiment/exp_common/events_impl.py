@@ -64,6 +64,19 @@ def get_imgs(domain_type: EDomainType):
         {'name': co.IMG_TABLE, 'src': url_for('static', filename='tooldelivery_images/table.png')},  # noqa: E501
     ]
     # yapf: enable
+  elif domain_type == EDomainType.ToolHandover:
+    # yapf: disable
+    imgs = [
+        {'name': co.IMG_FORCEPS, 'src': url_for('static', filename='toolhandover_images/forceps.png')},  # noqa: E501
+        {'name': co.IMG_NURSE, 'src': url_for('static', filename='toolhandover_images/nurse.png')},  # noqa: E501
+        {'name': co.IMG_PATIENT, 'src': url_for('static', filename='toolhandover_images/patient.png')},  # noqa: E501
+        {'name': co.IMG_SCALPEL, 'src': url_for('static', filename='toolhandover_images/scalpel.png')},  # noqa: E501
+        {'name': co.IMG_SCISSORS, 'src': url_for('static', filename='toolhandover_images/scissors.png')},  # noqa: E501
+        {'name': co.IMG_SURGEON, 'src': url_for('static', filename='toolhandover_images/surgeon.png')},  # noqa: E501
+        {'name': co.IMG_SUTURE, 'src': url_for('static', filename='toolhandover_images/suture.png')},  # noqa: E501
+        {'name': co.IMG_TABLE, 'src': url_for('static', filename='toolhandover_images/table.png')},  # noqa: E501
+    ]
+    # yapf: enable
   else:
     raise ValueError("invalid domain")
 

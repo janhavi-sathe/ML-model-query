@@ -45,6 +45,8 @@ class ToolDeliverySimulator(Simulator):
         "Walls": self.mmdp.walls
     }
 
+    self.init_game()
+
   def init_game(self):
     self.reset_game()
 
