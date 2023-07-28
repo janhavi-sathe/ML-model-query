@@ -30,7 +30,7 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
   N_MH = tho.NurseAction.Move_hand.name
 
   ACTION_BUTTONS = [S_STAY, S_CV, S_NS, S_HANDOVER, S_GT, S_IT,
-                    # N_STAY, N_PU, N_DROP, N_MH
+                    N_STAY, N_PU, N_DROP, N_MH
                     ]
   # ACTION_BUTTONS = ["next"]
 
@@ -89,16 +89,56 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
       drawing info
     '''
 
-    if clicked_btn in self.ACTION_BUTTONS:
+    if self.is_sel_latent_btn(clicked_btn):
+      latent = self.selbtn2latent(clicked_btn)
+      if latent is not None:
+        game = user_game_data.get_game_ref()
+        if "it" in latent:
+          tool_id = int(latent.split("it")[1])
+          game.event_input(self._S, (tho.SurgeonAction.Indicate_Tool, tho.Tool_Type(tool_id)), None)
+          
+          user_game_data.data[Exp1UserData.SELECT_IT] = False
+        elif "mh" in latent:
+          loc_id = int(latent.split("mh")[1])
+          game.event_input(self._N, (tho.NurseAction.Move_hand, tho.Tool_Location(loc_id)), None)
+          user_game_data.data[Exp1UserData.SELECT_MH] = False
+        
+        # take actions
+        map_agent2action = game.get_joint_action()
+        game.take_a_step(map_agent2action)
+
+        if game.is_finished():
+          self._on_game_finished(user_game_data)
+        return
+    elif clicked_btn == self.S_IT:
+      user_game_data.data[Exp1UserData.SELECT_IT] = True
+      return
+    elif user_game_data.data[Exp1UserData.SELECT_IT]:
+      user_game_data.data[Exp1UserData.SELECT_IT] = False
+      return
+    elif clicked_btn == self.N_MH:
+      user_game_data.data[Exp1UserData.SELECT_MH] = True
+      return
+    elif user_game_data.data[Exp1UserData.SELECT_MH]:
+      user_game_data.data[Exp1UserData.SELECT_MH] = False
+      return
+    elif clicked_btn == self.S_HANDOVER:
+      user_game_data.data[Exp1UserData.S_HANDOVER] = True
+    elif clicked_btn in self.ACTION_BUTTONS:
       _, _, _, done = self.action_event(user_game_data, clicked_btn)
       if done:
         self._on_game_finished(user_game_data)
       return
-
+    
+    # no matter what, turn off handover state
+    # either handover was successful as action was a drop, or not in which we assume the state of the OR is different and thus surgeon doesn't want to handover anymore
+    if clicked_btn != self.S_HANDOVER:
+      user_game_data.data[Exp1UserData.S_HANDOVER] = False
+    
     return super().button_clicked(user_game_data, clicked_btn)
 
   def _get_instruction(self, user_game_data: Exp1UserData):
-    return ("Control the CN with the buttons to progress through the simulation.")
+    return ("Control the Surgeon and Nurse with the buttons to progress through the simulation.")
 
   def _get_drawing_order(self, user_game_data: Exp1UserData):
     dict_game = user_game_data.get_game_ref().get_env_info()
@@ -155,7 +195,7 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
     if surgeon_sight == tho.SurgeonSight.Patient:
       it_ok = False
 
-    return False, False, False, not it_ok, False, False
+    return False, False, False, not it_ok, False, False, False, False, False
 
   def _get_btn_actions(
       self,
@@ -165,7 +205,10 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
       disable_gt: bool = False,
       disable_it: bool = False, 
       disable_stay: bool = False,
-      disable_handover: bool = False) -> Sequence[co.DrawingObject]:
+      disable_handover: bool = False,
+      disable_pu: bool = False,
+      disable_drop: bool = False,
+      disable_mh: bool = False) -> Sequence[co.DrawingObject]:
 
     game_width = self.GAME_WIDTH
     game_right = self.GAME_RIGHT
@@ -174,48 +217,67 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
     x_ctrl_cen = int(game_right + (co.CANVAS_WIDTH - game_right) / 2)
     y_ctrl_cen = int(co.CANVAS_HEIGHT * 0.65)
     x_joy_cen = int(x_ctrl_cen - ctrl_btn_w * 1.5)
-    btn_stay = co.JoystickStay((x_joy_cen, y_ctrl_cen),
-                              ctrl_btn_w,
-                              disable=disable_stay, name=self.S_STAY)
     
     font_size = 20
-    btn_cv = co.ButtonRect(
+    btn_scv = co.ButtonRect(
         self.S_CV,
-        (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen - int(ctrl_btn_w * 1.8)),
-        (ctrl_btn_w * 2, ctrl_btn_w),
+        (x_ctrl_cen - int(ctrl_btn_w * 1.5), y_ctrl_cen - int(ctrl_btn_w * 1.8)),
+        (ctrl_btn_w * 3, ctrl_btn_w),
         font_size,
         "Change View",
         disable=disable_cv)
-    btn_ns = co.ButtonRect(
+    btn_sns = co.ButtonRect(
         self.S_NS,
-        (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen - int(ctrl_btn_w * 0.6)),
-        (ctrl_btn_w * 2, ctrl_btn_w),
+        (x_ctrl_cen - int(ctrl_btn_w * 1.5), y_ctrl_cen - int(ctrl_btn_w * 0.6)),
+        (ctrl_btn_w * 3, ctrl_btn_w),
         font_size,
         "Next Step",
         disable=disable_ns)
-    btn_handover = co.ButtonRect(
+    btn_shandover = co.ButtonRect(
         self.S_HANDOVER,
-        (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen + int(ctrl_btn_w * 0.6)),
-        (ctrl_btn_w * 2, ctrl_btn_w),
+        (x_ctrl_cen - int(ctrl_btn_w * 1.5), y_ctrl_cen + int(ctrl_btn_w * 0.6)),
+        (ctrl_btn_w * 3, ctrl_btn_w),
         font_size,
-        "Next Step",
+        "Handover",
         disable=disable_handover)
-    btn_gt = co.ButtonRect(
+    btn_sgt = co.ButtonRect(
         self.S_GT,
-        (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen + int(ctrl_btn_w * 1.8)),
-        (ctrl_btn_w * 2, ctrl_btn_w),
+        (x_ctrl_cen - int(ctrl_btn_w * 1.5), y_ctrl_cen + int(ctrl_btn_w * 1.8)),
+        (ctrl_btn_w * 3, ctrl_btn_w),
         font_size,
         "Gather Tool",
         disable=disable_gt)
-    btn_it = co.ButtonRect(
+    btn_sit = co.ButtonRect(
         self.S_IT,
-        (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen + int(ctrl_btn_w * 3.0)),
-        (ctrl_btn_w * 2, ctrl_btn_w),
+        (x_ctrl_cen - int(ctrl_btn_w * 1.5), y_ctrl_cen + int(ctrl_btn_w * 3.0)),
+        (ctrl_btn_w * 3, ctrl_btn_w),
         font_size,
         "Indicate Tool",
         disable=disable_it)
+    
+    btn_npu = co.ButtonRect(
+        self.N_PU,
+        (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen - int(ctrl_btn_w * 1.8)),
+        (ctrl_btn_w * 3, ctrl_btn_w),
+        font_size,
+        "Pick Up",
+        disable=disable_pu)
+    btn_ndrop = co.ButtonRect(
+        self.N_DROP,
+        (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen - int(ctrl_btn_w * 0.6)),
+        (ctrl_btn_w * 3, ctrl_btn_w),
+        font_size,
+        "Drop",
+        disable=disable_drop)
+    btn_nmh = co.ButtonRect(
+        self.N_MH,
+        (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen + int(ctrl_btn_w * 0.6)),
+        (ctrl_btn_w * 3, ctrl_btn_w),
+        font_size,
+        "Move Hand",
+        disable=disable_mh)
   
-    list_buttons = [btn_stay, btn_cv, btn_ns, btn_handover, btn_gt, btn_it]
+    list_buttons = [btn_scv, btn_sns, btn_shandover, btn_sgt, btn_sit, btn_npu, btn_ndrop, btn_nmh]
     return list_buttons
 
   def _on_action_taken(self, user_game_data: Exp1UserData,
@@ -277,27 +339,51 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
     '''
     user_game_data: NOTE - values will be updated
     '''
+    game = user_game_data.get_game_ref()
+    game_env = game.get_env_info()
+    nurse_hand = game_env["nurse_hand"]
     action = None
+    handover = None
     if clicked_btn == self.S_STAY:
       action = tho.SurgeonAction.Stay
     elif clicked_btn == self.S_CV:
       action = tho.SurgeonAction.Change_View
     elif clicked_btn == self.S_NS:
       action = tho.SurgeonAction.Next_Step
-    elif clicked_btn == self.S_HANDOVER:
-      action = tho.SurgeonAction.Handover
+    # elif clicked_btn == self.S_HANDOVER:
+    #   action = tho.SurgeonAction.Handover
     elif clicked_btn == self.S_GT:
       action = tho.SurgeonAction.Gesture_Tool
-    elif clicked_btn == self.S_IT:
-      action = tho.SurgeonAction.Indicate_Tool
+    # elif clicked_btn == self.S_IT:
+    #   action = tho.SurgeonAction.Indicate_Tool
+    elif clicked_btn == self.N_STAY:
+      action = tho.NurseAction.Stay
+    elif clicked_btn == self.N_PU:
+      action = tho.NurseAction.PickUp
+    elif clicked_btn == self.N_DROP:
+      if user_game_data.data[Exp1UserData.S_HANDOVER] and nurse_hand == tho.Tool_Location.Surgeon:
+        handover = True
+      action = tho.NurseAction.Drop
+    # elif clicked_btn == self.N_MH:
+    #   action = tho.NurseAction.Move_hand
     
-    game = user_game_data.get_game_ref()
     # should not happen
     assert action is not None
     assert not game.is_finished()
 
-    game.event_input(self._S, action, None)
-    game.event_input(self._N, tho.NurseAction.STAY, None)
+    if handover is not None:
+      game.event_input(self._S, (tho.SurgeonAction.Handover, None), None)
+      game.event_input(self._N, (tho.NurseAction.Drop, None), None)
+      user_game_data.data[Exp1UserData.S_HANDOVER] = False
+    else:
+      S_action = (tho.SurgeonAction.Stay, None)
+      N_action = (tho.NurseAction.Stay, None)
+      if action in tho.SurgeonAction:
+        S_action = (action, None)
+      if action in tho.NurseAction:
+        N_action = (action, None)
+      game.event_input(self._S, S_action, None)
+      game.event_input(self._N, N_action, None)
 
     # take actions
     map_agent2action = game.get_joint_action()
@@ -308,22 +394,106 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
   def _game_overlay(self, game_env,
                     user_data: Exp1UserData) -> List[co.DrawingObject]:
 
+    # the / 300 and / 200 are hardcoded as 300 x units and 200 y units made up the canvas in the standalone app
     def coord_2_canvas(coord_x, coord_y):
-      x = int(self.GAME_LEFT + coord_x * self.GAME_WIDTH)
-      y = int(self.GAME_TOP + coord_y * self.GAME_HEIGHT)
+      x = int(self.GAME_LEFT + coord_x / 300 * self.GAME_WIDTH)
+      y = int(self.GAME_TOP + coord_y / 200 * self.GAME_HEIGHT)
       return (x, y)
 
     def size_2_canvas(width, height):
-      w = int(width * self.GAME_WIDTH)
-      h = int(height * self.GAME_HEIGHT)
+      w = int(width / 300 * self.GAME_WIDTH)
+      h = int(height / 200 * self.GAME_HEIGHT)
       return (w, h)
 
     overlay_obs = []
+
+    icon_sz = 80
+    surgeon_position = (220, 60, icon_sz, icon_sz)
+    tool_types = game_env["tool_types"]
+    tool_locations = game_env["tool_locations"]
+    table_position = (60, 110, 120, 120)
+    tool_sz = 30
+    table_part1 = (table_position[0] - 20,
+                          table_position[1] - 35, tool_sz, tool_sz)
+    table_part2 = (table_position[0] + 20,
+                          table_position[1] - 35, tool_sz, tool_sz)
+    table_part3 = (table_position[0] - 20,
+                          table_position[1] - 10, tool_sz, tool_sz)
+    table_part4 = (table_position[0] + 20,
+                          table_position[1] - 10, tool_sz, tool_sz)
+
+    if user_data.data[Exp1UserData.SELECT_IT]:
+      obj = co.Rectangle(co.SEL_LAYER, (self.GAME_LEFT, self.GAME_TOP),
+                          (self.GAME_WIDTH, self.GAME_HEIGHT),
+                          fill_color="white",
+                          alpha=0.8)
+      overlay_obs.append(obj)
+
+      radius = size_2_canvas(15, 0)[0]
+      font_size = 20
+
+      for idx, ttype in enumerate(tool_types):
+        if tool_locations[idx] == tho.Tool_Location.Table_1:
+          img_pos = table_part1
+        elif tool_locations[idx] == tho.Tool_Location.Table_2:
+          img_pos = table_part2
+        elif tool_locations[idx] == tho.Tool_Location.Table_3:
+          img_pos = table_part3
+        elif tool_locations[idx] == tho.Tool_Location.Table_4:
+          img_pos = table_part4
+
+        # store latent buttons in order of tool type
+        obj = co.SelectingCircle("latentit" + str(idx),
+                                  coord_2_canvas(img_pos[0], img_pos[1]), radius, font_size,
+                                  "")
+        overlay_obs.append(obj)
+    if user_data.data[Exp1UserData.SELECT_MH]:
+      obj = co.Rectangle(co.SEL_LAYER, (self.GAME_LEFT, self.GAME_TOP),
+                          (self.GAME_WIDTH, self.GAME_HEIGHT),
+                          fill_color="white",
+                          alpha=0.8)
+      overlay_obs.append(obj)
+
+      radius = size_2_canvas(15, 0)[0]
+      font_size = 20
+
+      for idx, loc in enumerate(tho.Tool_Location):
+        if loc == tho.Tool_Location.Surgeon:
+          img_pos = surgeon_position
+        elif loc == tho.Tool_Location.Table_1:
+          img_pos = table_part1
+        elif loc == tho.Tool_Location.Table_2:
+          img_pos = table_part2
+        elif loc == tho.Tool_Location.Table_3:
+          img_pos = table_part3
+        elif loc == tho.Tool_Location.Table_4:
+          img_pos = table_part4
+        else:
+          continue
+
+        # store latent buttons in order of tool type
+        obj = co.SelectingCircle("latentmh" + str(idx),
+                                  coord_2_canvas(img_pos[0], img_pos[1]), radius, font_size,
+                                  "")
+        overlay_obs.append(obj)
 
     return overlay_obs
 
   def _game_overlay_names(self, game_env, user_data: Exp1UserData) -> List:
     overlay_names = []
+    tool_types = game_env["tool_types"]
+    tool_locations = game_env["tool_locations"]
+    if user_data.data[Exp1UserData.SELECT_IT]:
+      overlay_names.append(co.SEL_LAYER)
+
+      for idx, ttype in enumerate(tool_types):
+        overlay_names.append("latentit" + str(idx))
+    if user_data.data[Exp1UserData.SELECT_MH]:
+      overlay_names.append(co.SEL_LAYER)
+
+      for idx, loc in enumerate(tho.Tool_Location):
+        overlay_names.append("latentmh" + str(idx))
+
     return overlay_names
 
   def _game_scene(self,
@@ -346,7 +516,7 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
 
   def selbtn2latent(self, sel_btn_name):
     if sel_btn_name[:6] == "latent":
-      return int(sel_btn_name[6:])
+      return sel_btn_name[6:]
 
     return None
 

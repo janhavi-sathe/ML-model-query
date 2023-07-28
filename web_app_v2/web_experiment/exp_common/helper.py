@@ -128,7 +128,7 @@ def get_btn_boxpush_actions(game_width,
                              disable=left_disable)
   font_size = 20
   btn_pickup = co.ButtonRect(
-      co.BTN_PICK_UP,
+      co.BTN_PICKUP,
       (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen - int(ctrl_btn_w * 0.6)),
       (ctrl_btn_w * 2, ctrl_btn_w),
       font_size,
@@ -939,19 +939,15 @@ def toolhandover_game_scene(game_env: Mapping[str, Any],
                             ) -> List[co.DrawingObject]:
   game_left, game_top, game_width, game_height = game_ltwh
 
-  # the / 10 and / 5 are hardcoded as 10 x units and 5 y units made up the canvas in the standalone app
+  # the / 300 and / 200 are hardcoded as 300 x units and 200 y units made up the canvas in the standalone app
   def coord_2_canvas(coord_x, coord_y):
-    # x = int(game_left + coord_x / 10 * game_width)
-    # y = int(game_top + coord_y / 5 * game_height)
-    x = int(game_left + coord_x)
-    y = int(game_top + coord_y)
+    x = int(game_left + coord_x / 300 * game_width)
+    y = int(game_top + coord_y / 200 * game_height)
     return (x, y)
 
   def size_2_canvas(width, height):
-    # w = int(width / 10 * game_width)
-    # h = int(height / 5 * game_height)
-    w = width
-    h = height
+    w = int(width / 300 * game_width)
+    h = int(height / 200 * game_height)
     return (w, h)
 
   # place_w = 0.12
@@ -963,9 +959,10 @@ def toolhandover_game_scene(game_env: Mapping[str, Any],
 
   def draw_pos_size_obj(pos_size, obj_name):
     x, y, w, h = pos_size
-
-    obj = co.GameObject(obj_name, (x, y),
-                        (w, h), 0, obj_name)
+    # the js canvas seems to set input coord as top left corner instead of center like in standalone app, so adjust here
+    coord, size = coord_2_canvas(x, y), size_2_canvas(w, h)
+    obj = co.GameObject(obj_name, (coord[0] - size[0] / 2, coord[1] - size[1] / 2),
+                        size, 0, obj_name)
     if cb_is_visible is None or cb_is_visible(obj):
       game_objs.append(obj)
 
@@ -975,6 +972,7 @@ def toolhandover_game_scene(game_env: Mapping[str, Any],
   patient_position = (190, 120, 200, 80)
   table_position = (60, 110, 120, 120)
   label_text = (270, 20)
+  label_text2 = (270, 35)
 
   tool_sz = 30
   table_part1 = (table_position[0] - 20,
@@ -991,25 +989,26 @@ def toolhandover_game_scene(game_env: Mapping[str, Any],
   surgeon_sight = game_env["surgeon_sight"]
   surgical_step = game_env["surgical_step"]
   nurse_hand = game_env["nurse_hand"]
+  tool_fornow = game_env["tool_fornow"]
   tool_locations = game_env["tool_locations"]
   current_step = game_env["current_step"]
 
   # background
   draw_pos_size_obj(nurse_position, co.IMG_NURSE)
   draw_pos_size_obj(surgeon_position, co.IMG_SURGEON)
-  draw_pos_size_obj(patient_position, co.IMG_PATIENT)
   draw_pos_size_obj(table_position, co.IMG_TABLE)
+  draw_pos_size_obj(patient_position, co.IMG_PATIENT)
 
   # tools
   for idx, ttype in enumerate(tool_types):
     if ttype == tho.Tool_Type.Tool_1:
-      image_file = "scalpel.png"
+      image_name = co.IMG_SCALPEL
     elif ttype == tho.Tool_Type.Tool_2:
-      image_file = "suture.png"
+      image_name = co.IMG_SUTURE
     elif ttype == tho.Tool_Type.Tool_3:
-      image_file = "forceps.png"
+      image_name = co.IMG_FORCEPS
     elif ttype == tho.Tool_Type.Tool_4:
-      image_file = "scissors.png"
+      image_name = co.IMG_SCISSORS
 
     if tool_locations[idx] == tho.Tool_Location.Nurse:
       img_pos = (nurse_position[0] + 20, nurse_position[1] - 20,
@@ -1025,30 +1024,41 @@ def toolhandover_game_scene(game_env: Mapping[str, Any],
       img_pos = table_part3
     elif tool_locations[idx] == tho.Tool_Location.Table_4:
       img_pos = table_part4
-
-    draw_pos_size_obj(img_pos, ttype.name)
+    draw_pos_size_obj(img_pos, image_name)
 
   # surgical step
-  game_objs.append(co.TextObject("surgical_step", label_text, size_2_canvas(80, 10)[0], 10, surgical_step.name))
+  x, y = coord_2_canvas(*label_text)
+  w = size_2_canvas(50, 0)[0]
+  game_objs.append(co.TextObject("surgical_step", (x - w / 2, y), w, 25, surgical_step.name))
 
   # patient state
-  game_objs.append(co.TextObject("patient_state", patient_position, size_2_canvas(80, 10)[0], 10, patient_state.name))
+  x, y = coord_2_canvas(patient_position[0], patient_position[1])
+  w = size_2_canvas(50, 0)[0]
+  game_objs.append(co.TextObject("patient_state", (x - w / 2, y), w, 25, patient_state.name))
+
+  # tool for now
+  text_tool = "None"
+  if tool_fornow is not None:
+    text_tool = tool_fornow.name
+  x, y = coord_2_canvas(*label_text2)
+  w = size_2_canvas(50, 0)[0]
+  game_objs.append(co.TextObject("text_tool", (x - w / 2, y), w, 25, text_tool))
 
   # surgeon sight
   if surgeon_sight == tho.SurgeonSight.Patient:
-    game_objs.append(co.LineSegment("sight0", (surgeon_position[0] - 5,
-                      surgeon_position[1] - 10), (patient_position[0],
+    game_objs.append(co.LineSegment("sight0", coord_2_canvas(surgeon_position[0] - 5,
+                      surgeon_position[1] - 10), size_2_canvas(patient_position[0],
                       patient_position[1])))
-    game_objs.append(co.LineSegment("sight1", (surgeon_position[0] + 5, surgeon_position[1] - 10), (patient_position[0] + 0.3 * patient_position[2],
+    game_objs.append(co.LineSegment("sight1", coord_2_canvas(surgeon_position[0] + 5, surgeon_position[1] - 10), size_2_canvas(patient_position[0] + 0.3 * patient_position[2],
         patient_position[1])))
   else:
-    game_objs.append(co.LineSegment("sight0", (surgeon_position[0] - 5,
+    game_objs.append(co.LineSegment("sight0", coord_2_canvas(surgeon_position[0] - 5,
                       surgeon_position[1] - 15),
-                      (table_position[0] + 0.3 * table_position[2],
+                      size_2_canvas(table_position[0] + 0.3 * table_position[2],
                       table_position[1] - 0.4 * table_position[3])))
-    game_objs.append(co.LineSegment("sight1", (surgeon_position[0] - 5,
+    game_objs.append(co.LineSegment("sight1", coord_2_canvas(surgeon_position[0] - 5,
                       surgeon_position[1] - 10),
-                      (table_position[0] + 0.3 * table_position[2],
+                      size_2_canvas(table_position[0] + 0.3 * table_position[2],
                       table_position[1])))
 
   # nurse hand
@@ -1068,9 +1078,17 @@ def toolhandover_game_scene(game_env: Mapping[str, Any],
   mid_coord = (int(0.5 * (hand_coord[0] + arm_st[0])),
                 int(0.5 * (hand_coord[1] + arm_st[1])) + 10)
 
-  game_objs.append(co.LineSegment("upper arm", arm_st, mid_coord, "red", 3))
-  game_objs.append(co.LineSegment("lower arm", mid_coord, hand_coord, "red", 3))
-  game_objs.append(co.Circle("hand", hand_coord, hand_sz, "red"))
+  game_objs.append(co.LineSegment("upper arm", coord_2_canvas(*arm_st), coord_2_canvas(*mid_coord), line_color="red", linewidth=3))
+  game_objs.append(co.LineSegment("lower arm", coord_2_canvas(*mid_coord), coord_2_canvas(*hand_coord), line_color="red", linewidth=3))
+  game_objs.append(co.Circle("hand", coord_2_canvas(*hand_coord), size_2_canvas(hand_sz, hand_sz)[0], "red"))
+
+  game_right = game_left + game_width
+  ctrl_btn_w = int(game_width / 12)
+  ctrl_btn_w_half = int(game_width / 24)
+  x_ctrl_cen = int(game_right + (co.CANVAS_WIDTH - game_right) / 2)
+  y_ctrl_cen = int(co.CANVAS_HEIGHT * 0.65)
+  game_objs.append(co.TextObject("surgeon_buttons", (x_ctrl_cen - int(ctrl_btn_w * 1.5) - 55, y_ctrl_cen - int(ctrl_btn_w * 3.0)), 200, 15, "Surgeon Actions"))
+  game_objs.append(co.TextObject("nurse_buttons", (x_ctrl_cen + int(ctrl_btn_w * 1.5) - 55, y_ctrl_cen - int(ctrl_btn_w * 3.0)), 200, 15, "Nurse Actions"))
 
   return game_objs
 
@@ -1086,23 +1104,34 @@ def toolhandover_game_scene_names(game_env: Mapping[str, Any],
   surgeon_sight = game_env["surgeon_sight"]
   surgical_step = game_env["surgical_step"]
   nurse_hand = game_env["nurse_hand"]
+  tool_fornow = game_env["tool_fornow"]
   tool_locations = game_env["tool_locations"]
   current_step = game_env["current_step"]
 
   # background
   drawing_names.append(co.IMG_NURSE)
   drawing_names.append(co.IMG_SURGEON)
-  drawing_names.append(co.IMG_PATIENT)
   drawing_names.append(co.IMG_TABLE)
+  drawing_names.append(co.IMG_PATIENT)
 
   # tools
   for idx, ttype in enumerate(tool_types):
-    drawing_names.append(ttype.name)
+    if ttype == tho.Tool_Type.Tool_1:
+      image_name = co.IMG_SCALPEL
+    elif ttype == tho.Tool_Type.Tool_2:
+      image_name = co.IMG_SUTURE
+    elif ttype == tho.Tool_Type.Tool_3:
+      image_name = co.IMG_FORCEPS
+    elif ttype == tho.Tool_Type.Tool_4:
+      image_name = co.IMG_SCISSORS
+    drawing_names.append(image_name)
 
   # surgical step
   drawing_names.append("surgical_step")
   # patient state
   drawing_names.append("patient_state")
+  # tool for now
+  drawing_names.append("text_tool")
 
   # surgeon sight
   drawing_names.append("sight0")
@@ -1112,6 +1141,9 @@ def toolhandover_game_scene_names(game_env: Mapping[str, Any],
   drawing_names.append("upper arm")
   drawing_names.append("lower arm")
   drawing_names.append("hand")
+
+  drawing_names.append("surgeon_buttons")
+  drawing_names.append("nurse_buttons")
 
   return drawing_names
 

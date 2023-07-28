@@ -133,6 +133,9 @@ class Exp1UserData(UserData):
   '''
   GAME = "game"
   SELECT = "select"
+  SELECT_IT = "select_it"
+  SELECT_MH = "select_mh"
+  S_HANDOVER = "s_handover"
   GAME_DONE = "game_done"
   ACTION_COUNT = "action_count"
   PARTIAL_OBS = "partial_obs"
@@ -147,6 +150,9 @@ class Exp1UserData(UserData):
     super().__init__(user)
     self.data[Exp1UserData.GAME] = None
     self.data[Exp1UserData.SELECT] = False
+    self.data[Exp1UserData.SELECT_IT] = False
+    self.data[Exp1UserData.SELECT_MH] = False
+    self.data[Exp1UserData.S_HANDOVER] = False
     self.data[Exp1UserData.GAME_DONE] = False
     self.data[Exp1UserData.ACTION_COUNT] = 0
     self.data[Exp1UserData.PARTIAL_OBS] = True

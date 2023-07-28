@@ -4,7 +4,6 @@ from ai_coach_domain.simulator import Simulator
 from ai_coach_domain.tool_handover.mdp import MDP_ToolHandover
 import ai_coach_domain.tool_handover.define as tho
 
-
 class ToolHandoverSimulator(Simulator):
   Surgeon = 0
   Nurse = 1
