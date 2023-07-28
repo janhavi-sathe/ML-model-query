@@ -138,7 +138,8 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
     return super().button_clicked(user_game_data, clicked_btn)
 
   def _get_instruction(self, user_game_data: Exp1UserData):
-    return ("Control the Surgeon and Nurse with the buttons to progress through the simulation.")
+    return ("Control the Surgeon and Nurse with the buttons to progress through the simulation.\n\n"
+            + "To make a handover, Nurse must possess tool and move hand to Surgeon. Then Surgeon must click Handover, then Nurse must click Drop.")
 
   def _get_drawing_order(self, user_game_data: Exp1UserData):
     dict_game = user_game_data.get_game_ref().get_env_info()
@@ -173,7 +174,7 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
 
     disable_status = self._get_action_btn_disable_state(user_game_data,
                                                         dict_game)
-    objs = self._get_btn_actions(dict_game, *disable_status)
+    objs = self._get_btn_actions(dict_game, user_game_data, *disable_status)
     for obj in objs:
       dict_objs[obj.name] = obj
 
@@ -200,6 +201,7 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
   def _get_btn_actions(
       self,
       game_env: Mapping[Any, Any],
+      user_game_data: Exp1UserData,
       disable_cv: bool = False,
       disable_ns: bool = False,
       disable_gt: bool = False,
@@ -262,13 +264,20 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
         font_size,
         "Pick Up",
         disable=disable_pu)
+    drop_line_color = "black"
+    drop_text_color = "black"
+    if user_game_data.data[Exp1UserData.S_HANDOVER]:
+      drop_line_color = "blue"
+      drop_text_color = "blue"
     btn_ndrop = co.ButtonRect(
         self.N_DROP,
         (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen - int(ctrl_btn_w * 0.6)),
         (ctrl_btn_w * 3, ctrl_btn_w),
         font_size,
         "Drop",
-        disable=disable_drop)
+        disable=disable_drop,
+        line_color=drop_line_color,
+        text_color=drop_text_color)
     btn_nmh = co.ButtonRect(
         self.N_MH,
         (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen + int(ctrl_btn_w * 0.6)),
@@ -321,7 +330,7 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
     dict_objs[obj.name] = obj
 
     disable_status = self._get_action_btn_disable_state(user_data, dict_game)
-    objs = self._get_btn_actions(dict_game, *disable_status)
+    objs = self._get_btn_actions(dict_game, user_data, *disable_status)
     for obj in objs:
       dict_objs[obj.name] = obj
 
