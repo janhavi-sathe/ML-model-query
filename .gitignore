@@ -25,7 +25,6 @@ human_data/
 result/
 experts/
 
-*.png
 *.log
 *.csv
 *.orig
