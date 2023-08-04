@@ -138,8 +138,9 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
     return super().button_clicked(user_game_data, clicked_btn)
 
   def _get_instruction(self, user_game_data: Exp1UserData):
-    return ("Control the Surgeon and Nurse with the buttons to progress through the simulation.\n\n"
-            + "To make a handover, Nurse must possess tool and move hand to Surgeon. Then Surgeon must click Handover, then Nurse must click Drop.")
+    return ("Control surgeon and nurse with the buttons.\n\n"
+            + "Handover from Nurse to Surgeon: Nurse must possess tool and have hand @ Surgeon. Surgeon click Handover, then Nurse click Drop.\n\n"
+            + "Surgeon to Nurse: same setup but instead Nurse click Pick Up.")
 
   def _get_drawing_order(self, user_game_data: Exp1UserData):
     dict_game = user_game_data.get_game_ref().get_env_info()
@@ -257,18 +258,30 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
         "Indicate Tool",
         disable=disable_it)
     
+    tool_types = game_env["tool_types"]
+    tool_locations = game_env["tool_locations"]
+    nurse_possess, surgeon_possess = [], []
+    for idx, ttype in enumerate(tool_types):
+      if tool_locations[idx] == tho.Tool_Location.Nurse:
+        nurse_possess.append(ttype)
+      if tool_locations[idx] == tho.Tool_Location.Surgeon:
+        surgeon_possess.append(ttype)
+    
+    nurse_hand = game_env["nurse_hand"]
+
+    highlight_drop = user_game_data.data[Exp1UserData.S_HANDOVER] and nurse_hand == tho.Tool_Location.Surgeon and len(nurse_possess) > 0 and len(surgeon_possess) == 0
+    highlight_pickup = user_game_data.data[Exp1UserData.S_HANDOVER] and nurse_hand == tho.Tool_Location.Surgeon and len(nurse_possess) == 0 and len(surgeon_possess) > 0
+
     btn_npu = co.ButtonRect(
         self.N_PU,
         (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen - int(ctrl_btn_w * 1.8)),
         (ctrl_btn_w * 3, ctrl_btn_w),
         font_size,
         "Pick Up",
-        disable=disable_pu)
-    drop_line_color = "black"
-    drop_text_color = "black"
-    if user_game_data.data[Exp1UserData.S_HANDOVER]:
-      drop_line_color = "blue"
-      drop_text_color = "blue"
+        disable=disable_pu,
+        line_color="blue" if highlight_pickup else "black",
+        text_color="blue" if highlight_pickup else "black")
+    
     btn_ndrop = co.ButtonRect(
         self.N_DROP,
         (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen - int(ctrl_btn_w * 0.6)),
@@ -276,8 +289,8 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
         font_size,
         "Drop",
         disable=disable_drop,
-        line_color=drop_line_color,
-        text_color=drop_text_color)
+        line_color="blue" if highlight_drop else "black",
+        text_color="blue" if highlight_drop else "black")
     btn_nmh = co.ButtonRect(
         self.N_MH,
         (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen + int(ctrl_btn_w * 0.6)),
@@ -352,7 +365,9 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
     game_env = game.get_env_info()
     nurse_hand = game_env["nurse_hand"]
     action = None
-    handover = None
+    # handover_sn is handover from surgeon to nurse, ns vice versa
+    handover_sn = None
+    handover_ns = None
     if clicked_btn == self.S_STAY:
       action = tho.SurgeonAction.Stay
     elif clicked_btn == self.S_CV:
@@ -368,10 +383,12 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
     elif clicked_btn == self.N_STAY:
       action = tho.NurseAction.Stay
     elif clicked_btn == self.N_PU:
+      if user_game_data.data[Exp1UserData.S_HANDOVER] and nurse_hand == tho.Tool_Location.Surgeon:
+        handover_sn = True
       action = tho.NurseAction.PickUp
     elif clicked_btn == self.N_DROP:
       if user_game_data.data[Exp1UserData.S_HANDOVER] and nurse_hand == tho.Tool_Location.Surgeon:
-        handover = True
+        handover_ns = True
       action = tho.NurseAction.Drop
     # elif clicked_btn == self.N_MH:
     #   action = tho.NurseAction.Move_hand
@@ -380,9 +397,13 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
     assert action is not None
     assert not game.is_finished()
 
-    if handover is not None:
+    if handover_ns is not None:
       game.event_input(self._S, (tho.SurgeonAction.Handover, None), None)
       game.event_input(self._N, (tho.NurseAction.Drop, None), None)
+      user_game_data.data[Exp1UserData.S_HANDOVER] = False
+    elif handover_sn is not None:
+      game.event_input(self._S, (tho.SurgeonAction.Handover, None), None)
+      game.event_input(self._N, (tho.NurseAction.PickUp, None), None)
       user_game_data.data[Exp1UserData.S_HANDOVER] = False
     else:
       S_action = (tho.SurgeonAction.Stay, None)
