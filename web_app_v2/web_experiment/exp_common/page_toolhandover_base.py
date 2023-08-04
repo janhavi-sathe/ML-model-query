@@ -16,6 +16,7 @@ from web_experiment.exp_common.page_base import ExperimentPageBase, Exp1UserData
 from web_experiment.exp_common.helper import (get_file_name,
                                               store_user_label_locally)
 
+
 class ToolHandoverGamePageBase(ExperimentPageBase):
   S_STAY = tho.SurgeonAction.Stay.name
   S_CV = tho.SurgeonAction.Change_View.name
@@ -29,9 +30,10 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
   N_DROP = tho.NurseAction.Drop.name
   N_MH = tho.NurseAction.Move_hand.name
 
-  ACTION_BUTTONS = [S_STAY, S_CV, S_NS, S_HANDOVER, S_GT, S_IT,
-                    N_STAY, N_PU, N_DROP, N_MH
-                    ]
+  ACTION_BUTTONS = [
+      S_STAY, S_CV, S_NS, S_HANDOVER, S_GT, S_IT, N_STAY, N_PU, N_DROP, N_MH
+  ]
+
   # ACTION_BUTTONS = ["next"]
 
   def __init__(self,
@@ -60,7 +62,7 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
 
       user_game_data.set_game(game)
     game.init_game()
-      
+
   def get_updated_drawing_info(self,
                                user_data: Exp1UserData,
                                clicked_button: str = None,
@@ -95,14 +97,18 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
         game = user_game_data.get_game_ref()
         if "it" in latent:
           tool_id = int(latent.split("it")[1])
-          game.event_input(self._S, (tho.SurgeonAction.Indicate_Tool, tho.Tool_Type(tool_id)), None)
-          
+          game.event_input(
+              self._S,
+              (tho.SurgeonAction.Indicate_Tool, tho.Tool_Type(tool_id)), None)
+
           user_game_data.data[Exp1UserData.SELECT_IT] = False
         elif "mh" in latent:
           loc_id = int(latent.split("mh")[1])
-          game.event_input(self._N, (tho.NurseAction.Move_hand, tho.Tool_Location(loc_id)), None)
+          game.event_input(
+              self._N, (tho.NurseAction.Move_hand, tho.Tool_Location(loc_id)),
+              None)
           user_game_data.data[Exp1UserData.SELECT_MH] = False
-        
+
         # take actions
         map_agent2action = game.get_joint_action()
         game.take_a_step(map_agent2action)
@@ -129,17 +135,20 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
       if done:
         self._on_game_finished(user_game_data)
       return
-    
+
     # no matter what, turn off handover state
     # either handover was successful as action was a drop, or not in which we assume the state of the OR is different and thus surgeon doesn't want to handover anymore
     if clicked_btn != self.S_HANDOVER:
       user_game_data.data[Exp1UserData.S_HANDOVER] = False
-    
+
     return super().button_clicked(user_game_data, clicked_btn)
 
   def _get_instruction(self, user_game_data: Exp1UserData):
-    return ("Control the Surgeon and Nurse with the buttons to progress through the simulation.\n\n"
-            + "To make a handover, Nurse must possess tool and move hand to Surgeon. Then Surgeon must click Handover, then Nurse must click Drop.")
+    return (
+        "Control the Surgeon and Nurse with the buttons to progress through the simulation.\n\n"
+        +
+        "To make a handover, Nurse must possess tool and move hand to Surgeon. Then Surgeon must click Handover, then Nurse must click Drop."
+    )
 
   def _get_drawing_order(self, user_game_data: Exp1UserData):
     dict_game = user_game_data.get_game_ref().get_env_info()
@@ -192,25 +201,24 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
 
     it_ok = True
     surgeon_sight = game_env["surgeon_sight"]
-    
+
     if surgeon_sight == tho.SurgeonSight.Patient:
       it_ok = False
 
     return False, False, False, not it_ok, False, False, False, False, False
 
-  def _get_btn_actions(
-      self,
-      game_env: Mapping[Any, Any],
-      user_game_data: Exp1UserData,
-      disable_cv: bool = False,
-      disable_ns: bool = False,
-      disable_gt: bool = False,
-      disable_it: bool = False, 
-      disable_stay: bool = False,
-      disable_handover: bool = False,
-      disable_pu: bool = False,
-      disable_drop: bool = False,
-      disable_mh: bool = False) -> Sequence[co.DrawingObject]:
+  def _get_btn_actions(self,
+                       game_env: Mapping[Any, Any],
+                       user_game_data: Exp1UserData,
+                       disable_cv: bool = False,
+                       disable_ns: bool = False,
+                       disable_gt: bool = False,
+                       disable_it: bool = False,
+                       disable_stay: bool = False,
+                       disable_handover: bool = False,
+                       disable_pu: bool = False,
+                       disable_drop: bool = False,
+                       disable_mh: bool = False) -> Sequence[co.DrawingObject]:
 
     game_width = self.GAME_WIDTH
     game_right = self.GAME_RIGHT
@@ -219,74 +227,70 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
     x_ctrl_cen = int(game_right + (co.CANVAS_WIDTH - game_right) / 2)
     y_ctrl_cen = int(co.CANVAS_HEIGHT * 0.65)
     x_joy_cen = int(x_ctrl_cen - ctrl_btn_w * 1.5)
-    
+
     font_size = 20
-    btn_scv = co.ButtonRect(
-        self.S_CV,
-        (x_ctrl_cen - int(ctrl_btn_w * 1.5), y_ctrl_cen - int(ctrl_btn_w * 1.8)),
-        (ctrl_btn_w * 3, ctrl_btn_w),
-        font_size,
-        "Change View",
-        disable=disable_cv)
-    btn_sns = co.ButtonRect(
-        self.S_NS,
-        (x_ctrl_cen - int(ctrl_btn_w * 1.5), y_ctrl_cen - int(ctrl_btn_w * 0.6)),
-        (ctrl_btn_w * 3, ctrl_btn_w),
-        font_size,
-        "Next Step",
-        disable=disable_ns)
-    btn_shandover = co.ButtonRect(
-        self.S_HANDOVER,
-        (x_ctrl_cen - int(ctrl_btn_w * 1.5), y_ctrl_cen + int(ctrl_btn_w * 0.6)),
-        (ctrl_btn_w * 3, ctrl_btn_w),
-        font_size,
-        "Handover",
-        disable=disable_handover)
-    btn_sgt = co.ButtonRect(
-        self.S_GT,
-        (x_ctrl_cen - int(ctrl_btn_w * 1.5), y_ctrl_cen + int(ctrl_btn_w * 1.8)),
-        (ctrl_btn_w * 3, ctrl_btn_w),
-        font_size,
-        "Gather Tool",
-        disable=disable_gt)
-    btn_sit = co.ButtonRect(
-        self.S_IT,
-        (x_ctrl_cen - int(ctrl_btn_w * 1.5), y_ctrl_cen + int(ctrl_btn_w * 3.0)),
-        (ctrl_btn_w * 3, ctrl_btn_w),
-        font_size,
-        "Indicate Tool",
-        disable=disable_it)
-    
-    btn_npu = co.ButtonRect(
-        self.N_PU,
-        (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen - int(ctrl_btn_w * 1.8)),
-        (ctrl_btn_w * 3, ctrl_btn_w),
-        font_size,
-        "Pick Up",
-        disable=disable_pu)
+    btn_scv = co.ButtonRect(self.S_CV, (x_ctrl_cen - int(ctrl_btn_w * 1.5),
+                                        y_ctrl_cen - int(ctrl_btn_w * 1.8)),
+                            (ctrl_btn_w * 3, ctrl_btn_w),
+                            font_size,
+                            "Change View",
+                            disable=disable_cv)
+    btn_sns = co.ButtonRect(self.S_NS, (x_ctrl_cen - int(ctrl_btn_w * 1.5),
+                                        y_ctrl_cen - int(ctrl_btn_w * 0.6)),
+                            (ctrl_btn_w * 3, ctrl_btn_w),
+                            font_size,
+                            "Next Step",
+                            disable=disable_ns)
+    btn_shandover = co.ButtonRect(self.S_HANDOVER,
+                                  (x_ctrl_cen - int(ctrl_btn_w * 1.5),
+                                   y_ctrl_cen + int(ctrl_btn_w * 0.6)),
+                                  (ctrl_btn_w * 3, ctrl_btn_w),
+                                  font_size,
+                                  "Handover",
+                                  disable=disable_handover)
+    btn_sgt = co.ButtonRect(self.S_GT, (x_ctrl_cen - int(ctrl_btn_w * 1.5),
+                                        y_ctrl_cen + int(ctrl_btn_w * 1.8)),
+                            (ctrl_btn_w * 3, ctrl_btn_w),
+                            font_size,
+                            "Signal Tool",
+                            disable=disable_gt)
+    btn_sit = co.ButtonRect(self.S_IT, (x_ctrl_cen - int(ctrl_btn_w * 1.5),
+                                        y_ctrl_cen + int(ctrl_btn_w * 3.0)),
+                            (ctrl_btn_w * 3, ctrl_btn_w),
+                            font_size,
+                            "Indicate Tool",
+                            disable=disable_it)
+
+    btn_npu = co.ButtonRect(self.N_PU, (x_ctrl_cen + int(ctrl_btn_w * 1.5),
+                                        y_ctrl_cen - int(ctrl_btn_w * 1.8)),
+                            (ctrl_btn_w * 3, ctrl_btn_w),
+                            font_size,
+                            "Pick Up",
+                            disable=disable_pu)
     drop_line_color = "black"
     drop_text_color = "black"
     if user_game_data.data[Exp1UserData.S_HANDOVER]:
       drop_line_color = "blue"
       drop_text_color = "blue"
-    btn_ndrop = co.ButtonRect(
-        self.N_DROP,
-        (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen - int(ctrl_btn_w * 0.6)),
-        (ctrl_btn_w * 3, ctrl_btn_w),
-        font_size,
-        "Drop",
-        disable=disable_drop,
-        line_color=drop_line_color,
-        text_color=drop_text_color)
-    btn_nmh = co.ButtonRect(
-        self.N_MH,
-        (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen + int(ctrl_btn_w * 0.6)),
-        (ctrl_btn_w * 3, ctrl_btn_w),
-        font_size,
-        "Move Hand",
-        disable=disable_mh)
-  
-    list_buttons = [btn_scv, btn_sns, btn_shandover, btn_sgt, btn_sit, btn_npu, btn_ndrop, btn_nmh]
+    btn_ndrop = co.ButtonRect(self.N_DROP, (x_ctrl_cen + int(ctrl_btn_w * 1.5),
+                                            y_ctrl_cen - int(ctrl_btn_w * 0.6)),
+                              (ctrl_btn_w * 3, ctrl_btn_w),
+                              font_size,
+                              "Drop",
+                              disable=disable_drop,
+                              line_color=drop_line_color,
+                              text_color=drop_text_color)
+    btn_nmh = co.ButtonRect(self.N_MH, (x_ctrl_cen + int(ctrl_btn_w * 1.5),
+                                        y_ctrl_cen + int(ctrl_btn_w * 0.6)),
+                            (ctrl_btn_w * 3, ctrl_btn_w),
+                            font_size,
+                            "Move Hand",
+                            disable=disable_mh)
+
+    list_buttons = [
+        btn_scv, btn_sns, btn_shandover, btn_sgt, btn_sit, btn_npu, btn_ndrop,
+        btn_nmh
+    ]
     return list_buttons
 
   def _on_action_taken(self, user_game_data: Exp1UserData,
@@ -370,12 +374,13 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
     elif clicked_btn == self.N_PU:
       action = tho.NurseAction.PickUp
     elif clicked_btn == self.N_DROP:
-      if user_game_data.data[Exp1UserData.S_HANDOVER] and nurse_hand == tho.Tool_Location.Surgeon:
+      if user_game_data.data[
+          Exp1UserData.S_HANDOVER] and nurse_hand == tho.Tool_Location.Surgeon:
         handover = True
       action = tho.NurseAction.Drop
     # elif clicked_btn == self.N_MH:
     #   action = tho.NurseAction.Move_hand
-    
+
     # should not happen
     assert action is not None
     assert not game.is_finished()
@@ -422,20 +427,20 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
     tool_locations = game_env["tool_locations"]
     table_position = (60, 110, 120, 120)
     tool_sz = 30
-    table_part1 = (table_position[0] - 20,
-                          table_position[1] - 35, tool_sz, tool_sz)
-    table_part2 = (table_position[0] + 20,
-                          table_position[1] - 35, tool_sz, tool_sz)
-    table_part3 = (table_position[0] - 20,
-                          table_position[1] - 10, tool_sz, tool_sz)
-    table_part4 = (table_position[0] + 20,
-                          table_position[1] - 10, tool_sz, tool_sz)
+    table_part1 = (table_position[0] - 20, table_position[1] - 35, tool_sz,
+                   tool_sz)
+    table_part2 = (table_position[0] + 20, table_position[1] - 35, tool_sz,
+                   tool_sz)
+    table_part3 = (table_position[0] - 20, table_position[1] - 10, tool_sz,
+                   tool_sz)
+    table_part4 = (table_position[0] + 20, table_position[1] - 10, tool_sz,
+                   tool_sz)
 
     if user_data.data[Exp1UserData.SELECT_IT]:
       obj = co.Rectangle(co.SEL_LAYER, (self.GAME_LEFT, self.GAME_TOP),
-                          (self.GAME_WIDTH, self.GAME_HEIGHT),
-                          fill_color="white",
-                          alpha=0.8)
+                         (self.GAME_WIDTH, self.GAME_HEIGHT),
+                         fill_color="white",
+                         alpha=0.8)
       overlay_obs.append(obj)
 
       radius = size_2_canvas(15, 0)[0]
@@ -453,14 +458,14 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
 
         # store latent buttons in order of tool type
         obj = co.SelectingCircle("latentit" + str(idx),
-                                  coord_2_canvas(img_pos[0], img_pos[1]), radius, font_size,
-                                  "")
+                                 coord_2_canvas(img_pos[0], img_pos[1]), radius,
+                                 font_size, "")
         overlay_obs.append(obj)
     if user_data.data[Exp1UserData.SELECT_MH]:
       obj = co.Rectangle(co.SEL_LAYER, (self.GAME_LEFT, self.GAME_TOP),
-                          (self.GAME_WIDTH, self.GAME_HEIGHT),
-                          fill_color="white",
-                          alpha=0.8)
+                         (self.GAME_WIDTH, self.GAME_HEIGHT),
+                         fill_color="white",
+                         alpha=0.8)
       overlay_obs.append(obj)
 
       radius = size_2_canvas(15, 0)[0]
@@ -482,8 +487,8 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
 
         # store latent buttons in order of tool type
         obj = co.SelectingCircle("latentmh" + str(idx),
-                                  coord_2_canvas(img_pos[0], img_pos[1]), radius, font_size,
-                                  "")
+                                 coord_2_canvas(img_pos[0], img_pos[1]), radius,
+                                 font_size, "")
         overlay_obs.append(obj)
 
     return overlay_obs
@@ -515,6 +520,7 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
     return toolhandover_game_scene(game_env, game_ltwh, include_background)
 
   def _game_scene_names(self, game_env, user_data: Exp1UserData) -> List:
+
     def is_visible(img_name):
       return True
 
