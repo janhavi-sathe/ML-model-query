@@ -1,15 +1,16 @@
 import numpy as np
 import os
 import pickle
-from ai_coach_core.utils.exceptions import InvalidTransitionError
+from aic_core.utils.exceptions import InvalidTransitionError
 from .environment import MMDPPolicy
 from .tooldelivery_v3_mdp import ToolDeliveryMDP_V3
-import ai_coach_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
+import aic_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
 
 RATIONALITY_SCALAR = 1
 
 
 class ToolDeliveryPolicy_V3(MMDPPolicy):
+
   def __init__(self, mmdp):
     super().__init__()
     assert isinstance(mmdp, ToolDeliveryMDP_V3), "Wrong MMDP"

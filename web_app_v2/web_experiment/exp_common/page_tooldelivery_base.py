@@ -2,13 +2,13 @@ from typing import Mapping, Any, Sequence, List
 import copy
 import numpy as np
 
-from ai_coach_domain.tooldelivery.environment import RequestEnvironment
-from ai_coach_domain.tooldelivery.tooldelivery_v3_mdp import ToolDeliveryMDP_V3
-from ai_coach_domain.tooldelivery.tooldelivery_v3_policy import ToolDeliveryPolicy_V3
-from ai_coach_domain.tooldelivery.tooldelivery_v3_state_action import ActionCN, ActionSN, ActionAS, ToolLoc 
-from ai_coach_domain.tooldelivery.simulator import ToolDeliverySimulator
+from aic_domain.tooldelivery.environment import RequestEnvironment
+from aic_domain.tooldelivery.tooldelivery_v3_mdp import ToolDeliveryMDP_V3
+from aic_domain.tooldelivery.tooldelivery_v3_policy import ToolDeliveryPolicy_V3
+from aic_domain.tooldelivery.tooldelivery_v3_state_action import ActionCN, ActionSN, ActionAS, ToolLoc
+from aic_domain.tooldelivery.simulator import ToolDeliverySimulator
 
-from ai_coach_domain.agent import InteractiveAgent
+from aic_domain.agent import InteractiveAgent
 from web_experiment.exp_common.helper import tooldelivery_game_scene, tooldelivery_game_scene_names
 import web_experiment.exp_common.canvas_objects as co
 from web_experiment.models import db, User
@@ -16,6 +16,7 @@ from web_experiment.define import EDomainType
 from web_experiment.exp_common.page_base import ExperimentPageBase, Exp1UserData
 from web_experiment.exp_common.helper import (get_file_name,
                                               store_user_label_locally)
+
 
 class ToolDeliveryGamePageBase(ExperimentPageBase):
   CN_STAY = ActionCN.STAY.name
@@ -38,10 +39,18 @@ class ToolDeliveryGamePageBase(ExperimentPageBase):
   AS_USE_SCALPEL = ActionAS.USE_SCALPEL.name
   AS_USE_SUTURE = ActionAS.USE_SUTURE.name
 
-  ACTION_BUTTONS = [CN_STAY, CN_UP, CN_DOWN, CN_LEFT, CN_RIGHT, CN_PICKUP, CN_HANDOVER,
-                    # SN_STAY, SN_HO_SCALPEL, SN_HO_SUTURE, SN_ASKTOOL, SN_SCALPEL_RELATED, SN_SUTURE_RELATED,
-                    # AS_STAY, AS_HO_SCALPEL, AS_USE_SCALPEL, AS_USE_SUTURE
-                    ]
+  ACTION_BUTTONS = [
+      CN_STAY,
+      CN_UP,
+      CN_DOWN,
+      CN_LEFT,
+      CN_RIGHT,
+      CN_PICKUP,
+      CN_HANDOVER,
+      # SN_STAY, SN_HO_SCALPEL, SN_HO_SUTURE, SN_ASKTOOL, SN_SCALPEL_RELATED, SN_SUTURE_RELATED,
+      # AS_STAY, AS_HO_SCALPEL, AS_USE_SCALPEL, AS_USE_SUTURE
+  ]
+
   # ACTION_BUTTONS = ["next"]
 
   def __init__(self,
@@ -71,7 +80,7 @@ class ToolDeliveryGamePageBase(ExperimentPageBase):
 
       user_game_data.set_game(game)
     game.init_game()
-      
+
   def get_updated_drawing_info(self,
                                user_data: Exp1UserData,
                                clicked_button: str = None,
@@ -109,7 +118,8 @@ class ToolDeliveryGamePageBase(ExperimentPageBase):
     return super().button_clicked(user_game_data, clicked_btn)
 
   def _get_instruction(self, user_game_data: Exp1UserData):
-    return ("Control the CN with the buttons to progress through the simulation.")
+    return (
+        "Control the CN with the buttons to progress through the simulation.")
 
   def _get_drawing_order(self, user_game_data: Exp1UserData):
     dict_game = user_game_data.get_game_ref().get_env_info()
@@ -163,11 +173,16 @@ class ToolDeliveryGamePageBase(ExperimentPageBase):
     pickup_ok = True
     handover_ok = True
     cn_pos = game_env["CN_pos"]
-    cabinet_loc = (game_env["Cabinet_pos_size"][0], game_env["Cabinet_pos_size"][1])
-    storage_loc = (game_env["Storage_pos_size"][0], game_env["Storage_pos_size"][1])
-    handover_loc = (game_env["Handover_pos_size"][0], game_env["Handover_pos_size"][1])
-    list_spare_tool_loc = [game_env["Scalpel_stored"], game_env["Suture_stored"]]
-    
+    cabinet_loc = (game_env["Cabinet_pos_size"][0],
+                   game_env["Cabinet_pos_size"][1])
+    storage_loc = (game_env["Storage_pos_size"][0],
+                   game_env["Storage_pos_size"][1])
+    handover_loc = (game_env["Handover_pos_size"][0],
+                    game_env["Handover_pos_size"][1])
+    list_spare_tool_loc = [
+        game_env["Scalpel_stored"], game_env["Suture_stored"]
+    ]
+
     if cn_pos not in [cabinet_loc, storage_loc]:
       pickup_ok = False
     if cn_pos != handover_loc:
@@ -178,8 +193,9 @@ class ToolDeliveryGamePageBase(ExperimentPageBase):
       pickup_ok = False
     if ToolLoc.CN not in list_spare_tool_loc:
       handover_ok = False
-    
-    print(cn_pos, cabinet_loc, storage_loc, handover_loc, list_spare_tool_loc, cn_pos in [cabinet_loc, storage_loc])
+
+    print(cn_pos, cabinet_loc, storage_loc, handover_loc, list_spare_tool_loc,
+          cn_pos in [cabinet_loc, storage_loc])
     print(ToolLoc.CABINET in list_spare_tool_loc, pickup_ok, handover_ok)
     return False, False, not pickup_ok, not handover_ok
 
@@ -199,38 +215,46 @@ class ToolDeliveryGamePageBase(ExperimentPageBase):
     y_ctrl_cen = int(co.CANVAS_HEIGHT * 0.65)
     x_joy_cen = int(x_ctrl_cen - ctrl_btn_w * 1.5)
     btn_stay = co.JoystickStay((x_joy_cen, y_ctrl_cen),
-                              ctrl_btn_w,
-                              disable=disable_stay, name=self.CN_STAY)
+                               ctrl_btn_w,
+                               disable=disable_stay,
+                               name=self.CN_STAY)
     btn_up = co.JoystickUp((x_joy_cen, y_ctrl_cen - ctrl_btn_w_half),
-                          ctrl_btn_w,
-                          disable=disable_move, name=self.CN_UP)
+                           ctrl_btn_w,
+                           disable=disable_move,
+                           name=self.CN_UP)
     btn_right = co.JoystickRight((x_joy_cen + ctrl_btn_w_half, y_ctrl_cen),
-                                ctrl_btn_w,
-                                disable=disable_move, name=self.CN_RIGHT)
+                                 ctrl_btn_w,
+                                 disable=disable_move,
+                                 name=self.CN_RIGHT)
     btn_down = co.JoystickDown((x_joy_cen, y_ctrl_cen + ctrl_btn_w_half),
-                              ctrl_btn_w,
-                              disable=disable_move, name=self.CN_DOWN)
+                               ctrl_btn_w,
+                               disable=disable_move,
+                               name=self.CN_DOWN)
     btn_left = co.JoystickLeft((x_joy_cen - ctrl_btn_w_half, y_ctrl_cen),
-                              ctrl_btn_w,
-                              disable=disable_move, name=self.CN_LEFT)
-    
-    font_size = 20
-    btn_pickup = co.ButtonRect(
-        self.CN_PICKUP,
-        (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen - int(ctrl_btn_w * 0.6)),
-        (ctrl_btn_w * 2, ctrl_btn_w),
-        font_size,
-        "Pick Up",
-        disable=disable_pickup)
-    btn_handover = co.ButtonRect(
-        self.CN_HANDOVER,
-        (x_ctrl_cen + int(ctrl_btn_w * 1.5), y_ctrl_cen + int(ctrl_btn_w * 0.6)),
-        (ctrl_btn_w * 2, ctrl_btn_w),
-        font_size,
-        "Handover",
-        disable=disable_handover)
+                               ctrl_btn_w,
+                               disable=disable_move,
+                               name=self.CN_LEFT)
 
-    list_buttons = [btn_stay, btn_up, btn_right, btn_down, btn_left, btn_pickup, btn_handover]
+    font_size = 20
+    btn_pickup = co.ButtonRect(self.CN_PICKUP,
+                               (x_ctrl_cen + int(ctrl_btn_w * 1.5),
+                                y_ctrl_cen - int(ctrl_btn_w * 0.6)),
+                               (ctrl_btn_w * 2, ctrl_btn_w),
+                               font_size,
+                               "Pick Up",
+                               disable=disable_pickup)
+    btn_handover = co.ButtonRect(self.CN_HANDOVER,
+                                 (x_ctrl_cen + int(ctrl_btn_w * 1.5),
+                                  y_ctrl_cen + int(ctrl_btn_w * 0.6)),
+                                 (ctrl_btn_w * 2, ctrl_btn_w),
+                                 font_size,
+                                 "Handover",
+                                 disable=disable_handover)
+
+    list_buttons = [
+        btn_stay, btn_up, btn_right, btn_down, btn_left, btn_pickup,
+        btn_handover
+    ]
     return list_buttons
 
   def _on_action_taken(self, user_game_data: Exp1UserData,
@@ -307,7 +331,7 @@ class ToolDeliveryGamePageBase(ExperimentPageBase):
       action = ActionCN.PICKUP
     elif clicked_btn == self.CN_HANDOVER:
       action = ActionCN.HANDOVER
-    
+
     game = user_game_data.get_game_ref()
     # should not happen
     assert action is not None
@@ -354,6 +378,7 @@ class ToolDeliveryGamePageBase(ExperimentPageBase):
     return tooldelivery_game_scene(game_env, game_ltwh, include_background)
 
   def _game_scene_names(self, game_env, user_data: Exp1UserData) -> List:
+
     def is_visible(img_name):
       return True
 

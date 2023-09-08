@@ -1,8 +1,8 @@
 from typing import Hashable, Mapping
 import numpy as np
-from ai_coach_domain.simulator import Simulator
-from ai_coach_domain.tool_handover.mdp import MDP_ToolHandover
-import ai_coach_domain.tool_handover.define as tho
+from aic_domain.simulator import Simulator
+from aic_domain.tool_handover.mdp import MDP_ToolHandover
+import aic_domain.tool_handover.define as tho
 
 class ToolHandoverSimulator(Simulator):
   Surgeon = 0

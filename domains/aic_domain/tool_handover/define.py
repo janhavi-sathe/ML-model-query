@@ -1,5 +1,5 @@
 from enum import Enum
-from ai_coach_core.utils.mdp_utils import ActionSpace, StateSpace
+from aic_core.utils.mdp_utils import ActionSpace, StateSpace
 
 
 class PatientState(Enum):

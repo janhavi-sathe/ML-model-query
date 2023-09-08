@@ -1,10 +1,10 @@
 from typing import Hashable, Mapping
 import numpy as np
-from ai_coach_domain.simulator import Simulator
-from ai_coach_domain.tooldelivery.tooldelivery_v3_mdp import ToolDeliveryMDP_V3
-from ai_coach_domain.tooldelivery.tooldelivery_v3_policy import (
+from aic_domain.simulator import Simulator
+from aic_domain.tooldelivery.tooldelivery_v3_mdp import ToolDeliveryMDP_V3
+from aic_domain.tooldelivery.tooldelivery_v3_policy import (
     ToolDeliveryPolicy_V3)
-import ai_coach_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
+import aic_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
 
 
 class ToolDeliverySimulator(Simulator):

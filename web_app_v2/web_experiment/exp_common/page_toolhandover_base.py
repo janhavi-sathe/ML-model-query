@@ -2,12 +2,12 @@ from typing import Mapping, Any, Sequence, List
 import copy
 import numpy as np
 
-from ai_coach_domain.agent import InteractiveAgent
-from ai_coach_domain.tool_handover.mdp import MDP_ToolHandover
-from ai_coach_domain.tool_handover.simulator import ToolHandoverSimulator
-import ai_coach_domain.tool_handover.define as tho
+from aic_domain.agent import InteractiveAgent
+from aic_domain.tool_handover.mdp import MDP_ToolHandover
+from aic_domain.tool_handover.simulator import ToolHandoverSimulator
+import aic_domain.tool_handover.define as tho
 
-from ai_coach_domain.agent import InteractiveAgent
+from aic_domain.agent import InteractiveAgent
 from web_experiment.exp_common.helper import toolhandover_game_scene, toolhandover_game_scene_names
 import web_experiment.exp_common.canvas_objects as co
 from web_experiment.models import db, User

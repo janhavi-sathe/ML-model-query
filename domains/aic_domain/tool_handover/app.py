@@ -1,8 +1,8 @@
 import os
 from typing import Hashable, Tuple
 from stand_alone.app import AppInterface
-from ai_coach_domain.tool_handover.simulator import ToolHandoverSimulator
-import ai_coach_domain.tool_handover.define as tho
+from aic_domain.tool_handover.simulator import ToolHandoverSimulator
+import aic_domain.tool_handover.define as tho
 
 
 class ToolHandoverApp(AppInterface):

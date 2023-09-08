@@ -1,10 +1,10 @@
 import os
 import numpy as np
-from ai_coach_domain.tooldelivery.environment import RequestEnvironment
-from ai_coach_domain.tooldelivery.tooldelivery_v3_mdp import ToolDeliveryMDP_V3
-from ai_coach_domain.tooldelivery.tooldelivery_v3_policy import (
+from aic_domain.tooldelivery.environment import RequestEnvironment
+from aic_domain.tooldelivery.tooldelivery_v3_mdp import ToolDeliveryMDP_V3
+from aic_domain.tooldelivery.tooldelivery_v3_policy import (
     ToolDeliveryPolicy_V3)
-import ai_coach_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
+import aic_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
 
 
 class ToolDeliveryEnv_V3(RequestEnvironment):

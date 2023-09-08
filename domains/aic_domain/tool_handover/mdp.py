@@ -1,8 +1,8 @@
 import numpy as np
-from ai_coach_core.models.mdp import LatentMDP
-from ai_coach_core.utils.mdp_utils import StateSpace
-from ai_coach_domain.tool_handover.transition import tool_handover_transition
-import ai_coach_domain.tool_handover.define as tho
+from aic_core.models.mdp import LatentMDP
+from aic_core.utils.mdp_utils import StateSpace
+from aic_domain.tool_handover.transition import tool_handover_transition
+import aic_domain.tool_handover.define as tho
 
 
 class MDP_ToolHandover(LatentMDP):

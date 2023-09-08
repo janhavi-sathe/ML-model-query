@@ -3,9 +3,9 @@ import tkinter
 import tkinter.scrolledtext
 import tkinter.filedialog
 from PIL import Image, ImageTk
-from ai_coach_domain.tooldelivery.utils import read_sample
-from ai_coach_domain.tooldelivery.tooldelivery_v3_env import ToolDeliveryEnv_V3
-import ai_coach_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
+from aic_domain.tooldelivery.utils import read_sample
+from aic_domain.tooldelivery.tooldelivery_v3_env import ToolDeliveryEnv_V3
+import aic_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
 
 
 class ToolDeliveryPlayer():

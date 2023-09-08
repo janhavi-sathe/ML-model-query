@@ -1,8 +1,8 @@
 import os
 from typing import Hashable, Tuple
 from stand_alone.app import AppInterface
-from ai_coach_domain.tooldelivery.simulator import ToolDeliverySimulator
-import ai_coach_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
+from aic_domain.tooldelivery.simulator import ToolDeliverySimulator
+import aic_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
 
 
 class ToolDeliveryApp(AppInterface):

@@ -1,5 +1,5 @@
 from typing import Sequence, Tuple, Any, Union
-import ai_coach_domain.tool_handover.define as tho
+import aic_domain.tool_handover.define as tho
 from copy import deepcopy
 
 
