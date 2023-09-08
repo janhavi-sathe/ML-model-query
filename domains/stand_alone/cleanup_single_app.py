@@ -1,11 +1,11 @@
 from typing import Hashable, Tuple
 from stand_alone.app import AppInterface
-from ai_coach_domain.box_push import EventType, BoxState, conv_box_idx_2_state
-from ai_coach_domain.cleanup_single.simulator import CleanupSingleSimulator
-from ai_coach_domain.cleanup_single.agent import Agent_CleanupSingle
-from ai_coach_domain.cleanup_single.policy import Policy_CleanupSingle
-from ai_coach_domain.cleanup_single.mdp import MDPCleanupSingle
-from ai_coach_domain.cleanup_single.maps import MAP_SINGLE_V1
+from aic_domain.box_push import EventType, BoxState, conv_box_idx_2_state
+from aic_domain.cleanup_single.simulator import CleanupSingleSimulator
+from aic_domain.cleanup_single.agent import Agent_CleanupSingle
+from aic_domain.cleanup_single.policy import Policy_CleanupSingle
+from aic_domain.cleanup_single.mdp import MDPCleanupSingle
+from aic_domain.cleanup_single.maps import MAP_SINGLE_V1
 
 GAME_MAP = MAP_SINGLE_V1
 
@@ -19,7 +19,7 @@ class BoxPushApp(AppInterface):
     'define game related variables and objects'
     self.x_grid = GAME_MAP["x_grid"]
     self.y_grid = GAME_MAP["y_grid"]
-    self.game = CleanupSingleSimulator()
+    self.game = CleanupSingleSimulator(False)
     self.game.max_steps = 150
 
     mdp = MDPCleanupSingle(**GAME_MAP)

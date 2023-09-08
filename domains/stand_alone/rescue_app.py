@@ -1,22 +1,22 @@
 from typing import Hashable, Tuple, Sequence
 from stand_alone.app import AppInterface
 import numpy as np
-from ai_coach_domain.rescue import E_EventType, Location, Place, Route, E_Type
-from ai_coach_domain.rescue.maps import MAP_RESCUE
-from ai_coach_domain.rescue.simulator import RescueSimulator
-from ai_coach_domain.agent.cached_agent import BTILCachedPolicy
-from ai_coach_domain.rescue.agent import (AIAgent_Rescue_PartialObs,
-                                          AIAgent_Rescue_BTIL)
-from ai_coach_domain.rescue.policy import Policy_Rescue
-from ai_coach_domain.rescue.mdp import MDP_Rescue_Task, MDP_Rescue_Agent
+from aic_domain.rescue import E_EventType, Location, Place, Route, E_Type
+from aic_domain.rescue.maps import MAP_RESCUE
+from aic_domain.rescue.simulator import RescueSimulator
+from aic_domain.agent.cached_agent import BTILCachedPolicy
+from aic_domain.rescue.agent import (AIAgent_Rescue_PartialObs,
+                                     AIAgent_Rescue_BTIL)
+from aic_domain.rescue.policy import Policy_Rescue
+from aic_domain.rescue.mdp import MDP_Rescue_Task, MDP_Rescue_Agent
 import pickle
-from ai_coach_core.intervention.feedback_strategy import (
+from aic_core.intervention.feedback_strategy import (
     get_combos_sorted_by_simulated_values)
 
 GAME_MAP = MAP_RESCUE
 
 TEST_BTIL_AGENT = True
-DATA_DIR = "misc/BTIL_feedback_results/data/"
+DATA_DIR = "analysis/TIC_results/data/"
 V_VAL_FILE_NAME = "rescue_2_500_0,30_30_merged_v_values_learned.pickle"
 # V_VAL_FILE_NAME = None
 
@@ -52,7 +52,7 @@ class RescueApp(AppInterface):
       policy2 = Policy_Rescue(task_mdp, agent_mdp, TEMPERATURE, 1)
       agent2 = AIAgent_Rescue_PartialObs(init_states, 1, policy2)
     else:
-      data_dir = "misc/BTIL_feedback_results/data/learned_models/"  # noqa: E501
+      data_dir = "analysis/TIC_results/data/learned_models/"  # noqa: E501
       np_policy_1 = np.load(
           data_dir + "rescue_2_btil2_policy_synth_woTx_FTTT_500_0,30_a1.npy")
       test_policy_1 = BTILCachedPolicy(np_policy_1, task_mdp, 0,

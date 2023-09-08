@@ -3,11 +3,11 @@ from typing import Mapping, Any, List, Tuple, Callable, Sequence
 import os
 import time
 import numpy as np
-from ai_coach_domain.box_push import conv_box_idx_2_state, BoxState
-from ai_coach_domain.rescue import (Place, Route, Location, E_Type, PlaceName,
-                                    Work, is_work_done)
-import ai_coach_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
-import ai_coach_domain.tool_handover.define as tho
+from aic_domain.box_push import conv_box_idx_2_state, BoxState
+from aic_domain.rescue import (Place, Route, Location, E_Type, PlaceName, Work,
+                               is_work_done)
+import aic_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
+import aic_domain.tool_handover.define as tho
 import web_experiment.exp_common.canvas_objects as co
 
 

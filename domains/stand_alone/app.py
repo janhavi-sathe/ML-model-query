@@ -2,7 +2,7 @@ import abc
 from typing import Hashable, Tuple
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
-from ai_coach_domain.simulator import Simulator
+from aic_domain.simulator import Simulator
 from PIL import Image, ImageTk
 import threading
 
@@ -287,25 +287,3 @@ class AppInterface(abc.ABC):
     points = [x_pos_1, y_pos_1, x_pos_3, y_pos_3, x_pos_2, y_pos_2]
 
     return self.canvas.create_polygon(points, fill=color)
-
-  def create_image(self, x_cen, y_cen, width, height, obj_name, file_name):
-    if obj_name not in self.cached_images:
-      img = Image.open(file_name)
-      f_w, f_h = img.size
-      w_ratio = width / f_w
-      h_ratio = height / f_h
-
-      if w_ratio < h_ratio:
-        width = int(width)
-        height = int(f_h * w_ratio)
-      else:
-        width = int(f_w * h_ratio)
-        height = int(height)
-
-      img = img.resize((width, height), Image.ANTIALIAS)
-      img = ImageTk.PhotoImage(img)
-      self.cached_images[obj_name] = img
-    else:
-      img = self.cached_images[obj_name]
-
-    return self.canvas.create_image(x_cen, y_cen, anchor=tk.CENTER, image=img)
