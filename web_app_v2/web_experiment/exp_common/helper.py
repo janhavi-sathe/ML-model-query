@@ -977,18 +977,18 @@ def toolhandover_game_scene(
   nurse_position = (150, 60, icon_sz, icon_sz)
   surgeon_position = (220, 60, icon_sz, icon_sz)
   patient_position = (205, 90, 200, 150)
-  table_position = (60, 110, 120, 120)
-  label_text = (270, 10)
-  label_text2 = (270, 25)
+  table_position = (60, 110, 120, 180)
+  label_text = (270, 0)
+  label_text2 = (270, 15)
 
   tool_sz = 30
-  table_part1 = (table_position[0] - 20, table_position[1] - 35, tool_sz,
+  table_part1 = (table_position[0] - 20, table_position[1] - 60, tool_sz,
                  tool_sz)
-  table_part2 = (table_position[0] + 20, table_position[1] - 35, tool_sz,
+  table_part2 = (table_position[0] + 20, table_position[1] - 60, tool_sz,
                  tool_sz)
-  table_part3 = (table_position[0] - 20, table_position[1] - 10, tool_sz,
+  table_part3 = (table_position[0] - 20, table_position[1] - 20, tool_sz,
                  tool_sz)
-  table_part4 = (table_position[0] + 20, table_position[1] - 10, tool_sz,
+  table_part4 = (table_position[0] + 20, table_position[1] - 20, tool_sz,
                  tool_sz)
 
   tool_types = game_env["tool_types"]
@@ -1035,13 +1035,13 @@ def toolhandover_game_scene(
 
   # surgical step
   x, y = coord_2_canvas(*label_text)
-  w = size_2_canvas(50, 0)[0]
+  w = size_2_canvas(75, 0)[0]
   game_objs.append(
       co.TextObject("surgical_step", (x - w / 2, y), w, 25, surgical_step.name))
 
   # patient state
   x, y = coord_2_canvas(patient_position[0] + 10, patient_position[1] + 20)
-  w = size_2_canvas(50, 0)[0]
+  w = size_2_canvas(75, 0)[0]
   game_objs.append(
       co.TextObject("patient_state", (x - w / 2, y), w, 25, patient_state.name))
 
@@ -1050,7 +1050,7 @@ def toolhandover_game_scene(
   if tool_fornow is not None:
     text_tool = tool_fornow.name
   x, y = coord_2_canvas(*label_text2)
-  w = size_2_canvas(50, 0)[0]
+  w = size_2_canvas(75, 0)[0]
   game_objs.append(co.TextObject("text_tool", (x - w / 2, y), w, 25, text_tool))
 
   # surgeon sight
@@ -1059,25 +1059,25 @@ def toolhandover_game_scene(
         co.LineSegment(
             "sight0",
             coord_2_canvas(surgeon_position[0] - 5, surgeon_position[1] - 10),
-            size_2_canvas(patient_position[0], patient_position[1])))
+            coord_2_canvas(patient_position[0], patient_position[1])))
     game_objs.append(
         co.LineSegment(
             "sight1",
             coord_2_canvas(surgeon_position[0] + 5, surgeon_position[1] - 10),
-            size_2_canvas(patient_position[0] + 0.3 * patient_position[2],
+            coord_2_canvas(patient_position[0] + 0.3 * patient_position[2],
                           patient_position[1])))
   else:
     game_objs.append(
         co.LineSegment(
             "sight0",
             coord_2_canvas(surgeon_position[0] - 5, surgeon_position[1] - 15),
-            size_2_canvas(table_position[0] + 0.3 * table_position[2],
+            coord_2_canvas(table_position[0] + 0.3 * table_position[2],
                           table_position[1] - 0.4 * table_position[3])))
     game_objs.append(
         co.LineSegment(
             "sight1",
             coord_2_canvas(surgeon_position[0] - 5, surgeon_position[1] - 10),
-            size_2_canvas(table_position[0] + 0.3 * table_position[2],
+            coord_2_canvas(table_position[0] + 0.3 * table_position[2],
                           table_position[1])))
 
   # nurse hand

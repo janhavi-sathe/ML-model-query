@@ -184,9 +184,9 @@ class ExperimentPageBase(CanvasPageBase):
   SPOTLIGHT = "Spotlight"
 
   GAME_LEFT = 0
-  GAME_TOP = 0
-  GAME_WIDTH = co.CANVAS_HEIGHT
-  GAME_HEIGHT = co.CANVAS_HEIGHT
+  GAME_TOP = co.CANVAS_HEIGHT * 1/3
+  GAME_WIDTH = co.CANVAS_WIDTH * 2/3
+  GAME_HEIGHT = co.CANVAS_HEIGHT * 2/3
   GAME_RIGHT = GAME_LEFT + GAME_WIDTH
   GAME_BOTTOM = GAME_TOP + GAME_HEIGHT
 
@@ -254,8 +254,8 @@ class ExperimentPageBase(CanvasPageBase):
           (self.GAME_RIGHT, self.GAME_BOTTOM))
 
     if self._SHOW_INSTRUCTION:
-      obj = self._get_instruction_objs(user_data)
-      dict_objs[obj.name] = obj
+      for obj in self._get_instruction_objs(user_data):
+        dict_objs[obj.name] = obj
 
     if self._SHOW_SCORE:
       obj = self._get_score_obj(user_data)
@@ -316,12 +316,20 @@ class ExperimentPageBase(CanvasPageBase):
 
   def _get_instruction_objs(self, user_data: UserData):
     margin = 10
-    pos = (self.GAME_RIGHT + margin, margin)
-    width = co.CANVAS_WIDTH - pos[0] - margin
+    pos = (margin, margin)
+    width = co.CANVAS_WIDTH * 2 / 3 - margin
     text_instr = co.TextObject(self.TEXT_INSTRUCTION, pos, width, 18,
                                self._get_instruction(user_data))
+    
+    margin = 5
+    pos = (margin, margin)
+    size = (co.CANVAS_WIDTH * 2 / 3 - margin, int(self.GAME_HEIGHT * 0.5))
+    rect_instr = co.ClippedRectangle("rect_instr22", pos, size, "white", "black")
+    # circ = co.Circle("circlespammer", pos, 50, "black")
+    circ = co.TextObject(self.TEXT_INSTRUCTION, (margin + self.GAME_WIDTH, margin), width, 18,
+                               "these dumb instructinos")
 
-    return text_instr
+    return text_instr, circ
 
   def _get_score_text(self, user_data: Exp1UserData):
     return "Time Taken: 0"

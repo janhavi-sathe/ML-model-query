@@ -344,8 +344,8 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
     for obj in self._game_overlay(dict_game, user_data):
       dict_objs[obj.name] = obj
 
-    obj = self._get_instruction_objs(user_data)
-    dict_objs[obj.name] = obj
+    for obj in self._get_instruction_objs(user_data):
+      dict_objs[obj.name] = obj
 
     disable_status = self._get_action_btn_disable_state(user_data, dict_game)
     objs = self._get_btn_actions(dict_game, user_data, *disable_status)
