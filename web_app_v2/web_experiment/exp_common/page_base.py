@@ -324,12 +324,14 @@ class ExperimentPageBase(CanvasPageBase):
     margin = 5
     pos = (margin, margin)
     size = (co.CANVAS_WIDTH * 2 / 3 - margin, int(self.GAME_HEIGHT * 0.5))
-    rect_instr = co.ClippedRectangle("rect_instr22", pos, size, "white", "black")
+    rect_instr = co.Rectangle("rect_instr", (margin + self.GAME_WIDTH, margin), (50, 50), "blue", "blue")
+    rect_instr = co.LineSegment("seg", (margin + 50, margin + 50), (margin + 100, margin + 100), 2, "black")
+    # rect_instr = co.TextObject(self.TEXT_INSTRUCTION, (margin, margin), width, 18, "testing")
     # circ = co.Circle("circlespammer", pos, 50, "black")
-    circ = co.TextObject(self.TEXT_INSTRUCTION, (margin + self.GAME_WIDTH, margin), width, 18,
-                               "these dumb instructinos")
+    # circ = co.TextObject(self.TEXT_INSTRUCTION, (margin + self.GAME_WIDTH, margin), width, 18,
+    #                            "testing")
 
-    return text_instr, circ
+    return (text_instr,)
 
   def _get_score_text(self, user_data: Exp1UserData):
     return "Time Taken: 0"

@@ -161,6 +161,8 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
 
     drawing_order.append(self.TEXT_INSTRUCTION)
 
+    drawing_order.append("control_panel")
+
     return drawing_order
 
   def _get_init_drawing_objects(
@@ -307,6 +309,18 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
     list_buttons = [btn_scv, btn_sns, btn_shandover, btn_sgt, btn_sit, btn_npu, btn_ndrop, btn_nmh]
     return list_buttons
 
+  def _get_control_panel(self):
+    game_width = self.GAME_WIDTH
+    game_right = self.GAME_RIGHT
+    ctrl_btn_w = int(game_width / 12)
+    ctrl_btn_w_half = int(game_width / 24)
+    x_ctrl_cen = int(game_right + (co.CANVAS_WIDTH - game_right) / 2)
+    y_ctrl_cen = int(co.CANVAS_HEIGHT * 0.65)
+    x_joy_cen = int(x_ctrl_cen - ctrl_btn_w * 1.5)
+
+    frame = co.Rectangle("control_panel", (game_right, int(co.CANVAS_HEIGHT * 0.15)), (400, 400), "black", "black")
+    return [frame]
+
   def _on_action_taken(self, user_game_data: Exp1UserData,
                        dict_prev_game: Mapping[str, Any],
                        tuple_actions: Sequence[Any]):
@@ -345,6 +359,9 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
       dict_objs[obj.name] = obj
 
     for obj in self._get_instruction_objs(user_data):
+      dict_objs[obj.name] = obj
+
+    for obj in self._get_control_panel():
       dict_objs[obj.name] = obj
 
     disable_status = self._get_action_btn_disable_state(user_data, dict_game)
@@ -441,21 +458,23 @@ class ToolHandoverGamePageBase(ExperimentPageBase):
       return (w, h)
 
     overlay_obs = []
-
+    
     icon_sz = 80
+    nurse_position = (150, 60, icon_sz, icon_sz)
     surgeon_position = (220, 60, icon_sz, icon_sz)
+    patient_position = (205, 90, 200, 150)
+    table_position = (60, 110, 120, 180)
     tool_types = game_env["tool_types"]
     tool_locations = game_env["tool_locations"]
-    table_position = (60, 110, 120, 120)
     tool_sz = 30
-    table_part1 = (table_position[0] - 20, table_position[1] - 35, tool_sz,
-                   tool_sz)
-    table_part2 = (table_position[0] + 20, table_position[1] - 35, tool_sz,
-                   tool_sz)
-    table_part3 = (table_position[0] - 20, table_position[1] - 10, tool_sz,
-                   tool_sz)
-    table_part4 = (table_position[0] + 20, table_position[1] - 10, tool_sz,
-                   tool_sz)
+    table_part1 = (table_position[0] - 20, table_position[1] - 60, tool_sz,
+                  tool_sz)
+    table_part2 = (table_position[0] + 20, table_position[1] - 60, tool_sz,
+                  tool_sz)
+    table_part3 = (table_position[0] - 20, table_position[1] - 20, tool_sz,
+                  tool_sz)
+    table_part4 = (table_position[0] + 20, table_position[1] - 20, tool_sz,
+                  tool_sz)
 
     if user_data.data[Exp1UserData.SELECT_IT]:
       obj = co.Rectangle(co.SEL_LAYER, (self.GAME_LEFT, self.GAME_TOP),
