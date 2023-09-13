@@ -1,6 +1,3 @@
-from aic_domain.tooldelivery.play_animation import ToolDeliveryPlayer
-from aic_domain.agent import InteractiveAgent
-from aic_domain.tooldelivery.tooldelivery_v3_mdp import ToolDeliveryMDP_V3
 from aic_domain.tooldelivery.tooldelivery_v3_policy import ToolDeliveryPolicy_V3
 from aic_domain.tooldelivery.simulator import ToolDeliverySimulator
 
@@ -9,7 +6,7 @@ from web_experiment.models import db, User
 from web_experiment.exp_common.page_base import Exp1UserData
 from web_experiment.exp_common.helper import (get_file_name,
                                               store_user_label_locally)
-from web_experiment.exp_common.page_tooldelivery_base import ToolDeliveryGamePageBase
+from web_experiment.exp_common.page_tooldelivery_base import (ToolDeliveryGamePageBase)
 
 TEMPERATURE = 0.3
 

@@ -1,21 +1,14 @@
 from typing import Mapping, Any, Sequence, List
-import copy
-import numpy as np
-
-from aic_domain.tooldelivery.environment import RequestEnvironment
-from aic_domain.tooldelivery.tooldelivery_v3_mdp import ToolDeliveryMDP_V3
-from aic_domain.tooldelivery.tooldelivery_v3_policy import ToolDeliveryPolicy_V3
-from aic_domain.tooldelivery.tooldelivery_v3_state_action import ActionCN, ActionSN, ActionAS, ToolLoc
+from aic_domain.tooldelivery.tooldelivery_v3_state_action import (ActionCN,
+                                                                  ActionSN,
+                                                                  ActionAS,
+                                                                  ToolLoc)
 from aic_domain.tooldelivery.simulator import ToolDeliverySimulator
-
-from aic_domain.agent import InteractiveAgent
-from web_experiment.exp_common.helper import tooldelivery_game_scene, tooldelivery_game_scene_names
+from web_experiment.exp_common.helper_surgery import (
+    tooldelivery_game_scene, tooldelivery_game_scene_names)
 import web_experiment.exp_common.canvas_objects as co
-from web_experiment.models import db, User
 from web_experiment.define import EDomainType
 from web_experiment.exp_common.page_base import ExperimentPageBase, Exp1UserData
-from web_experiment.exp_common.helper import (get_file_name,
-                                              store_user_label_locally)
 
 
 class ToolDeliveryGamePageBase(ExperimentPageBase):

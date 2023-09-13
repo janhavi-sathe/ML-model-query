@@ -1,13 +1,11 @@
-from aic_domain.agent import InteractiveAgent
 from aic_domain.rescue_v2.maps import MAP_RESCUE
-from aic_domain.tool_handover.mdp import MDP_ToolHandover
 from aic_domain.tool_handover.simulator import ToolHandoverSimulator
-
 from web_experiment.models import db, User
 from web_experiment.exp_common.page_base import Exp1UserData
 from web_experiment.exp_common.helper import (get_file_name,
                                               store_user_label_locally)
-from web_experiment.exp_common.page_toolhandover_base import ToolHandoverGamePageBase
+from web_experiment.exp_common.page_toolhandover_base import (
+    ToolHandoverGamePageBase)
 
 TEMPERATURE = 0.3
 
