@@ -171,17 +171,7 @@ class MDP_ToolHandover_V2(LatentMDP):
     if a_rdy:
       illegal_a_actions.append(tho.AnesthesiaAction.Proceed)
 
-    target_pos = n_pos
-    if n_dir == tho.NurseDirection.Up:
-      target_pos = (n_pos[0], n_pos[1] - 1)
-    elif n_dir == tho.NurseDirection.Left:
-      target_pos = (n_pos[0] - 1, n_pos[1])
-    elif n_dir == tho.NurseDirection.Down:
-      target_pos = (n_pos[0], n_pos[1] + 1)
-    elif n_dir == tho.NurseDirection.Right:
-      target_pos = (n_pos[0] + 1, n_pos[1])
-    else:
-      raise ValueError("Invalid nurse direction.")
+    target_pos = tho.get_target_pos(n_pos, n_dir)
 
     if target_pos not in self.nurse_possible_pos:
       illegal_n_actions.append((tho.NurseAction.Move_Forward, None))

@@ -4,7 +4,7 @@ from aic_domain.tooldelivery.tooldelivery_v3_state_action import (ActionCN,
                                                                   ActionAS,
                                                                   ToolLoc)
 from aic_domain.tooldelivery.simulator import ToolDeliverySimulator
-from web_experiment.exp_common.helper_surgery import (
+from web_experiment.exp_common.helper_handover import (
     tooldelivery_game_scene, tooldelivery_game_scene_names)
 import web_experiment.exp_common.canvas_objects as co
 from web_experiment.define import EDomainType

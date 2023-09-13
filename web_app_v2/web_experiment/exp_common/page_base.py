@@ -133,9 +133,6 @@ class Exp1UserData(UserData):
   '''
   GAME = "game"
   SELECT = "select"
-  SELECT_IT = "select_it"
-  SELECT_MH = "select_mh"
-  S_HANDOVER = "s_handover"
   GAME_DONE = "game_done"
   ACTION_COUNT = "action_count"
   PARTIAL_OBS = "partial_obs"
@@ -150,9 +147,6 @@ class Exp1UserData(UserData):
     super().__init__(user)
     self.data[Exp1UserData.GAME] = None
     self.data[Exp1UserData.SELECT] = False
-    self.data[Exp1UserData.SELECT_IT] = False
-    self.data[Exp1UserData.SELECT_MH] = False
-    self.data[Exp1UserData.S_HANDOVER] = False
     self.data[Exp1UserData.GAME_DONE] = False
     self.data[Exp1UserData.ACTION_COUNT] = 0
     self.data[Exp1UserData.PARTIAL_OBS] = True
@@ -184,9 +178,9 @@ class ExperimentPageBase(CanvasPageBase):
   SPOTLIGHT = "Spotlight"
 
   GAME_LEFT = 0
-  GAME_TOP = co.CANVAS_HEIGHT * 1/3
-  GAME_WIDTH = co.CANVAS_WIDTH * 2/3
-  GAME_HEIGHT = co.CANVAS_HEIGHT * 2/3
+  GAME_TOP = 0
+  GAME_WIDTH = co.CANVAS_HEIGHT
+  GAME_HEIGHT = co.CANVAS_HEIGHT
   GAME_RIGHT = GAME_LEFT + GAME_WIDTH
   GAME_BOTTOM = GAME_TOP + GAME_HEIGHT
 
@@ -254,8 +248,8 @@ class ExperimentPageBase(CanvasPageBase):
           (self.GAME_RIGHT, self.GAME_BOTTOM))
 
     if self._SHOW_INSTRUCTION:
-      for obj in self._get_instruction_objs(user_data):
-        dict_objs[obj.name] = obj
+      obj = self._get_instruction_objs(user_data)
+      dict_objs[obj.name] = obj
 
     if self._SHOW_SCORE:
       obj = self._get_score_obj(user_data)
@@ -316,22 +310,12 @@ class ExperimentPageBase(CanvasPageBase):
 
   def _get_instruction_objs(self, user_data: UserData):
     margin = 10
-    pos = (margin, margin)
-    width = co.CANVAS_WIDTH * 2 / 3 - margin
+    pos = (self.GAME_RIGHT + margin, margin)
+    width = co.CANVAS_WIDTH - pos[0] - margin
     text_instr = co.TextObject(self.TEXT_INSTRUCTION, pos, width, 18,
                                self._get_instruction(user_data))
-    
-    margin = 5
-    pos = (margin, margin)
-    size = (co.CANVAS_WIDTH * 2 / 3 - margin, int(self.GAME_HEIGHT * 0.5))
-    rect_instr = co.Rectangle("rect_instr", (margin + self.GAME_WIDTH, margin), (50, 50), "blue", "blue")
-    rect_instr = co.LineSegment("seg", (margin + 50, margin + 50), (margin + 100, margin + 100), 2, "black")
-    # rect_instr = co.TextObject(self.TEXT_INSTRUCTION, (margin, margin), width, 18, "testing")
-    # circ = co.Circle("circlespammer", pos, 50, "black")
-    # circ = co.TextObject(self.TEXT_INSTRUCTION, (margin + self.GAME_WIDTH, margin), width, 18,
-    #                            "testing")
 
-    return (text_instr,)
+    return text_instr
 
   def _get_score_text(self, user_data: Exp1UserData):
     return "Time Taken: 0"

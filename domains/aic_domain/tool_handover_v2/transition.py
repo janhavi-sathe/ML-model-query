@@ -18,17 +18,7 @@ def tool_handover_transition_v2(
              nurse_asked)]
 
   # for multiple use
-  target_pos = nurse_pos
-  if nurse_dir == tho.NurseDirection.Up:
-    target_pos = (nurse_pos[0], nurse_pos[1] - 1)
-  elif nurse_dir == tho.NurseDirection.Left:
-    target_pos = (nurse_pos[0] - 1, nurse_pos[1])
-  elif nurse_dir == tho.NurseDirection.Down:
-    target_pos = (nurse_pos[0], nurse_pos[1] + 1)
-  elif nurse_dir == tho.NurseDirection.Right:
-    target_pos = (nurse_pos[0] + 1, nurse_pos[1])
-  else:
-    raise ValueError("Invalid nurse direction")
+  target_pos = tho.get_target_pos(nurse_pos, nurse_dir)
 
   # nurse direction
   dist_nurse_dir = []

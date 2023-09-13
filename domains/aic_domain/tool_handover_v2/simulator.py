@@ -181,6 +181,7 @@ class ToolHandoverV2Simulator(Simulator):
         "cur_step": self.cur_step,
         "cur_requirement": self.cur_requirement,
         "nurse_asked": self.nurse_asked,
+        "current_step": self.current_step
     }
 
     return env_info

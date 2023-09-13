@@ -89,3 +89,19 @@ POSSIBLE_TOOLS = list(Requirement)[1:]
 def can_exchange_tool(nurse_pos, nurse_dir, surgeon_pos):
   return (nurse_pos[0] == surgeon_pos[0] - 1 and nurse_pos[1] == surgeon_pos[1]
           and nurse_dir in [NurseDirection.Down, NurseDirection.Right])
+
+
+def get_target_pos(nurse_pos, nurse_dir):
+  target_pos = nurse_pos
+  if nurse_dir == NurseDirection.Up:
+    target_pos = (nurse_pos[0], nurse_pos[1] - 1)
+  elif nurse_dir == NurseDirection.Left:
+    target_pos = (nurse_pos[0] - 1, nurse_pos[1])
+  elif nurse_dir == NurseDirection.Down:
+    target_pos = (nurse_pos[0], nurse_pos[1] + 1)
+  elif nurse_dir == NurseDirection.Right:
+    target_pos = (nurse_pos[0] + 1, nurse_pos[1])
+  else:
+    raise ValueError("Invalid nurse direction")
+
+  return target_pos
