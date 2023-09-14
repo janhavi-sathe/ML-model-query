@@ -10,15 +10,15 @@ from web_experiment.exp_common.helper import get_file_name
 from web_experiment.exp_common.page_rescue_v2_base import RescueV2GamePageBase
 
 TEMPERATURE = 0.3
-RESCUE_TEAMMATE1_POLICY = Policy_Rescue(MDP_Rescue_Task(**MAP_RESCUE),
-                                        MDP_Rescue_Agent(**MAP_RESCUE),
-                                        TEMPERATURE, RescueSimulatorV2.AGENT2)
-RESCUE_TEAMMATE2_POLICY = Policy_Rescue(MDP_Rescue_Task(**MAP_RESCUE),
-                                        MDP_Rescue_Agent(**MAP_RESCUE),
-                                        TEMPERATURE, RescueSimulatorV2.AGENT3)
 
 
 class RescueV2GamePage(RescueV2GamePageBase):
+  _TEAMMATE_POLICY_1 = Policy_Rescue(MDP_Rescue_Task(**MAP_RESCUE),
+                                     MDP_Rescue_Agent(**MAP_RESCUE),
+                                     TEMPERATURE, RescueSimulatorV2.AGENT2)
+  _TEAMMATE_POLICY_2 = Policy_Rescue(MDP_Rescue_Task(**MAP_RESCUE),
+                                     MDP_Rescue_Agent(**MAP_RESCUE),
+                                     TEMPERATURE, RescueSimulatorV2.AGENT3)
 
   def __init__(self,
                manual_latent_selection,
@@ -27,10 +27,6 @@ class RescueV2GamePage(RescueV2GamePageBase):
                prompt_freq: int = 5) -> None:
     super().__init__(manual_latent_selection, MAP_RESCUE, auto_prompt,
                      prompt_on_change, prompt_freq)
-    global RESCUE_TEAMMATE1_POLICY, RESCUE_TEAMMATE2_POLICY
-
-    self._TEAMMATE_POLICY_1 = RESCUE_TEAMMATE1_POLICY
-    self._TEAMMATE_POLICY_2 = RESCUE_TEAMMATE2_POLICY
 
   def _on_game_finished(self, user_game_data: Exp1UserData):
     '''

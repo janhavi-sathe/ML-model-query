@@ -11,7 +11,10 @@ class MDP_ToolHandover_V2(LatentMDP):
 
   def __init__(self, surgeon_pos, patient_pos_size, perf_pos, anes_pos,
                nurse_init_pos, nurse_init_dir, nurse_possible_pos, table_blocks,
-               vital_pos, surgical_steps, tool_table_zone, **kwargs):
+               vital_pos, surgical_steps, tool_table_zone, width, height,
+               **kwargs):
+    self.width = width
+    self.height = height
     self.surgeon_pos = surgeon_pos
     self.patient_pos_size = patient_pos_size
     self.perf_pos = perf_pos

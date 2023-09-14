@@ -5,9 +5,9 @@ from aic_domain.box_push import conv_box_idx_2_state, BoxState, EventType
 from web_experiment.define import EDomainType
 import web_experiment.exp_common.canvas_objects as co
 from web_experiment.exp_common.page_base import Exp1UserData, ExperimentPageBase
-from web_experiment.exp_common.helper import (boxpush_game_scene,
-                                              boxpush_game_scene_names,
-                                              get_btn_boxpush_actions)
+from web_experiment.exp_common.scene_helper import (boxpush_game_scene,
+                                                    boxpush_game_scene_names)
+from web_experiment.exp_common.helper import get_btn_boxpush_actions
 
 TEST_ROBOT_SIGHT = False
 
@@ -424,7 +424,7 @@ class BoxPushGamePageBase(ExperimentPageBase):
       action = EventType.DOWN
     elif clicked_btn == co.BTN_STAY:
       action = EventType.STAY
-    elif clicked_btn == co.BTN_PICK_UP:
+    elif clicked_btn == co.BTN_PICKUP:
       action = EventType.HOLD
     elif clicked_btn == co.BTN_DROP:
       action = EventType.UNHOLD

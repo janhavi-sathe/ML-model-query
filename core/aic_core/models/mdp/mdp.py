@@ -89,7 +89,8 @@ class MDP:
     # Mapping takes state index as input and outputs a factored state.
     np_idx_to_state = np.zeros((self.num_actual_states, self.num_state_factors),
                                dtype=np.int32)
-    for state, idx in np.ndenumerate(self.np_state_to_idx):
+    for state, idx in tqdm(np.ndenumerate(self.np_state_to_idx),
+                           total=self.num_actual_states):
       np_idx_to_state[idx] = state
     self.np_idx_to_state = np_idx_to_state
 

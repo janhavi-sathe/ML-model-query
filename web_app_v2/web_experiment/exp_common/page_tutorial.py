@@ -432,7 +432,7 @@ class CanvasPagePickUpTargetAttempt(CanvasPageTutorialBase):
       self, user_game_data: Exp1UserData) -> Mapping[str, co.DrawingObject]:
     dict_objs = self._base_get_init_drawing_objects(user_game_data)
 
-    obj = dict_objs[co.BTN_PICK_UP]  # type: co.ButtonRect
+    obj = dict_objs[co.BTN_PICKUP]  # type: co.ButtonRect
     obj = self._get_spotlight(*obj.pos, int(obj.size[0] * 0.6))
     dict_objs[obj.name] = obj
 
@@ -475,13 +475,13 @@ class CanvasPagePickUpTargetAttempt(CanvasPageTutorialBase):
         user_game_data.go_to_next_page()
 
   def button_clicked(self, user_game_data: Exp1UserData, clicked_btn: str):
-    if clicked_btn == co.BTN_PICK_UP:
-      user_game_data.data[self.CLICKED_BTNS].add(co.BTN_PICK_UP)
+    if clicked_btn == co.BTN_PICKUP:
+      user_game_data.data[self.CLICKED_BTNS].add(co.BTN_PICKUP)
 
     return self._base_button_clicked(user_game_data, clicked_btn)
 
   def _get_button_commands(self, clicked_btn, user_data: Exp1UserData):
-    if clicked_btn == co.BTN_PICK_UP:
+    if clicked_btn == co.BTN_PICKUP:
       return {"delete": [self.SPOTLIGHT]}
 
     return None
@@ -494,7 +494,7 @@ class CanvasPagePickUpTargetAttempt(CanvasPageTutorialBase):
     dict_objs = self._base_get_updated_drawing_objects(user_data,
                                                        dict_prev_game)
 
-    if co.BTN_PICK_UP not in user_data.data[self.CLICKED_BTNS]:
+    if co.BTN_PICKUP not in user_data.data[self.CLICKED_BTNS]:
       objs = self._get_btn_actions(True, True, True, True, True, False, True,
                                    True)
       for obj in objs:

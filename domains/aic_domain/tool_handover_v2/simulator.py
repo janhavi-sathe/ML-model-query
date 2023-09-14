@@ -22,8 +22,8 @@ class ToolHandoverV2Simulator(Simulator):
     self.anes_agent = None
     self.perf_agent = None
 
-  def init_game(self, **kwargs):
-    self.mmdp = MDP_ToolHandover_V2(**kwargs)
+  def init_game(self, mdp_tool_handover: MDP_ToolHandover_V2):
+    self.mmdp = mdp_tool_handover
     self.reset_game()
 
   def set_autonomous_agent(
@@ -159,6 +159,8 @@ class ToolHandoverV2Simulator(Simulator):
 
   def get_env_info(self):
     env_info = {
+        "width": self.mmdp.width,
+        "height": self.mmdp.height,
         "surgeon_pos": self.mmdp.surgeon_pos,
         "patient_pos_size": self.mmdp.patient_pos_size,
         "perf_pos": self.mmdp.perf_pos,

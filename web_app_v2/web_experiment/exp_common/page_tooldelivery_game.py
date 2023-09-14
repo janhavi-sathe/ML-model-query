@@ -4,9 +4,10 @@ from aic_domain.tooldelivery.simulator import ToolDeliverySimulator
 from aic_domain.rescue_v2.maps import MAP_RESCUE
 from web_experiment.models import db, User
 from web_experiment.exp_common.page_base import Exp1UserData
-from web_experiment.exp_common.helper import (get_file_name,
-                                              store_user_label_locally)
-from web_experiment.exp_common.page_tooldelivery_base import (ToolDeliveryGamePageBase)
+from web_experiment.exp_common.helper import (
+    get_file_name, store_user_label_locally)
+from web_experiment.exp_common.page_tooldelivery_base import (
+    ToolDeliveryGamePageBase)
 
 TEMPERATURE = 0.3
 

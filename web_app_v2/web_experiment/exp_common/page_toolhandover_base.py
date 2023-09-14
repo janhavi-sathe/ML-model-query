@@ -10,6 +10,7 @@ import aic_domain.tool_handover_v2.define as tho
 from aic_domain.tool_handover_v2.surgery_info import CABG_INFO
 from aic_domain.tool_handover_v2.agent import (SurgeonAgent, PerfusionAgent,
                                                AnesthesiaAgent)
+from aic_domain.tool_handover_v2.mdp import MDP_ToolHandover_V2
 
 
 class ToolHandoverGamePageBase(SurgeryPageBase):
@@ -20,18 +21,21 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
   N_ASK_REQUIREMENT = tho.NurseAction.Ask_Requirement.name
   N_ASSIST = tho.NurseAction.Assist.name
   N_PICKUPDROP = tho.NurseAction.PickUp_Drop.name
+  N_MOVE_FORWARD = tho.NurseAction.Move_Forward.name
 
   ACTION_BUTTONS = [
       N_STAY, N_ROTATE_L, N_ROTATE_180, N_ROTATE_R, N_ASK_REQUIREMENT, N_ASSIST,
-      N_PICKUPDROP
+      N_PICKUPDROP, N_MOVE_FORWARD
   ]
 
-  CONTROL_PANEL = "control_panel"
+  DIALOG_PANEL = "dialog_panel"
+  DIALOG_ITEM = "idalog_item"
+  NUM_SHOW = 5
+  MDP = MDP_ToolHandover_V2(**CABG_INFO)
 
-  def __init__(self, manual_latent_selection, surgery_info) -> None:
+  def __init__(self, manual_latent_selection) -> None:
     super().__init__(True, True, True, EDomainType.ToolHandover)
     self._MANUAL_SELECTION = manual_latent_selection
-    self._SURGERY_INFO = surgery_info
 
     self._N = ToolHandoverV2Simulator.Nurse
     self._S = ToolHandoverV2Simulator.Surgeon
@@ -40,14 +44,15 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
 
   def init_user_data(self, user_game_data: SurgeryUserData):
     user_game_data.data[SurgeryUserData.GAME_DONE] = False
+    user_game_data.data[SurgeryUserData.DIALOGS] = []
 
     game = user_game_data.get_game_ref()
     if game is None:
       game = ToolHandoverV2Simulator()
-
       user_game_data.set_game(game)
-    game.init_game(**CABG_INFO)
-    surgeon_agent = SurgeonAgent(CABG_INFO["surgeon_pos"])
+
+    game.init_game(self.MDP)
+    surgeon_agent = SurgeonAgent(game.get_env_info()["surgeon_pos"])
     perf_agent = PerfusionAgent()
     anes_agent = AnesthesiaAgent()
     game.set_autonomous_agent(surgeon_agent=surgeon_agent,
@@ -88,7 +93,6 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
         _, _, _, done = self.action_event(user_game_data, latent)
         if done:
           self._on_game_finished(user_game_data)
-
         return
     elif clicked_btn == self.N_PICKUPDROP:
       user_game_data.data[SurgeryUserData.SELECT_MH] = True
@@ -108,16 +112,19 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
     dict_game = user_game_data.get_game_ref().get_env_info()
     drawing_order = []
     drawing_order.append(self.GAME_BORDER)
+    drawing_order.append(self.INSTRUCTION_BORDER)
 
     drawing_order = (drawing_order +
                      self._game_scene_names(dict_game, user_game_data))
     drawing_order = (drawing_order +
                      self._game_overlay_names(dict_game, user_game_data))
-    drawing_order = drawing_order + self.ACTION_BUTTONS
 
     drawing_order.append(self.TEXT_INSTRUCTION)
 
-    drawing_order.append(self.CONTROL_PANEL)
+    drawing_order.append(self.DIALOG_PANEL)
+    for idx in range(self.NUM_SHOW):
+      drawing_order.append(self.DIALOG_ITEM + str(idx))
+    drawing_order = drawing_order + self.ACTION_BUTTONS
 
     return drawing_order
 
@@ -137,6 +144,12 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
     for obj in overlay_objs:
       dict_objs[obj.name] = obj
 
+    obj = self._get_instruction_objs(user_game_data)
+    dict_objs[obj.name] = obj
+
+    for obj in self._get_dialog_panel(user_game_data):
+      dict_objs[obj.name] = obj
+
     disable_status = self._get_action_btn_disable_state(user_game_data,
                                                         dict_game)
     objs = self._get_btn_actions(dict_game, user_game_data, *disable_status)
@@ -153,9 +166,9 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
     game_done = user_data.data[SurgeryUserData.GAME_DONE]
 
     if game_done:
-      return True, True, True, True, True, True, True
+      return True, True, True, True, True, True, True, True
 
-    return False, False, False, False, False, False, False
+    return False, False, False, False, False, False, False, False
 
   def _get_btn_actions(
       self,
@@ -167,55 +180,46 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
       disable_rotate_r: bool = False,
       disable_ask: bool = False,
       disable_assist: bool = False,
-      disable_pickdrop: bool = False) -> Sequence[co.DrawingObject]:
+      disable_pickdrop: bool = False,
+      disable_move_forward: bool = False) -> Sequence[co.DrawingObject]:
 
     game_width = self.GAME_WIDTH
     game_right = self.GAME_RIGHT
     ctrl_btn_w = int(game_width / 12)
-    ctrl_btn_w_half = int(game_width / 24)
     x_ctrl_cen = int(game_right + (co.CANVAS_WIDTH - game_right) / 2)
-    y_ctrl_cen = int(co.CANVAS_HEIGHT * 0.65)
-    x_joy_cen = int(x_ctrl_cen - ctrl_btn_w * 1.5)
+    y_ctrl_cen = int(co.CANVAS_HEIGHT * 0.8)
 
-    font_size = 20
-    btn_stay = co.ButtonRect(self.N_STAY, (x_ctrl_cen - int(ctrl_btn_w * 1.5),
-                                           y_ctrl_cen - int(ctrl_btn_w * 1.8)),
-                             (ctrl_btn_w * 3, ctrl_btn_w),
-                             font_size,
-                             "Stay",
-                             disable=disable_stay)
+    font_size = 18
     btn_rot_l = co.ButtonRect(self.N_ROTATE_L,
                               (x_ctrl_cen - int(ctrl_btn_w * 1.5),
-                               y_ctrl_cen - int(ctrl_btn_w * 0.6)),
+                               y_ctrl_cen - int(ctrl_btn_w * 1.8)),
                               (ctrl_btn_w * 3, ctrl_btn_w),
                               font_size,
                               "Rotate Left",
                               disable=disable_rotate_l)
     btn_rot_180 = co.ButtonRect(self.N_ROTATE_180,
                                 (x_ctrl_cen - int(ctrl_btn_w * 1.5),
-                                 y_ctrl_cen + int(ctrl_btn_w * 0.6)),
+                                 y_ctrl_cen - int(ctrl_btn_w * 0.6)),
                                 (ctrl_btn_w * 3, ctrl_btn_w),
                                 font_size,
                                 "Rotate 180",
                                 disable=disable_rotate_180)
     btn_rot_r = co.ButtonRect(self.N_ROTATE_R,
                               (x_ctrl_cen - int(ctrl_btn_w * 1.5),
-                               y_ctrl_cen + int(ctrl_btn_w * 1.8)),
+                               y_ctrl_cen + int(ctrl_btn_w * 0.6)),
                               (ctrl_btn_w * 3, ctrl_btn_w),
                               font_size,
                               "Rotate Right",
                               disable=disable_rotate_r)
-    btn_ask = co.ButtonRect(self.N_ASK_REQUIREMENT,
-                            (x_ctrl_cen - int(ctrl_btn_w * 1.5),
-                             y_ctrl_cen + int(ctrl_btn_w * 3.0)),
-                            (ctrl_btn_w * 3, ctrl_btn_w),
-                            font_size,
-                            "Ask Requirement",
-                            disable=disable_ask)
-
+    btn_stay = co.ButtonRect(self.N_STAY, (x_ctrl_cen + int(ctrl_btn_w * 1.5),
+                                           y_ctrl_cen - int(ctrl_btn_w * 1.8)),
+                             (ctrl_btn_w * 3, ctrl_btn_w),
+                             font_size,
+                             "Stay",
+                             disable=disable_stay)
     btn_assist = co.ButtonRect(self.N_ASSIST,
                                (x_ctrl_cen + int(ctrl_btn_w * 1.5),
-                                y_ctrl_cen - int(ctrl_btn_w * 1.8)),
+                                y_ctrl_cen - int(ctrl_btn_w * 0.6)),
                                (ctrl_btn_w * 3, ctrl_btn_w),
                                font_size,
                                "Assist",
@@ -227,25 +231,65 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
 
     btn_pickdrop = co.ButtonRect(self.N_PICKUPDROP,
                                  (x_ctrl_cen + int(ctrl_btn_w * 1.5),
-                                  y_ctrl_cen - int(ctrl_btn_w * 0.6)),
+                                  y_ctrl_cen + int(ctrl_btn_w * 0.6)),
                                  (ctrl_btn_w * 3, ctrl_btn_w),
                                  font_size,
                                  pickdrop_label,
                                  disable=disable_pickdrop)
+    btn_move = co.ButtonRect(self.N_MOVE_FORWARD,
+                             (x_ctrl_cen + int(ctrl_btn_w * 1.5),
+                              y_ctrl_cen + int(ctrl_btn_w * 1.8)),
+                             (ctrl_btn_w * 3, ctrl_btn_w),
+                             font_size,
+                             "Move Forward",
+                             disable=disable_move_forward)
+
+    btn_ask = co.ButtonRect(self.N_ASK_REQUIREMENT,
+                            (x_ctrl_cen - int(ctrl_btn_w * 1.5),
+                             y_ctrl_cen + int(ctrl_btn_w * 1.8)),
+                            (ctrl_btn_w * 3, ctrl_btn_w),
+                            font_size,
+                            "Ask",
+                            disable=disable_ask)
 
     list_buttons = [
         btn_stay, btn_rot_l, btn_rot_180, btn_rot_r, btn_ask, btn_assist,
-        btn_pickdrop
+        btn_pickdrop, btn_move
     ]
     return list_buttons
 
-  def _get_control_panel(self):
-    game_right = self.GAME_RIGHT
+  def _get_dialog_panel(self, user_game_data: SurgeryUserData):
 
-    frame = co.Rectangle(self.CONTROL_PANEL,
-                         (game_right, int(co.CANVAS_HEIGHT * 0.15)), (350, 350),
-                         "black", "black")
-    return [frame]
+    panel_width = co.CANVAS_WIDTH - self.GAME_RIGHT
+    panel_height = co.CANVAS_HEIGHT * 0.6
+
+    frame = co.Rectangle(self.DIALOG_PANEL, (self.GAME_RIGHT, 0),
+                         (panel_width, panel_height),
+                         fill=False,
+                         border=True,
+                         linewidth=3)
+    list_objs = [frame]
+    MARGIN = 5
+    list_diag = user_game_data.data[SurgeryUserData.DIALOGS]
+    for idx, item in enumerate(list_diag[-self.NUM_SHOW:]):
+      agent, text = item
+
+      align = "right"
+      color = "red"
+      if agent == self._S:
+        align = "left"
+        color = "cyan"
+
+      obj = co.TextObject(self.DIALOG_ITEM + str(idx),
+                          (self.GAME_RIGHT + MARGIN, idx * 30 + MARGIN),
+                          panel_width,
+                          20,
+                          text,
+                          text_align=align,
+                          text_color=color)
+      list_objs.append(obj)
+
+    return list_objs
 
   def _on_action_taken(self, user_game_data: SurgeryUserData,
                        dict_prev_game: Mapping[str, Any],
@@ -253,7 +297,6 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
     '''
     user_cur_game_data: NOTE - values will be updated
     '''
-
     pass
 
   def _on_game_finished(self, user_game_data: SurgeryUserData):
@@ -264,7 +307,7 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
 
     # update score
     game = user_game_data.get_game_ref()
-    user_game_data.data[SurgeryUserData.SCORE] = game.current_step
+    user_game_data.data[SurgeryUserData.SCORE] = game.get_score()
 
   def _get_updated_drawing_objects(
       self,
@@ -284,10 +327,10 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
     for obj in self._game_overlay(dict_game, user_data):
       dict_objs[obj.name] = obj
 
-    for obj in self._get_instruction_objs(user_data):
-      dict_objs[obj.name] = obj
+    obj = self._get_instruction_objs(user_data)
+    dict_objs[obj.name] = obj
 
-    for obj in self._get_control_panel():
+    for obj in self._get_dialog_panel(user_data):
       dict_objs[obj.name] = obj
 
     disable_status = self._get_action_btn_disable_state(user_data, dict_game)
@@ -297,7 +340,7 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
 
     return dict_objs
 
-  def _get_button_commands(self, clicked_btn, user_data: Exp1UserData):
+  def _get_button_commands(self, clicked_btn, user_data: SurgeonAgent):
     return None
 
   def _get_animations(self, dict_prev_game: Mapping[str, Any],
@@ -322,11 +365,16 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
       action = (tho.NurseAction.Rotate_180, None)
     elif clicked_btn == self.N_ASSIST:
       action = (tho.NurseAction.Assist, None)
+    elif clicked_btn == self.N_MOVE_FORWARD:
+      action = (tho.NurseAction.Move_Forward, None)
     elif clicked_btn == self.N_ASK_REQUIREMENT:
       action = (tho.NurseAction.Ask_Requirement, None)
+      user_game_data.data[SurgeryUserData.DIALOGS].append(
+          (self._N, "Can you tell me your requirement?"))
     elif "mh" in clicked_btn:
       loc_id = int(clicked_btn.split("mh")[1])
       action = (tho.NurseAction.PickUp_Drop, tho.PickupLocation(loc_id))
+      user_game_data.data[SurgeryUserData.SELECT_MH] = False
 
     # should not happen
     assert action is not None
@@ -336,6 +384,9 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
 
     # take actions
     map_agent2action = game.get_joint_action()
+    if map_agent2action[self._S] == tho.SurgeonAction.Tell_Requirement:
+      user_game_data.data[SurgeryUserData.DIALOGS].append(
+          (self._S, game.get_env_info()["cur_requirement"].name))
     game.take_a_step(map_agent2action)
 
     return ([], [], [], game.is_finished())
@@ -365,14 +416,14 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
                          alpha=0.8)
       overlay_obs.append(obj)
 
-      radius = size_2_canvas(15, 0)[0]
+      radius = size_2_canvas(0.2, 0)[0]
       font_size = 20
 
       nurse_pos = game_env["nurse_pos"]
       nurse_dir = game_env["nurse_dir"]
       target_pos = tho.get_target_pos(nurse_pos, nurse_dir)
 
-      for idx, loc in enumerate(tho.PickupLocation):
+      for loc in tho.PickupLocation:
         if loc == tho.PickupLocation.Quadrant1:
           img_pos = (target_pos[0] + 0.75, target_pos[1] + 0.25)
         elif loc == tho.PickupLocation.Quadrant2:
@@ -385,7 +436,7 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
           raise ValueError("Unknown location")
 
         # store latent buttons in order of tool type
-        obj = co.SelectingCircle("latentmh" + str(idx),
+        obj = co.SelectingCircle("latentmh" + str(loc.value),
                                  coord_2_canvas(img_pos[0], img_pos[1]), radius,
                                  font_size, "")
         overlay_obs.append(obj)

@@ -1,21 +1,17 @@
-import abc
-from typing import Mapping, Any
-from aic_domain.simulator import Simulator
+from typing import Mapping
 import web_experiment.exp_common.canvas_objects as co
-from web_experiment.define import EDomainType
 from .page_base import Exp1UserData, ExperimentPageBase
 
 
 class SurgeryUserData(Exp1UserData):
-  SELECT_IT = "select_it"
   SELECT_MH = "select_mh"
-  S_HANDOVER = "s_handover"
+  DIALOGS = "dialogs"
 
   def __init__(self, user) -> None:
     super().__init__(user)
-    self.data[SurgeryUserData.SELECT_IT] = False
     self.data[SurgeryUserData.SELECT_MH] = False
-    self.data[SurgeryUserData.S_HANDOVER] = False
+    # dialog item should be (agent, text) format
+    self.data[SurgeryUserData.DIALOGS] = []
 
 
 class SurgeryPageBase(ExperimentPageBase):
@@ -25,6 +21,42 @@ class SurgeryPageBase(ExperimentPageBase):
   GAME_WIDTH = GAME_HEIGHT
   GAME_RIGHT = GAME_LEFT + GAME_WIDTH
   GAME_BOTTOM = GAME_TOP + GAME_HEIGHT
+  INSTRUCTION_BORDER = "instruction_border"
+
+  def _get_drawing_order(self, user_game_data: SurgeryUserData = None):
+    drawing_order = []
+    if self._SHOW_BORDER:
+      drawing_order.append(self.GAME_BORDER)
+      drawing_order.append(self.INSTRUCTION_BORDER)
+
+    return drawing_order
+
+  def _get_init_drawing_objects(
+      self, user_data: SurgeryUserData) -> Mapping[str, co.DrawingObject]:
+
+    dict_objs = {}
+    if self._SHOW_BORDER:
+      dict_objs[self.GAME_BORDER] = co.Rectangle(
+          self.GAME_BORDER, (self.GAME_LEFT, self.GAME_TOP),
+          (self.GAME_WIDTH, self.GAME_HEIGHT),
+          fill=False,
+          border=True,
+          linewidth=3)
+      dict_objs[self.INSTRUCTION_BORDER] = co.Rectangle(
+          self.INSTRUCTION_BORDER, (0, 0), (self.GAME_WIDTH, self.GAME_TOP),
+          fill=False,
+          border=True,
+          linewidth=3)
+
+    if self._SHOW_INSTRUCTION:
+      obj = self._get_instruction_objs(user_data)
+      dict_objs[obj.name] = obj
+
+    if self._SHOW_SCORE:
+      obj = self._get_score_obj(user_data)
+      dict_objs[obj.name] = obj
+
+    return dict_objs
 
   def _get_spotlight(self, x_cen, y_cen, radius):
     outer_ltwh = (0, 0, co.CANVAS_WIDTH, co.CANVAS_HEIGHT)

@@ -7,6 +7,7 @@ from web_experiment.models import db, ExpIntervention, ExpDataCollection
 
 
 class CanvasPageStart(ExperimentPageBase):
+
   def __init__(self, domain_type: EDomainType) -> None:
     super().__init__(True, True, True, domain_type)
 

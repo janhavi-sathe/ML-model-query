@@ -2,6 +2,7 @@ import os
 from typing import Hashable, Tuple
 from stand_alone.app import AppInterface
 from aic_domain.tool_handover_v2.simulator import ToolHandoverV2Simulator
+from aic_domain.tool_handover_v2.mdp import MDP_ToolHandover_V2
 import aic_domain.tool_handover_v2.define as tho
 from aic_domain.tool_handover_v2.surgery_info import CABG_INFO
 from aic_domain.tool_handover_v2.agent import (SurgeonAgent, PerfusionAgent,
@@ -24,8 +25,9 @@ class ToolHandoverV2App(AppInterface):
     anes_agent = AnesthesiaAgent()
     perf_agent = PerfusionAgent()
 
+    mdp = MDP_ToolHandover_V2(**CABG_INFO)
     self.game = ToolHandoverV2Simulator()
-    self.game.init_game(**CABG_INFO)
+    self.game.init_game(mdp)
     self.game.set_autonomous_agent(nurse_agent=nurse_agent,
                                    surgeon_agent=surgeon_agent,
                                    anes_agent=anes_agent,

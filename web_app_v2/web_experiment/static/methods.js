@@ -956,7 +956,7 @@ class GameData {
           item.pos,
           item.size,
           item.angle,
-          this.dict_imgs[item.name]
+          this.dict_imgs[item.img_name]
         );
         // console.log("hi m y name is", item.name, tmp_obj.img, this.dict_imgs);
       }

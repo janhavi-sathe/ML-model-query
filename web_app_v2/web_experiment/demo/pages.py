@@ -4,8 +4,9 @@ from web_experiment.exp_common.page_rescue_game import RescueGameUserRandom
 from web_experiment.exp_common.page_rescue_v2_game import RescueV2GameUserRandom
 from web_experiment.exp_common.page_tooldelivery_game import (
     ToolDeliveryUserRandom)
-from web_experiment.exp_common.page_toolhandover_game import (
-    ToolHandoverUserRandom)
+from web_experiment.exp_common.page_toolhandover_base import (
+    ToolHandoverGamePageBase)
+from aic_domain.tool_handover_v2.surgery_info import CABG_INFO
 
 
 class BoxPushV2Demo(BoxPushV2UserRandom):
@@ -50,7 +51,7 @@ class RescueDemo(RescueGameUserRandom):
       score = 0
       time_taken = 0
     else:
-      score = user_data.get_game_ref().score
+      score = user_data.get_game_ref().get_score()
       time_taken = user_data.get_game_ref().current_step
 
     text_score = "Time Taken: " + str(time_taken) + "\n"
@@ -78,7 +79,7 @@ class RescueV2Demo(RescueV2GameUserRandom):
       score = 0
       time_taken = 0
     else:
-      score = user_data.get_game_ref().score
+      score = user_data.get_game_ref().get_score()
       time_taken = user_data.get_game_ref().current_step
 
     text_score = "Time Taken: " + str(time_taken) + "\n"
@@ -106,15 +107,19 @@ class ToolDeliveryDemo(ToolDeliveryUserRandom):
       score = 0
       time_taken = 0
     else:
-      score = user_data.get_game_ref().score
+      score = user_data.get_game_ref().get_score()
       time_taken = user_data.get_game_ref().current_step
 
     text_score = "Time Taken: " + str(time_taken) + "\n"
     text_score = "Score: " + str(score) + "\n"
 
     return text_score
-  
-class ToolHandoverDemo(ToolHandoverUserRandom):
+
+
+class ToolHandoverDemo(ToolHandoverGamePageBase):
+
+  def __init__(self, manual_latent_selection) -> None:
+    super().__init__(manual_latent_selection)
 
   def _on_game_finished(self, user_game_data: Exp1UserData):
     user_game_data.data[Exp1UserData.GAME_DONE] = True
@@ -133,7 +138,7 @@ class ToolHandoverDemo(ToolHandoverUserRandom):
       score = 0
       time_taken = 0
     else:
-      score = user_data.get_game_ref().score
+      score = user_data.get_game_ref().get_score()
       time_taken = user_data.get_game_ref().current_step
 
     text_score = "Time Taken: " + str(time_taken) + "\n"
