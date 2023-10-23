@@ -448,8 +448,8 @@ class ToolHandoverGamePageBase(SurgeryPageBase):
     if user_data.data[SurgeryUserData.SELECT_MH]:
       overlay_names.append(co.SEL_LAYER)
 
-      for idx, loc in enumerate(tho.PickupLocation):
-        overlay_names.append("latentmh" + str(idx))
+      for loc in tho.PickupLocation:
+        overlay_names.append("latentmh" + str(loc.value))
 
     return overlay_names
 
