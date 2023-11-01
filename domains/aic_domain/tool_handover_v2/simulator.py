@@ -16,7 +16,7 @@ class ToolHandoverV2Simulator(Simulator):
   def __init__(self) -> None:
     super().__init__(0)
 
-    self.max_steps = 300
+    self.max_steps = 500
     self.nurse_agent = None
     self.surgeon_agent = None
     self.anes_agent = None

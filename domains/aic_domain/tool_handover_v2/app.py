@@ -6,7 +6,8 @@ from aic_domain.tool_handover_v2.mdp import MDP_ToolHandover_V2
 import aic_domain.tool_handover_v2.define as tho
 from aic_domain.tool_handover_v2.surgery_info import CABG_INFO
 from aic_domain.tool_handover_v2.agent import (SurgeonAgent, PerfusionAgent,
-                                               AnesthesiaAgent)
+                                               AnesthesiaAgent, NurseAgent)
+from aic_domain.tool_handover_v2.nurse_mdp import THONursePolicy, MDP_THO_Nurse
 from aic_domain.agent import InteractiveAgent
 
 
@@ -20,7 +21,15 @@ class ToolHandoverV2App(AppInterface):
     self.width = CABG_INFO["width"]
     self.height = CABG_INFO["height"]
 
-    nurse_agent = InteractiveAgent()
+    TEMPERATURE = 0.3
+    # nurse_agent = InteractiveAgent()
+    nurse_mdp = MDP_THO_Nurse(**CABG_INFO)
+    nurse_policy = THONursePolicy(nurse_mdp, TEMPERATURE)
+
+    # Setting this variable False will emulate a novice nurse
+    EXPERIENCED_NURSE = True
+    self.nurse_agent = NurseAgent(nurse_policy, EXPERIENCED_NURSE)
+
     surgeon_agent = SurgeonAgent(CABG_INFO["surgeon_pos"])
     anes_agent = AnesthesiaAgent()
     perf_agent = PerfusionAgent()
@@ -28,7 +37,7 @@ class ToolHandoverV2App(AppInterface):
     mdp = MDP_ToolHandover_V2(**CABG_INFO)
     self.game = ToolHandoverV2Simulator()
     self.game.init_game(mdp)
-    self.game.set_autonomous_agent(nurse_agent=nurse_agent,
+    self.game.set_autonomous_agent(nurse_agent=self.nurse_agent,
                                    surgeon_agent=surgeon_agent,
                                    anes_agent=anes_agent,
                                    perf_agent=perf_agent)
@@ -93,6 +102,8 @@ class ToolHandoverV2App(AppInterface):
 
   def _update_canvas_scene(self):
     data = self.game.get_env_info()
+    if len(self.game.history) > 0:
+      print(self.game.history[-1][2].name, self.game.history[-1][1][:2])
 
     x_unit = int(self.canvas_width / self.width)
     y_unit = int(self.canvas_height / self.height)

@@ -61,7 +61,8 @@ def tool_handover_transition_v2(
       idx = table_blocks.index(target_pos)
       for tool, table_zone in tool_table_zone.items():
         if table_zone[0] == idx and table_zone[1] == quadrant:
-          if nurse_tool == tho.Requirement.Hand_Only:  # pickup
+          if (nurse_tool == tho.Requirement.Hand_Only
+              and tool != surgeon_tool):  # pickup
             new_nurse_surgeon_tool[0] = tool
           elif tool == nurse_tool:  # drop
             new_nurse_surgeon_tool[0] = tho.Requirement.Hand_Only
@@ -88,7 +89,8 @@ def tool_handover_transition_v2(
     P_GET_STABLE = 0.8
     appropriate = False
     if cur_requirement == tho.Requirement.Nurse_Assist:
-      if nurse_action[0] == tho.NurseAction.Assist:
+      if (tho.can_exchange_tool(nurse_pos, nurse_dir, surgeon_pos)
+          and nurse_action[0] == tho.NurseAction.Assist):
         appropriate = True
     else:
       if surgeon_tool == cur_requirement:
@@ -118,7 +120,8 @@ def tool_handover_transition_v2(
       and surgeon_action == tho.SurgeonAction.Proceed):
     appropriate = False
     if cur_requirement == tho.Requirement.Nurse_Assist:
-      if nurse_action[0] == tho.NurseAction.Assist:
+      if (tho.can_exchange_tool(nurse_pos, nurse_dir, surgeon_pos)
+          and nurse_action[0] == tho.NurseAction.Assist):
         appropriate = True
     else:
       if surgeon_tool == cur_requirement:
@@ -132,22 +135,23 @@ def tool_handover_transition_v2(
   for p_surg_rdy, s_surg_rdy in dist_surg_ready:
     for p_anes_rdy, s_anes_rdy in dist_anes_ready:
       for p_perf_rdy, s_perf_rdy in dist_perf_ready:
+        p_rdy = p_surg_rdy * p_perf_rdy * p_anes_rdy
         if s_surg_rdy and s_perf_rdy and s_anes_rdy:
           new_step = cur_step + 1
           if new_step >= len(surgical_steps):
             list_p_ready_vital_req_step.append(
-                (1.0, patient_vital, surgeon_ready, anes_ready, perf_ready,
+                (p_rdy, patient_vital, surgeon_ready, anes_ready, perf_ready,
                  new_step, cur_requirement))  # terminal state
           else:
             for req, p_r in surgical_steps[new_step][tho.PatientVital.Stable]:
-              prop = p_surg_rdy * p_perf_rdy * p_anes_rdy * p_r
+              prop = p_rdy * p_r
               if prop > 0:
                 list_p_ready_vital_req_step.append(
                     (prop, tho.PatientVital.Stable, False, False, False,
                      new_step, req))
         else:
           for p_vital_req, s_vital_req in dist_pat_vital_next_req:
-            prop = p_surg_rdy * p_perf_rdy * p_anes_rdy * p_vital_req
+            prop = p_rdy * p_vital_req
             if prop > 0:
               s_vital, s_req = s_vital_req
               list_p_ready_vital_req_step.append(

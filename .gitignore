@@ -14,12 +14,13 @@ data/
 *.egg-info/
 
 *.pickle
+*.png
 
 aws_web_app/venv/
 *.zip
 
-tests/*_trajectories
-tests/*_data
+*_trajectories/
+*_data/
 output/
 human_data/
 result*/
