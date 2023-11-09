@@ -15,6 +15,7 @@ data/
 
 *.pickle
 *.png
+*.npy
 
 aws_web_app/venv/
 *.zip

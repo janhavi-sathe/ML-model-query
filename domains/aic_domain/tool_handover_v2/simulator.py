@@ -1,4 +1,6 @@
+import os
 from typing import Hashable, Mapping
+from aic_domain.tool_handover_v2.nurse_mdp import THONursePolicy
 import numpy as np
 from aic_domain.simulator import Simulator
 from aic_domain.tool_handover_v2.mdp import MDP_ToolHandover_V2
@@ -145,6 +147,60 @@ class ToolHandoverV2Simulator(Simulator):
 
     return dict_agent_action
 
+  def save_history(self, file_name, header):
+    dir_path = os.path.dirname(file_name)
+    if dir_path != '' and not os.path.exists(dir_path):
+      os.makedirs(dir_path)
+
+    with open(file_name, 'w', newline='') as txtfile:
+      # sequence
+      txtfile.write(header)
+      txtfile.write('\n')
+      txtfile.write('tup_state,tup_actions,cur_latent\n')
+
+      for tup_state, tup_actions, cur_latent in self.history:
+        state_idx = self.mmdp.conv_sim_states_to_mdp_sidx(tup_state)
+        action_idx = self.mmdp.conv_sim_actions_to_mdp_aidx(tup_actions)
+        latent_idx = self.nurse_agent.policy_model.conv_latent_to_idx(cur_latent)
+        txtfile.write('%d,%d,%d' % (state_idx, action_idx, latent_idx))
+        txtfile.write('\n')
+
+      # last state
+      state_idx = self.mmdp.conv_sim_states_to_mdp_sidx(tup_state)
+      txtfile.write('%d' % (state_idx, ))
+      txtfile.write('\n')
+
+    DATA_DIR = os.path.dirname(os.path.dirname(file_name))
+    if not os.path.exists(os.path.join(DATA_DIR, "readable")):
+      os.makedirs(os.path.join(DATA_DIR, "readable"))
+    with open(os.path.join(DATA_DIR, "readable", os.path.basename(file_name)), 'w', newline='') as txtfile:
+      # sequence
+      txtfile.write(header)
+      txtfile.write('\n')
+      txtfile.write('patient_vital, nurse_dir, nurse_pos, nurse_tool, surgeon_tool, surgeon_ready, perf_ready, anes_ready, cur_step, cur_requirement, nurse_asked; tup_actions; cur_latent;\n')
+
+      for tup_state, tup_actions, cur_latent in self.history:
+        # state
+        for idx in range(len(tup_state) - 1):
+          txtfile.write('%s, ' % (tup_state[idx], ))
+        txtfile.write('%s; ' % (tup_state[-1], ))
+
+        # print(tup_actions, cur_latent)
+        txtfile.write('%s, %s; ' % tup_actions[0])
+        txtfile.write('%s; ' % tup_actions[1])
+        txtfile.write('%s; ' % tup_actions[2])
+        txtfile.write('%s; ' % tup_actions[3])
+
+        txtfile.write('%s; ' % cur_latent)
+        txtfile.write('\n')
+
+      # last state
+      for idx in range(len(tup_state) - 1):
+        txtfile.write('%s, ' % (tup_state[idx], ))
+      txtfile.write('%s; ' % (tup_state[-1], ))
+
+      txtfile.write('\n')
+
   def is_finished(self) -> bool:
     if super().is_finished():
       return True
@@ -153,6 +209,36 @@ class ToolHandoverV2Simulator(Simulator):
 
     state_idx = self.mmdp.conv_sim_states_to_mdp_sidx(tup_state)
     return self.mmdp.is_terminal(state_idx)
+
+  @classmethod
+  def read_file(cls, file_name, mmdp, nurse_agent):
+    traj = []
+    with open(file_name, newline='') as txtfile:
+      lines = txtfile.readlines()
+      i_start = 0
+      for i_r, row in enumerate(lines):
+        if row == ('tup_state,tup_actions,cur_latent\n'):
+          i_start = i_r
+          break
+
+      for i_r in range(i_start + 1, len(lines)):
+        line = lines[i_r]
+        unload = line.rstrip().split(",")
+        if len(unload) == 3:
+          sidx, aidx, xidx = unload
+          sidx, aidx, xidx = int(sidx), int(aidx), int(xidx)
+          state = mmdp.conv_mdp_sidx_to_sim_states(sidx)
+          actions = mmdp.conv_mdp_aidx_to_sim_actions(aidx)
+          latent = nurse_agent.policy_model.conv_idx_to_latent(xidx)
+
+          traj.append([state, actions, latent])
+        else:
+          sidx = int(unload[0])
+          state = mmdp.conv_mdp_sidx_to_sim_states(sidx)
+
+          traj.append([state])
+
+    return traj
 
   def get_score(self):
     return -self.get_current_step()

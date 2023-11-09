@@ -14,8 +14,9 @@ from aic_domain.agent import InteractiveAgent
 class ToolHandoverV2App(AppInterface):
 
   def __init__(self) -> None:
-    super().__init__()
     self.image_dir = os.path.join(os.path.dirname(__file__), "../images/")
+    # Setting this variable False will emulate a novice nurse
+    super().__init__()
 
   def _init_game(self):
     self.width = CABG_INFO["width"]
@@ -26,7 +27,6 @@ class ToolHandoverV2App(AppInterface):
     nurse_mdp = MDP_THO_Nurse(**CABG_INFO)
     nurse_policy = THONursePolicy(nurse_mdp, TEMPERATURE)
 
-    # Setting this variable False will emulate a novice nurse
     EXPERIENCED_NURSE = True
     self.nurse_agent = NurseAgent(nurse_policy, EXPERIENCED_NURSE)
 
