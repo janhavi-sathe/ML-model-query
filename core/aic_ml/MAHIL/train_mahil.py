@@ -5,8 +5,7 @@ import torch
 from itertools import count
 from torch.utils.tensorboard import SummaryWriter
 from collections import deque
-from aic_ml.baselines.IQLearn.utils.utils import (eval_mode,
-                                                  compute_expert_return_mean)
+from aic_ml.baselines.IQLearn.utils.utils import (eval_mode)
 from aic_ml.baselines.IQLearn.utils.logger import Logger
 from aic_ml.OptionIQL.helper.option_memory import (OptionMemory)
 from .helper.utils import (get_expert_batch, get_samples, conv_samples_tup2dict,
@@ -22,6 +21,7 @@ def load_multiagent_data_w_labels(list_agent_names: Sequence[Any],
                                   num_trajs, n_labeled, seed):
   list_expert_trajs = load_trajectories(demo_path, num_trajs, seed + 42)
   n_samples = sum(list_expert_trajs[0]["lengths"])
+  num_trajs = len(list_expert_trajs[0]["lengths"])
 
   dict_expert_trajs = {}
   dict_expert_labels = {}
@@ -131,21 +131,13 @@ def train(config: omegaconf.DictConfig,
              reinit=True,
              config=dict_config)
 
-  alg_type = 'iq'
-
   # device
-  device_name = "cuda:0" if torch.cuda.is_available() else "cpu"
-  cuda_deterministic = False
+  # device = torch.device(config.device)
 
   # set seeds
   random.seed(seed)
   np.random.seed(seed)
   torch.manual_seed(seed)
-
-  device = torch.device(device_name)
-  if device.type == 'cuda' and torch.cuda.is_available() and cuda_deterministic:
-    torch.backends.cudnn.benchmark = False
-    torch.backends.cudnn.deterministic = True
 
   env = env_factory(**env_kwargs)  # type: ParallelEnv
   eval_env = env_factory(**env_kwargs)  # type: ParallelEnv
@@ -160,6 +152,7 @@ def train(config: omegaconf.DictConfig,
   eps_window = int(eps_window)
   max_explore_step = int(max_explore_step)
 
+  # ----- create agents
   dict_agents = {}  # type: Dict[Any, MAHIL]
   dict_replay_memory = {}  # type: Dict[Any, OptionMemory]
   for agent_idx in range(env.num_agents):
@@ -168,7 +161,7 @@ def train(config: omegaconf.DictConfig,
     dict_agents[a_name] = agent
     dict_replay_memory[a_name] = OptionMemory(n_replay_mem, seed + 1)
 
-  # Load expert data
+  # ----- Load expert data
   n_labeled = int(num_trajs * config.supervision)
   dict_expert_trajs, dict_expert_labels, cnt_label, n_expert_samples = (
       load_multiagent_data_w_labels(env.agents, dict_agents, demo_path,
@@ -240,7 +233,7 @@ def train(config: omegaconf.DictConfig,
       for a_name in env.agents:
         agent = dict_agents[a_name]
 
-        if config.use_auxiliary_obs is True:
+        if config.use_auxiliary_obs:
           # TODO: implement get_aux at custom methods
           joint_aux[a_name] = env.get_auxiliary_obs(a_name)
         else:
@@ -257,7 +250,8 @@ def train(config: omegaconf.DictConfig,
         dict_replay_memory[a_name].add(
             (joint_prev_lat[a_name], joint_prev_aux[a_name], joint_obs[a_name],
              joint_latent[a_name], joint_actions[a_name], joint_aux[a_name],
-             joint_next_obs[a_name], rewards[a_name], dones[a_name]))
+             joint_next_obs[a_name], joint_next_latent[a_name], rewards[a_name],
+             dones[a_name]))
 
         if dones[a_name] or truncates[a_name]:
           env_done = True
@@ -273,26 +267,25 @@ def train(config: omegaconf.DictConfig,
           logger.log(f'eval/episode_reward/{a_name}',
                      np.mean(dict_eval_returns[a_name]), explore_steps)
 
-        logger.log('eval/episode_reward/sum', np.mean(ret_sum), explore_steps)
+        mean_ret_sum = np.mean(ret_sum)
+        logger.log('eval/episode_reward/sum', mean_ret_sum, explore_steps)
         logger.log('eval/episode_step', np.mean(eval_timesteps), explore_steps)
 
         logger.dump(explore_steps, ty='eval')
 
-        if ret_sum >= best_eval_returns:
+        if mean_ret_sum >= best_eval_returns:
           # Store best eval returns
           best_eval_returns = ret_sum
           wandb.run.summary["best_returns"] = best_eval_returns
           save(dict_agents,
-               epoch,
                env_name,
-               alg_type,
                output_dir=output_dir,
                suffix=output_suffix + "_best")
 
       explore_steps += 1
       if dict_replay_memory[env.agents[0]].size() >= n_init_mem:
         # Start learning
-        if begin_learn is False:
+        if not begin_learn:
           print('Learn begins!')
           begin_learn = True
 
@@ -312,10 +305,11 @@ def train(config: omegaconf.DictConfig,
                 agent, expert_traj, dict_expert_labels[a_name])
             end_mental_state = infer_last_next_mental_state(
                 agent, expert_traj, mental_states)
-            dict_expert_data[a_name] = get_expert_batch(
-                expert_traj, mental_states, agent.device, agent.PREV_LATENT,
-                1 if agent.discrete_act else agent.action_dim,
-                len(agent.PREV_AUX), end_mental_state)
+            dict_expert_data[a_name] = get_expert_batch(expert_traj,
+                                                        mental_states,
+                                                        agent.device,
+                                                        agent.PREV_LATENT,
+                                                        end_mental_state)
 
         ######
         # IQ-Learn

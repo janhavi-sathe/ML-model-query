@@ -2,13 +2,58 @@ import os
 import torch
 import numpy as np
 from aic_ml.baselines.IQLearn.dataset.expert_dataset import read_file
-from aic_ml.baselines.IQLearn.utils.utils import eval_mode
+from aic_ml.baselines.IQLearn.utils.utils import eval_mode, one_hot
 from pettingzoo.utils.env import ParallelEnv
 
 
-def get_expert_batch(expert_traj, mental_states, device, init_latent,
-                     action_dim, aux_dim, mental_states_after_end):
+def conv_input(batch_input, is_onehot_needed, dimension, device):
+  if is_onehot_needed:
+    if not isinstance(batch_input, torch.Tensor):
+      batch_input = torch.tensor(batch_input,
+                                 dtype=torch.float).reshape(-1).to(device)
+    else:
+      batch_input = batch_input.reshape(-1)
+    # TODO: used a trick to handle initial/unobserved values.
+    #       may need to find a better way later
+    batch_input = one_hot(batch_input, dimension + 1)
+    batch_input = batch_input[:, :-1]
+  else:
+    if not isinstance(batch_input, torch.Tensor):
+      batch_input = torch.tensor(np.array(batch_input).reshape(-1, dimension),
+                                 dtype=torch.float).to(device)
+
+  return batch_input
+
+
+def conv_tuple_input(tup_batch, tup_is_onehot_needed, tup_dimension, device):
+  list_batch = []
+  for idx in range(len(tup_batch)):
+    batch = conv_input(tup_batch[idx], tup_is_onehot_needed[idx],
+                       tup_dimension[idx], device)
+    list_batch.append(batch)
+
+  # concat
+  batch_input = torch.cat(list_batch, dim=1)
+
+  return batch_input
+
+
+def split_by_size(batch_input, split_size):
+  if len(split_size) == 0:
+    return ()
+  else:
+    return torch.split(torch.as_tensor(batch_input), split_size, dim=-1)
+
+
+def get_expert_batch(expert_traj,
+                     mental_states,
+                     device,
+                     init_latent,
+                     mental_states_after_end=None,
+                     has_mental=True):
   '''
+  if has_mental is False, all mental-related input arguments will be ignored
+          and "prev_latents", "latents" and "next_latents" will not be returned.
   return: dictionary with these keys: states, prev_latents, prev_auxs, 
                             next_states, latents, actions, auxs, rewards, dones
   '''
@@ -16,47 +61,50 @@ def get_expert_batch(expert_traj, mental_states, device, init_latent,
 
   dict_batch = {}
   dict_batch['states'] = []
-  dict_batch['prev_latents'] = []
   dict_batch['prev_auxs'] = []
   dict_batch['next_states'] = []
-  dict_batch['latents'] = []
   dict_batch['actions'] = []
   dict_batch['auxs'] = []
   dict_batch['rewards'] = []
   dict_batch['dones'] = []
-  dict_batch['next_latents'] = []
 
-  init_latent = np.array(init_latent).reshape(-1)
+  if has_mental:
+    dict_batch['prev_latents'] = []
+    dict_batch['latents'] = []
+    if mental_states_after_end is not None:
+      dict_batch['next_latents'] = []
+
+    init_latent = np.array(init_latent).reshape(-1)
 
   for i_e in range(num_samples):
     length = len(expert_traj["rewards"][i_e])
 
     dict_batch['states'].append(
         np.array(expert_traj["states"][i_e]).reshape(length, -1))
-
-    dict_batch['prev_latents'].append(init_latent)
-    dict_batch['prev_latents'].append(
-        np.array(mental_states[i_e][:-1]).reshape(-1, 1))
-
     dict_batch['prev_auxs'].append(
-        np.array(expert_traj["prev_auxs"][i_e]).reshape(-1, aux_dim))
-
+        np.array(expert_traj["prev_auxs"][i_e]).reshape(length, -1))
     dict_batch['next_states'].append(
         np.array(expert_traj["next_states"][i_e]).reshape(length, -1))
-    dict_batch['latents'].append(np.array(mental_states[i_e]).reshape(-1, 1))
     dict_batch['actions'].append(
-        np.array(expert_traj["actions"][i_e]).reshape(-1, action_dim))
+        np.array(expert_traj["actions"][i_e]).reshape(length, -1))
     dict_batch['auxs'].append(
-        np.array(expert_traj["auxs"][i_e]).reshape(-1, aux_dim))
+        np.array(expert_traj["auxs"][i_e]).reshape(length, -1))
     dict_batch['rewards'].append(
         np.array(expert_traj["rewards"][i_e]).reshape(-1, 1))
     dict_batch['dones'].append(
         np.array(expert_traj["dones"][i_e]).reshape(-1, 1))
 
-    dict_batch["next_latents"].append(
-        np.array(mental_states[i_e][1:]).reshape(-1, 1))
-    dict_batch["next_latents"].append(
-        np.array(mental_states_after_end[i_e]).reshape(-1))
+    if has_mental:
+      dict_batch['prev_latents'].append(init_latent)
+      dict_batch['prev_latents'].append(
+          np.array(mental_states[i_e][:-1]).reshape(-1, 1))
+      dict_batch['latents'].append(np.array(mental_states[i_e]).reshape(-1, 1))
+
+      if mental_states_after_end is not None:
+        dict_batch["next_latents"].append(
+            np.array(mental_states[i_e][1:]).reshape(-1, 1))
+        dict_batch["next_latents"].append(
+            np.array(mental_states_after_end[i_e]).reshape(-1))
 
   for key, val in dict_batch.items():
     tmp = np.vstack(val)
@@ -178,18 +226,12 @@ def load_trajectories(expert_location: str,
   return list_each_agent
 
 
-def save(dict_agents,
-         epoch,
-         env_name,
-         alg_type: str,
-         output_dir='results',
-         suffix=""):
+def save(dict_agents, env_name, output_dir='results', suffix=""):
   if not os.path.exists(output_dir):
     os.mkdir(output_dir)
 
   for a_name in dict_agents:
-    name = f'{alg_type}_{env_name}_{a_name}'
-    file_path = os.path.join(output_dir, f'{name}' + suffix)
+    file_path = os.path.join(output_dir, f'{env_name}' + suffix + f'_{a_name}')
     dict_agents[a_name].save(file_path)
 
 
@@ -207,7 +249,7 @@ def evaluate(dict_agents, env: ParallelEnv, use_auxiliary_obs, num_episodes=10):
     joint_prev_aux = {}
     for a_name in env.agents:
       agent = dict_agents[a_name]
-      prev_lat, prev_aux = agent.PREV_LATENT, agent.PREV_ACTION
+      prev_lat, prev_aux = agent.PREV_LATENT, agent.PREV_AUX
       joint_prev_lat[a_name] = prev_lat
       joint_prev_aux[a_name] = prev_aux
 
@@ -229,7 +271,7 @@ def evaluate(dict_agents, env: ParallelEnv, use_auxiliary_obs, num_episodes=10):
             joint_actions)
         episode_step += 1
         for a_name in env.agents:
-          if use_auxiliary_obs is True:
+          if use_auxiliary_obs:
             joint_aux[a_name] = env.get_auxiliary_obs(a_name)
           else:
             joint_aux[a_name] = agent.PREV_AUX

@@ -4,6 +4,7 @@ from .nn_models import (SimpleOptionQNetwork, DoubleOptionQCritic,
                         SingleOptionQCritic, DiagGaussianOptionActor)
 from .option_iql import IQLOptionSAC, IQLOptionSoftQ
 from omegaconf import DictConfig
+from ..helper.utils import split_by_size
 
 
 def get_tx_pi_config(config: DictConfig):
@@ -46,11 +47,11 @@ class MAHIL:
     self.device = torch.device(config.device)
     self.PREV_LATENT = lat_dim
 
-    if config.use_auxiliary_obs is True and len(tup_aux_dim) > 0:
+    if config.use_auxiliary_obs and len(tup_aux_dim) > 0:
       prev_aux = []
       aux_split_size = []
       for idx in range(len(tup_aux_dim)):
-        if tup_discrete_aux[idx] is True:
+        if tup_discrete_aux[idx]:
           prev_aux.append(np.array([tup_aux_dim[idx]], dtype=np.float32))
           aux_split_size.append(1)
         else:
@@ -71,8 +72,8 @@ class MAHIL:
 
     config_tx, config_pi = get_tx_pi_config(config)
 
-    tup_tx_obs_dim = (obs_dim, ) + tup_aux_dim
-    tup_tx_discrete_obs = (discrete_obs, ) + tup_discrete_aux
+    tup_tx_obs_dim = (obs_dim, *tup_aux_dim)
+    tup_tx_discrete_obs = (discrete_obs, *tup_discrete_aux)
     self.tx_agent = IQLOptionSoftQ(config_tx, tup_tx_obs_dim, lat_dim,
                                    lat_dim + 1, tup_tx_discrete_obs,
                                    SimpleOptionQNetwork, self._get_tx_iq_vars)
@@ -108,20 +109,14 @@ class MAHIL:
     self.tx_agent.reset_optimizers()
     self.pi_agent.reset_optimizers()
 
-  def _split_auxs(self, auxs):
-    if len(self.AUX_SPLIT_SIZE) == 0:
-      return ()
-    else:
-      return torch.split(torch.as_tensor(auxs), self.AUX_SPLIT_SIZE, dim=-1)
-
   def _get_tx_iq_vars(self, batch):
-    batch_prev_aux_split = self._split_auxs(batch['prev_auxs'])
-    batch_aux_split = self._split_auxs(batch['auxs'])
+    batch_prev_aux_split = split_by_size(batch['prev_auxs'], self.AUX_SPLIT_SIZE)
+    batch_aux_split = split_by_size(batch['auxs'], self.AUX_SPLIT_SIZE)
 
-    tup_obs = (batch['states'], ) + batch_prev_aux_split
+    tup_obs = (batch['states'], *batch_prev_aux_split)
     vec_v_args = (tup_obs, batch['prev_latents'])
 
-    tup_next_obs = (batch['next_states'], ) + batch_aux_split
+    tup_next_obs = (batch['next_states'], *batch_aux_split)
     latent = batch['latents']
     vec_next_v_args = (tup_next_obs, latent)
     vec_actions = (latent, )
@@ -230,7 +225,7 @@ class MAHIL:
     return self.pi_agent.choose_action((obs, ), option, sample)
 
   def choose_mental_state(self, obs, prev_option, prev_aux, sample=False):
-    batch_prev_aux_split = self._split_auxs(prev_aux)
+    batch_prev_aux_split = split_by_size(prev_aux, self.AUX_SPLIT_SIZE)
     tup_obs = (obs, ) + batch_prev_aux_split
     return self.tx_agent.choose_action(tup_obs, prev_option, sample)
 
@@ -248,8 +243,8 @@ class MAHIL:
     '''
     len_demo = len(obs)
 
-    batch_prev_aux_split = self._split_auxs(prev_aux)
-    tup_tx_obs = (obs, ) + batch_prev_aux_split
+    batch_prev_aux_split = split_by_size(prev_aux, self.AUX_SPLIT_SIZE)
+    tup_tx_obs = (obs, *batch_prev_aux_split)
 
     with torch.no_grad():
       log_pis = self.pi_agent.log_probs(

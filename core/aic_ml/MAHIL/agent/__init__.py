@@ -34,7 +34,7 @@ def make_mahil_agent(config: DictConfig, env: ParallelEnv, agent_idx):
       action_dim = tmp_action_dim
       discrete_act = tmp_discrete_act
 
-    if config.use_auxiliary_obs is True:
+    if config.use_auxiliary_obs:
       list_aux_dim.append(tmp_action_dim)
       list_discrete_aux.append(tmp_discrete_act)
 
