@@ -110,7 +110,8 @@ class MAHIL:
     self.pi_agent.reset_optimizers()
 
   def _get_tx_iq_vars(self, batch):
-    batch_prev_aux_split = split_by_size(batch['prev_auxs'], self.AUX_SPLIT_SIZE)
+    batch_prev_aux_split = split_by_size(batch['prev_auxs'],
+                                         self.AUX_SPLIT_SIZE)
     batch_aux_split = split_by_size(batch['auxs'], self.AUX_SPLIT_SIZE)
 
     tup_obs = (batch['states'], *batch_prev_aux_split)

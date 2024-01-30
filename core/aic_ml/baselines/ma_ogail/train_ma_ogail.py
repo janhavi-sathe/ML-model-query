@@ -16,15 +16,15 @@ from .model.agent import make_agent, MA_OGAIL
 
 
 def learn(config: omegaconf.DictConfig,
+          use_option,
           demo_path,
           log_dir,
           save_dir,
-          env_factory,
+          cb_env_factory,
           pretrain_name,
           eval_interval,
           env_kwargs={}):
 
-  use_option = config.use_option
   n_traj = config.n_traj
   n_sample = config.n_sample
   max_exp_step = config.max_explore_step
@@ -56,8 +56,8 @@ def learn(config: omegaconf.DictConfig,
 
   logger = Logger(log_dir)
 
-  env = env_factory(**env_kwargs)  # type: ParallelEnv
-  eval_env = env_factory(**env_kwargs)  # type: ParallelEnv
+  env = cb_env_factory(**env_kwargs)  # type: ParallelEnv
+  eval_env = cb_env_factory(**env_kwargs)  # type: ParallelEnv
 
   # Seed envs
   env.reset(seed=seed)
@@ -67,7 +67,7 @@ def learn(config: omegaconf.DictConfig,
   dict_agents = {}  # type: Dict[Any, MA_OGAIL]
   for agent_idx in range(env.num_agents):
     a_name = env.agents[agent_idx]
-    dict_agents[a_name] = make_agent(config, env, agent_idx)
+    dict_agents[a_name] = make_agent(config, env, agent_idx, use_option)
 
   # ----- Load expert data
   n_labeled = int(n_traj * config.supervision)
@@ -166,7 +166,7 @@ def learn(config: omegaconf.DictConfig,
           joint_actions[a_name] = action
           list_actions.append(action)
 
-        joint_next_obs, rewards, truncates, dones, infos = env.step(
+        joint_next_obs, rewards, dones, truncates, infos = env.step(
             joint_actions)
         joint_aux = {}
         for i_agent in range(len(env.agents)):

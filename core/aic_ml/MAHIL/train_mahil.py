@@ -104,10 +104,9 @@ def infer_last_next_mental_state(agent: MAHIL, expert_traj, list_mental_states):
 
 def train(config: omegaconf.DictConfig,
           demo_path,
-          num_trajs,
           log_dir,
           output_dir,
-          env_factory,
+          cb_env_factory,
           log_interval=500,
           eval_interval=5000,
           env_kwargs={}):
@@ -118,6 +117,7 @@ def train(config: omegaconf.DictConfig,
   max_explore_step = config.max_explore_step
   eps_window = 10
   num_episodes = 10
+  num_trajs = config.n_traj
 
   dict_config = omegaconf.OmegaConf.to_container(config,
                                                  resolve=True,
@@ -139,8 +139,8 @@ def train(config: omegaconf.DictConfig,
   np.random.seed(seed)
   torch.manual_seed(seed)
 
-  env = env_factory(**env_kwargs)  # type: ParallelEnv
-  eval_env = env_factory(**env_kwargs)  # type: ParallelEnv
+  env = cb_env_factory(**env_kwargs)  # type: ParallelEnv
+  eval_env = cb_env_factory(**env_kwargs)  # type: ParallelEnv
 
   # Seed envs
   env.reset(seed=seed)
@@ -227,7 +227,7 @@ def train(config: omegaconf.DictConfig,
                                               sample=True)
           joint_actions[a_name] = action
 
-      joint_next_obs, rewards, truncates, dones, infos = env.step(joint_actions)
+      joint_next_obs, rewards, dones, truncates, infos = env.step(joint_actions)
       joint_aux = {}
       joint_next_latent = {}
       for a_name in env.agents:

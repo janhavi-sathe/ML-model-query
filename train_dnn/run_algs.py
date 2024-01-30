@@ -117,7 +117,6 @@ def main(cfg: DictConfig):
 
 
 if __name__ == "__main__":
-  import time
   start_time = time.time()
   main()
   print("Excution time: ", time.time() - start_time)

@@ -267,7 +267,7 @@ def evaluate(dict_agents, env: ParallelEnv, use_auxiliary_obs, num_episodes=10):
           joint_latent[a_name] = latent
           joint_actions[a_name] = action
 
-        joint_next_obs, rewards, truncates, dones, infos = env.step(
+        joint_next_obs, rewards, dones, truncates, infos = env.step(
             joint_actions)
         episode_step += 1
         for a_name in env.agents:
