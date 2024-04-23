@@ -6,7 +6,6 @@ from aic_domain.simulator import Simulator
 
 # TODO: game configuration ui / logic
 class AppInterface():
-
   def __init__(self) -> None:
     self.main_window = None
     self.game = None  # type: Simulator
@@ -150,6 +149,15 @@ class AppInterface():
       cursor_pos: Tuple[float, float]) -> Tuple[Hashable, Hashable, Hashable]:
     pass
 
+  def _debug_before_action_sample(self):
+    pass
+
+  def _debug_before_action_taken(self, action_map):
+    return action_map
+
+  def _debug_after_action_taken(self):
+    pass
+
   def _on_key_pressed(self, key_event):
     if not self._started:
       return
@@ -157,8 +165,10 @@ class AppInterface():
     agent, e_type, e_value = self._conv_key_to_agent_event(key_event.keysym)
     self.game.event_input(agent, e_type, e_value)
     if self._event_based:
-      action_map = self.game.get_joint_action()
+      self._debug_before_action_sample()
+      action_map = self._debug_before_action_taken(self.game.get_joint_action())
       self.game.take_a_step(action_map)
+      self._debug_after_action_taken()
 
       if not self.game.is_finished():
         # update canvas
