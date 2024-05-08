@@ -9,7 +9,6 @@ from omegaconf import DictConfig
 
 
 class Policy(torch.nn.Module):
-
   def __init__(self, config: DictConfig, dim_s=2, dim_a=2):
     super(Policy, self).__init__()
     self.dim_a = dim_a
@@ -62,7 +61,6 @@ class Policy(torch.nn.Module):
 
 
 class OptionPolicy(torch.nn.Module):
-
   def __init__(self,
                config: DictConfig,
                dim_s=2,
@@ -182,6 +180,7 @@ class OptionPolicy(torch.nn.Module):
     else:
       mean, logstd = self.a_mean_logstd(st, ct)
       if ct is None:
+        at = conv_nn_input(at, False, self.dim_a, self.device)
         at = at.view(-1, 1, self.dim_a)
       return (-((at - mean).square()) / (2 * (logstd * 2).exp()) - logstd -
               math.log(math.sqrt(2 * math.pi))).sum(dim=-1, keepdim=True)
@@ -313,7 +312,6 @@ class OptionPolicy(torch.nn.Module):
 
 
 class MoEPolicy(torch.nn.Module):
-
   def __init__(self, config: DictConfig, dim_s=2, dim_a=2):
     super(MoEPolicy, self).__init__()
     self.dim_s = dim_s
