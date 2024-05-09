@@ -3,6 +3,17 @@
 We recommend you use `conda` environment. You can set up the virtual environment with following command:
 ```conda env create -f conda_env.yml ```
 
+gym 0.21 installation is broken with recent versions of setuptools and wheel (ref: https://stackoverflow.com/a/77205046).
+Please downgrade them to the following versions:
+```
+    pip install setuptools==65.5.1 wheel==0.38.0
+```
+
+Then, please install `core` and `domains` packages as follows:
+```
+  pip install -e core/
+  pip install -e domains/
+```
 
 ## Execution
 * Please read the README files in `domains/` and `web_app_v2/` directory.
