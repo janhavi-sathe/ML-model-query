@@ -261,3 +261,6 @@ class Movers(ParallelEnv):
     rewards = {agent: -1 for agent in self.agents}
 
     return obs, rewards, dones, truncs, infos
+
+  def get_auxiliary_obs(self, agent):
+    return self.cur_auxiliary_inputs[agent]

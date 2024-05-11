@@ -242,3 +242,6 @@ class Rescue(ParallelEnv):
     rewards = {agent: score_increment for agent in self.agents}
 
     return obs, rewards, dones, truncs, infos
+
+  def get_auxiliary_obs(self, agent):
+    return self.cur_auxiliary_inputs[agent]
