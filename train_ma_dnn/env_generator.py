@@ -1,5 +1,7 @@
 from pettingzoo_domain.movers import Movers
 from pettingzoo_domain.rescue import Rescue
+from pettingzoo_domain.labor_division import (TwoTargetDyadLaborDivision,
+                                              ThreeTargetDyadLaborDivision)
 from pettingzoo.mpe import (simple_crypto_v3, simple_push_v3,
                             simple_adversary_v3, simple_speaker_listener_v4,
                             simple_spread_v3, simple_tag_v3)
@@ -16,6 +18,10 @@ def env_generator(config):
     return Movers, {}
   elif env_name == "ma_rescue":
     return Rescue, {}
+  elif env_name == "LaborDivision2":
+    return TwoTargetDyadLaborDivision, {}
+  elif env_name == "LaborDivision3":
+    return ThreeTargetDyadLaborDivision, {}
   # Multi Particle Environments (MPE)
   elif env_name == "simple_crypto":
     kwargs = {"continuous_actions": False}

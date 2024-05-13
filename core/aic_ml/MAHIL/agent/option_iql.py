@@ -11,7 +11,6 @@ from omegaconf import DictConfig
 
 
 class IQMixin:
-
   def get_iq_variables(self, batch):
     'return vec_v_args, vec_next_v_args, vec_actions'
     raise NotImplementedError
@@ -106,8 +105,19 @@ class IQMixin:
           vec_v_args_policy, _, _ = self.get_iq_variables(policy_batch)
           vec_v_args = []
           for idx in range(len(vec_v_args_expert)):
-            item = torch.cat([vec_v_args_policy[idx], vec_v_args_expert[idx]],
-                             dim=0)
+            if isinstance(vec_v_args_policy[idx], tuple):
+              args_new = []
+              for fidx in range(len(vec_v_args_policy[idx])):
+                args_new.append(
+                    torch.cat([
+                        vec_v_args_policy[idx][fidx],
+                        vec_v_args_expert[idx][fidx]
+                    ],
+                              dim=0))
+              item = tuple(args_new)
+            else:
+              item = torch.cat([vec_v_args_policy[idx], vec_v_args_expert[idx]],
+                               dim=0)
             vec_v_args.append(item)
 
         for i in range(self.num_actor_update):
@@ -138,7 +148,6 @@ class IQMixin:
 
 
 class IQLOptionSoftQ(IQMixin, OptionSoftQ):
-
   def __init__(self, config: DictConfig, tup_obs_dim, action_dim, option_dim,
                tup_discrete_obs, q_net_base: Type[nn.Module],
                cb_get_iq_variables: Callable):
@@ -155,7 +164,6 @@ class IQLOptionSoftQ(IQMixin, OptionSoftQ):
 
 
 class IQLOptionSAC(IQMixin, OptionSAC):
-
   def __init__(self, config: DictConfig, tup_obs_dim, action_dim, option_dim,
                tup_discrete_obs, critic_base: Type[nn.Module], actor,
                cb_get_iq_variables: Callable):

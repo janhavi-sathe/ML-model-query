@@ -174,7 +174,7 @@ def load_trajectories(expert_location: str,
     with values of given shapes below:
         expert["states"]  =  [num_trajs, num_agents, traj_length, state_space]
         expert["actions"] =  [num_trajs, num_agents, traj_length, action_space]
-        expert["rewards"] =  [num_trajs, traj_length]
+        expert["rewards"] =  [num_trajs, num_agents, traj_length]
         expert["lengths"] =  [num_trajs]
 
         (optional)

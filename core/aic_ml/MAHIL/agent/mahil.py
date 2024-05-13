@@ -27,7 +27,6 @@ def get_tx_pi_config(config: DictConfig):
 
 
 class MAHIL:
-
   def __init__(self, config: DictConfig, obs_dim, action_dim, lat_dim,
                tup_aux_dim, discrete_obs, discrete_act, tup_discrete_aux):
     self.obs_dim = obs_dim
@@ -41,8 +40,6 @@ class MAHIL:
     self.update_tx_after_pi = config.mahil_tx_after_pi
     self.alter_update_n_pi_tx = config.mahil_alter_update_n_pi_tx
     self.order_update_pi_ratio = config.mahil_order_update_pi_ratio
-    self.tx_batch_size = min(config.mahil_tx_tx_batch_size,
-                             config.mini_batch_size)
 
     self.device = torch.device(config.device)
     self.PREV_LATENT = lat_dim
@@ -124,8 +121,8 @@ class MAHIL:
     return vec_v_args, vec_next_v_args, vec_actions
 
   def _get_pi_iq_vars(self, batch):
-    vec_v_args = (batch['states'], batch['latents'])
-    vec_next_v_args = (batch['next_states'], batch['next_latents'])
+    vec_v_args = ((batch['states'], ), batch['latents'])
+    vec_next_v_args = ((batch['next_states'], ), batch['next_latents'])
     vec_actions = (batch['actions'], )
     return vec_v_args, vec_next_v_args, vec_actions
 
@@ -145,11 +142,12 @@ class MAHIL:
 
   def tx_update(self, policy_batch, expert_batch, logger, step):
     TX_USE_TARGET, TX_DO_SOFT_UPDATE = False, False
-    tx_loss = self.tx_agent.iq_update(
-        policy_batch[:self.tx_batch_size], expert_batch[:self.tx_batch_size],
-        logger, self.tx_update_count, TX_USE_TARGET, TX_DO_SOFT_UPDATE,
-        self.tx_agent.method_loss, self.tx_agent.method_regularize,
-        self.tx_agent.method_div)
+    tx_loss = self.tx_agent.iq_update(policy_batch, expert_batch, logger,
+                                      self.tx_update_count, TX_USE_TARGET,
+                                      TX_DO_SOFT_UPDATE,
+                                      self.tx_agent.method_loss,
+                                      self.tx_agent.method_regularize,
+                                      self.tx_agent.method_div)
     self.tx_update_count += 1
     return tx_loss
 
@@ -204,9 +202,8 @@ class MAHIL:
     else:
       pi_use_target, pi_soft_update = True, True
 
-    loss_1 = self.tx_agent.iq_offline_update(expert_batch[:self.tx_batch_size],
-                                             logger, step, TX_USE_TARGET,
-                                             TX_DO_SOFT_UPDATE,
+    loss_1 = self.tx_agent.iq_offline_update(expert_batch, logger, step,
+                                             TX_USE_TARGET, TX_DO_SOFT_UPDATE,
                                              self.tx_agent.method_regularize,
                                              self.tx_agent.method_div)
     loss_2 = self.pi_agent.iq_offline_update(expert_batch, logger, step,

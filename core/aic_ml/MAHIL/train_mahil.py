@@ -275,7 +275,7 @@ def train(config: omegaconf.DictConfig,
 
         if mean_ret_sum >= best_eval_returns:
           # Store best eval returns
-          best_eval_returns = ret_sum
+          best_eval_returns = mean_ret_sum
           wandb.run.summary["best_returns"] = best_eval_returns
           save(dict_agents,
                env_name,

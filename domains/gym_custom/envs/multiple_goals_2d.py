@@ -151,37 +151,31 @@ class MultiGoals2D(gym.Env):
 
 
 class MultiGoals2D_1(MultiGoals2D):
-
   def __init__(self):
     super().__init__([(-4, 4)])
 
 
 class MultiGoals2D_2(MultiGoals2D):
-
   def __init__(self):
     super().__init__([(-4, 4), (4, 4)])
 
 
 class MultiGoals2D_3(MultiGoals2D):
-
   def __init__(self):
     super().__init__([(-4, 4), (4, 4), (0, -4)])
 
 
 class MultiGoals2D_4(MultiGoals2D):
-
   def __init__(self):
     super().__init__([(-4, 4), (4, 4), (4, -4), (-4, -4)])
 
 
 class MultiGoals2D_5(MultiGoals2D):
-
   def __init__(self):
     super().__init__([(-2.5, 4), (2.5, 4), (0, -4), (-4, -0.5), (4, -0.5)])
 
 
 class MGExpert:
-
   def __init__(self, env: MultiGoals2D, tolerance) -> None:
     self.PREV_LATENT = None
     self.PREV_ACTION = float("nan")
@@ -230,7 +224,7 @@ def generate_data(save_dir, env_name, n_traj, render=False, render_delay=10):
   elif env_name == "MultiGoals2D_5-v0":
     env = MultiGoals2D_5()
   else:
-    raise NotImplementedError
+    raise NotImplementedError()
 
   env.set_render_delay(render_delay)
   agent = MGExpert(env, 0.3)

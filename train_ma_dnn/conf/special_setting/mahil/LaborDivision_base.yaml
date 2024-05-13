@@ -1,0 +1,8 @@
+# @package _global_
+
+n_sample: 50000
+update_interval: 5
+mini_batch_size: 256
+
+
+mahil_pi_optimizer_lr_policy: 1.e-4
