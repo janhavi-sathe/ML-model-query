@@ -5,7 +5,6 @@ from omegaconf import DictConfig
 
 
 class PPO:
-
   def __init__(self, config: DictConfig, policy: Policy, critic_dim):
     self.policy = policy
     self.clip_eps = config.clip_eps
@@ -77,7 +76,6 @@ class PPO:
 
 
 class OptionPPO(torch.nn.Module):
-
   def __init__(self, config: DictConfig, policy: OptionPolicy, critic_dim):
     super(OptionPPO, self).__init__()
     self.train_policy = config.train_policy
@@ -128,7 +126,7 @@ class OptionPPO(torch.nn.Module):
         log_p_hi = torch.zeros_like(reward)
 
       if self.train_policy:
-        v_val_lo = vc.gather(dim=-1, index=latent).detach()
+        v_val_lo = vc.gather(dim=-1, index=latent.long()).detach()
         log_p_lo = self.policy.log_prob_action(low_obs, latent,
                                                actions).detach()
       else:
@@ -140,8 +138,8 @@ class OptionPPO(torch.nn.Module):
       returns = torch.zeros_like(reward)
       next_value_hi = 0.
       next_value_lo = 0.
-      adv_hi = 0.
-      adv_lo = 0.
+      adv_h = 0.
+      adv_l = 0.
       ret = 0.
 
       for i in reversed(range(reward.size(0))):
@@ -154,9 +152,9 @@ class OptionPPO(torch.nn.Module):
         else:
           delta_hi = reward[i] + self.gamma * next_value_hi - v_val_hi[i]
           delta_lo = reward[i] + self.gamma * next_value_lo - v_val_lo[i]
-          adv_hi = delta_hi + self.gamma * self.gae_tau * adv_hi
-          adv_lo = delta_lo + self.gamma * self.gae_tau * adv_lo
-          adv_hi[i], adv_lo[i] = adv_hi, adv_lo
+          adv_h = delta_hi + self.gamma * self.gae_tau * adv_h
+          adv_l = delta_lo + self.gamma * self.gae_tau * adv_l
+          adv_hi[i], adv_lo[i] = adv_h, adv_l
           next_value_hi, next_value_lo = v_val_hi[i], v_val_lo[i]
 
     return returns, adv_hi, adv_lo, v_val_hi, v_val_lo, pc, log_p_hi, log_p_lo

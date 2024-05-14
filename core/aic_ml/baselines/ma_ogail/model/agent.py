@@ -58,7 +58,6 @@ def make_agent(config: DictConfig, env: ParallelEnv, agent_idx, use_option):
 
 
 class MA_OGAIL:
-
   def __init__(self,
                config: DictConfig,
                use_option,
@@ -142,10 +141,14 @@ class MA_OGAIL:
 
   def gail_update(self, policy_trajs, expert_trajs, n_step=10):
     # convert sample format
-    merge_keys = ["states", "actions", "prev_latents", "latents", "prev_auxs"]
+    if self.use_option:
+      MERGE_KEYS = ["states", "actions", "prev_latents", "latents", "prev_auxs"]
+    else:
+      MERGE_KEYS = ["states", "actions", "prev_auxs"]
+
     num_policy_trajs = len(policy_trajs["states"])
     policy_data = {}
-    for key in merge_keys:
+    for key in MERGE_KEYS:
       list_tmp = []
       for i_e in range(num_policy_trajs):
         len_epi = policy_trajs["lengths"][i_e]
@@ -156,7 +159,7 @@ class MA_OGAIL:
 
     num_expert_trajs = len(expert_trajs["states"])
     expert_data = {}
-    for key in merge_keys:
+    for key in MERGE_KEYS:
       list_tmp = []
       for i_e in range(num_expert_trajs):
         len_epi = expert_trajs["lengths"][i_e]
@@ -174,38 +177,45 @@ class MA_OGAIL:
         batch_pol_state = policy_data["states"][ind_p]
         batch_pol_action = policy_data["actions"][ind_p]
         batch_pol_pre_aux = policy_data["prev_auxs"][ind_p]
-        batch_pol_pre_lat = policy_data["prev_latents"][ind_p]
-        batch_pol_latent = policy_data["latents"][ind_p]
 
         bat_sz = ind_p.size(0)
         ind_e = torch.randperm(n_e_samples, device=self.device)[:bat_sz]
         batch_exp_state = expert_data["states"][ind_e]
         batch_exp_action = expert_data["actions"][ind_e]
         batch_exp_pre_aux = expert_data["prev_auxs"][ind_e]
-        batch_exp_pre_lat = expert_data["prev_latents"][ind_e]
-        batch_exp_latent = expert_data["latents"][ind_e]
 
         batch_state = torch.cat((batch_pol_state, batch_exp_state), dim=0)
         batch_action = torch.cat((batch_pol_action, batch_exp_action), dim=0)
         batch_pre_aux = torch.cat((batch_pol_pre_aux, batch_exp_pre_aux), dim=0)
-        batch_pre_lat = torch.cat((batch_pol_pre_lat, batch_exp_pre_lat), dim=0)
-        batch_latent = torch.cat((batch_pol_latent, batch_exp_latent), dim=0)
+
         batch_is_policy = torch.cat(
             (torch.ones(bat_sz, 1, dtype=torch.float32, device=self.device),
              torch.zeros(bat_sz, 1, dtype=torch.float32, device=self.device)),
             dim=0)
 
-        tup_prev_aux = split_by_size(batch_pre_aux, self.AUX_SPLIT_SIZE)
+        tup_prev_aux = split_by_size(batch_pre_aux, self.AUX_SPLIT_SIZE,
+                                     self.device)
         batch_disc_obs = conv_tuple_input(
             (batch_state, *tup_prev_aux),
             (self.discrete_obs, *self.tup_discrete_aux),
             (self.obs_dim, *self.tup_aux_dim), self.device)
         batch_action = conv_input(batch_action, self.discrete_act,
                                   self.action_dim, self.device)
-        batch_pre_lat = conv_input(batch_pre_lat, False, 1, self.device)
-        batch_latent = conv_input(batch_latent, False, 1, self.device)
 
         if self.use_option:
+          batch_pol_pre_lat = policy_data["prev_latents"][ind_p]
+          batch_pol_latent = policy_data["latents"][ind_p]
+
+          batch_exp_pre_lat = expert_data["prev_latents"][ind_e]
+          batch_exp_latent = expert_data["latents"][ind_e]
+
+          batch_pre_lat = torch.cat((batch_pol_pre_lat, batch_exp_pre_lat),
+                                    dim=0)
+          batch_latent = torch.cat((batch_pol_latent, batch_exp_latent), dim=0)
+
+          batch_pre_lat = conv_input(batch_pre_lat, False, 1, self.device)
+          batch_latent = conv_input(batch_latent, False, 1, self.device)
+
           for _ in range(3):
             self.gail.step(batch_disc_obs, batch_pre_lat, batch_action,
                            batch_latent, batch_is_policy)
@@ -223,18 +233,28 @@ class MA_OGAIL:
     for i_e in range(num_trajs):
       obs = policy_trajs["states"][i_e]
       actions = policy_trajs["actions"][i_e]
-      reward = policy_trajs["rewards"][i_e]
+      reward = torch.as_tensor(policy_trajs["rewards"][i_e],
+                               dtype=torch.float32,
+                               device=self.device)
       prev_aux = policy_trajs["prev_auxs"][i_e]
 
-      tup_prev_aux = split_by_size(prev_aux, self.AUX_SPLIT_SIZE)
+      tup_prev_aux = split_by_size(prev_aux, self.AUX_SPLIT_SIZE, self.device)
       high_obs = conv_tuple_input(
           (obs, *tup_prev_aux), (self.discrete_obs, *self.tup_discrete_aux),
           (self.obs_dim, *self.tup_aux_dim), self.device)
+
+      if self.discrete_act:
+        actions = conv_input(actions, False, 1, self.device)
+      else:
+        actions = conv_input(actions, self.discrete_act, self.action_dim,
+                             self.device)
 
       if self.use_option:
         prev_lat = policy_trajs["prev_latents"][i_e]
         latent = policy_trajs["latents"][i_e]
         low_obs = conv_input(obs, self.discrete_obs, self.obs_dim, self.device)
+        prev_lat = conv_input(prev_lat, False, 1, self.device)
+        latent = conv_input(latent, False, 1, self.device)
         vec_interm = self.ppo.calc_adv_each_episode(low_obs, actions, high_obs,
                                                     prev_lat, latent, reward)
         for idx, item in enumerate(vec_interm):
@@ -242,7 +262,8 @@ class MA_OGAIL:
       else:
         others_actions = policy_trajs["others_actions"][i_e]
         tup_others_actions = split_by_size(others_actions,
-                                           self.OTHERS_ACTION_SPLIT_SIZE)
+                                           self.OTHERS_ACTION_SPLIT_SIZE,
+                                           self.device)
         critic_obs = conv_tuple_input(
             (obs, *tup_prev_aux, *tup_others_actions),
             (self.discrete_obs, *self.tup_discrete_aux, *self.tup_discrete_oth),
@@ -262,10 +283,14 @@ class MA_OGAIL:
       list_tmp = []
       for i_e in range(num_trajs):
         len_epi = policy_trajs["lengths"][i_e]
-        list_tmp.append(np.array(policy_trajs[key][i_e]).reshape(len_epi, -1))
-      policy_data[key] = torch.as_tensor(np.vstack(list_tmp),
-                                         dtype=torch.float,
-                                         device=self.device)
+        tmp_item = policy_trajs[key][i_e]
+        if not isinstance(tmp_item, torch.Tensor):
+          tmp_item = torch.as_tensor(np.array(tmp_item),
+                                     dtype=torch.float32,
+                                     device=self.device)
+        list_tmp.append(tmp_item.reshape(len_epi, -1))
+
+      policy_data[key] = torch.cat(list_tmp, dim=0)
 
     # update
     for _ in range(n_step):
@@ -276,7 +301,7 @@ class MA_OGAIL:
         prev_aux = policy_data["prev_auxs"][ind_b]
         returns = policy_data["returns"][ind_b]
 
-        tup_prev_aux = split_by_size(prev_aux, self.AUX_SPLIT_SIZE)
+        tup_prev_aux = split_by_size(prev_aux, self.AUX_SPLIT_SIZE, self.device)
         high_obs = conv_tuple_input(
             (obs, *tup_prev_aux), (self.discrete_obs, *self.tup_discrete_aux),
             (self.obs_dim, *self.tup_aux_dim), self.device)
@@ -305,7 +330,8 @@ class MA_OGAIL:
           others_actions = policy_data["others_actions"][ind_b]
 
           tup_others_actions = split_by_size(others_actions,
-                                             self.OTHERS_ACTION_SPLIT_SIZE)
+                                             self.OTHERS_ACTION_SPLIT_SIZE,
+                                             self.device)
           critic_obs = conv_tuple_input(
               (obs, *tup_prev_aux, *tup_others_actions),
               (self.discrete_obs, *self.tup_discrete_aux,
@@ -316,7 +342,7 @@ class MA_OGAIL:
                         fixed_logp)
 
   def gail_reward(self, obs, prev_lat, prev_aux, action, lat):
-    tup_prev_aux = split_by_size(prev_aux, self.AUX_SPLIT_SIZE)
+    tup_prev_aux = split_by_size(prev_aux, self.AUX_SPLIT_SIZE, self.device)
     disc_obs = conv_tuple_input((obs, *tup_prev_aux),
                                 (self.discrete_obs, *self.tup_discrete_aux),
                                 (self.obs_dim, *self.tup_aux_dim), self.device)
@@ -339,7 +365,7 @@ class MA_OGAIL:
     else:
       option = self.PREV_LATENT
 
-      tup_prev_aux = split_by_size(prev_aux, self.AUX_SPLIT_SIZE)
+      tup_prev_aux = split_by_size(prev_aux, self.AUX_SPLIT_SIZE, self.device)
       policy_obs = conv_tuple_input(
           (obs, *tup_prev_aux), (self.discrete_obs, *self.tup_discrete_aux),
           (self.obs_dim, *self.tup_aux_dim), self.device)
@@ -356,7 +382,7 @@ class MA_OGAIL:
                                             not sample)[0].cpu().numpy()
 
   def choose_mental_state(self, obs, prev_option, prev_aux, sample=False):
-    tup_prev_aux = split_by_size(prev_aux, self.AUX_SPLIT_SIZE)
+    tup_prev_aux = split_by_size(prev_aux, self.AUX_SPLIT_SIZE, self.device)
     high_obs = conv_tuple_input((obs, *tup_prev_aux),
                                 (self.discrete_obs, *self.tup_discrete_aux),
                                 (self.obs_dim, *self.tup_aux_dim), self.device)
@@ -364,7 +390,7 @@ class MA_OGAIL:
 
     with torch.no_grad():
       return self.gail.policy.sample_option(high_obs, prev_option,
-                                            not sample)[0].cpu().numpy()
+                                            not sample)[0].cpu().numpy()[0]
 
   def save(self, path):
     torch.save(self.gail.discriminator.state_dict(), path + "_disc")
@@ -387,7 +413,8 @@ class MA_OGAIL:
 
     len_demo = len(obs)
 
-    batch_prev_aux_split = split_by_size(prev_aux, self.AUX_SPLIT_SIZE)
+    batch_prev_aux_split = split_by_size(prev_aux, self.AUX_SPLIT_SIZE,
+                                         self.device)
     low_obs = conv_tuple_input((obs, *batch_prev_aux_split),
                                (self.discrete_obs, *self.tup_discrete_aux),
                                (self.obs_dim, *self.tup_aux_dim), self.device)

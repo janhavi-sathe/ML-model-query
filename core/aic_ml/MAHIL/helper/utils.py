@@ -22,7 +22,7 @@ def conv_input(batch_input, is_onehot_needed, dimension, device):
       batch_input = torch.tensor(np.array(batch_input).reshape(-1, dimension),
                                  dtype=torch.float).to(device)
 
-  return batch_input
+  return batch_input  # TODO: consider to(device) here too. anything to lose?
 
 
 def conv_tuple_input(tup_batch, tup_is_onehot_needed, tup_dimension, device):
@@ -38,11 +38,13 @@ def conv_tuple_input(tup_batch, tup_is_onehot_needed, tup_dimension, device):
   return batch_input
 
 
-def split_by_size(batch_input, split_size):
+def split_by_size(batch_input, split_size, device):
   if len(split_size) == 0:
     return ()
   else:
-    return torch.split(torch.as_tensor(batch_input), split_size, dim=-1)
+    return torch.split(torch.as_tensor(batch_input, device=device),
+                       split_size,
+                       dim=-1)
 
 
 def get_expert_batch(expert_traj,
@@ -253,37 +255,35 @@ def evaluate(dict_agents, env: ParallelEnv, use_auxiliary_obs, num_episodes=10):
       joint_prev_lat[a_name] = prev_lat
       joint_prev_aux[a_name] = prev_aux
 
-    with eval_mode(agent):
-      while not done:
-        joint_latent = {}
-        joint_actions = {}
-        joint_aux = {}
-        for a_name in env.agents:
-          agent = dict_agents[a_name]
-          latent, action = agent.choose_action(joint_obs[a_name],
-                                               joint_prev_lat[a_name],
-                                               joint_prev_aux[a_name],
-                                               sample=False)
-          joint_latent[a_name] = latent
-          joint_actions[a_name] = action
+    while not done:
+      joint_latent = {}
+      joint_actions = {}
+      joint_aux = {}
+      for a_name in env.agents:
+        agent = dict_agents[a_name]
+        latent, action = agent.choose_action(joint_obs[a_name],
+                                             joint_prev_lat[a_name],
+                                             joint_prev_aux[a_name],
+                                             sample=False)
+        joint_latent[a_name] = latent
+        joint_actions[a_name] = action
 
-        joint_next_obs, rewards, dones, truncates, infos = env.step(
-            joint_actions)
-        episode_step += 1
-        for a_name in env.agents:
-          if use_auxiliary_obs:
-            joint_aux[a_name] = env.get_auxiliary_obs(a_name)
-          else:
-            joint_aux[a_name] = agent.PREV_AUX
+      joint_next_obs, rewards, dones, truncates, infos = env.step(joint_actions)
+      episode_step += 1
+      for a_name in env.agents:
+        if use_auxiliary_obs:
+          joint_aux[a_name] = env.get_auxiliary_obs(a_name)
+        else:
+          joint_aux[a_name] = agent.PREV_AUX
 
-          episode_rewards[a_name] += rewards[a_name]
+        episode_rewards[a_name] += rewards[a_name]
 
-          if dones[a_name] or truncates[a_name]:
-            done = True
+        if dones[a_name] or truncates[a_name]:
+          done = True
 
-        joint_obs = joint_next_obs
-        joint_prev_lat = joint_latent
-        joint_prev_aux = joint_aux
+      joint_obs = joint_next_obs
+      joint_prev_lat = joint_latent
+      joint_prev_aux = joint_aux
 
     for a_name in env.agents:
       total_returns[a_name].append(episode_rewards[a_name])

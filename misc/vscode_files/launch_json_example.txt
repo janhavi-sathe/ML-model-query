@@ -1,0 +1,68 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "args": [],
+      "justMyCode": false
+    },
+    {
+      "name": "Current File with Arguments",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "args": "${command:pickArgs}",
+      "justMyCode": false
+    },
+    {
+      "name": "run_tic_result",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/analysis/TIC_results/save_merged_v_values.py",
+      "console": "integratedTerminal",
+      // prettier-ignore
+      "args": [
+        "--domain=movers", "--iteration=300",
+        "--num-train=160", "--humandata=True"
+      ],
+      "justMyCode": false
+    },
+    {
+      "name": "run_miql",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/train_dnn/run_algs.py",
+      "console": "integratedTerminal",
+      "args": "${command:pickArgs}",
+      "justMyCode": false
+    },
+    {
+      "name": "run_webapp",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/web_app_v2/run.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/web_app_v2",
+      // prettier-ignore
+      "args": [],
+      "justMyCode": false
+    },
+    {
+      "name": "run_mahil",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/train_ma_dnn/run_algs.py",
+      "console": "integratedTerminal",
+      "args": "${command:pickArgs}",
+      "justMyCode": false
+    }
+  ]
+}

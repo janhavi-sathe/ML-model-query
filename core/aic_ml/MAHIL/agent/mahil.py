@@ -108,8 +108,9 @@ class MAHIL:
 
   def _get_tx_iq_vars(self, batch):
     batch_prev_aux_split = split_by_size(batch['prev_auxs'],
-                                         self.AUX_SPLIT_SIZE)
-    batch_aux_split = split_by_size(batch['auxs'], self.AUX_SPLIT_SIZE)
+                                         self.AUX_SPLIT_SIZE, self.device)
+    batch_aux_split = split_by_size(batch['auxs'], self.AUX_SPLIT_SIZE,
+                                    self.device)
 
     tup_obs = (batch['states'], *batch_prev_aux_split)
     vec_v_args = (tup_obs, batch['prev_latents'])
@@ -223,7 +224,8 @@ class MAHIL:
     return self.pi_agent.choose_action((obs, ), option, sample)
 
   def choose_mental_state(self, obs, prev_option, prev_aux, sample=False):
-    batch_prev_aux_split = split_by_size(prev_aux, self.AUX_SPLIT_SIZE)
+    batch_prev_aux_split = split_by_size(prev_aux, self.AUX_SPLIT_SIZE,
+                                         self.device)
     tup_obs = (obs, ) + batch_prev_aux_split
     return self.tx_agent.choose_action(tup_obs, prev_option, sample)
 
@@ -241,7 +243,8 @@ class MAHIL:
     '''
     len_demo = len(obs)
 
-    batch_prev_aux_split = split_by_size(prev_aux, self.AUX_SPLIT_SIZE)
+    batch_prev_aux_split = split_by_size(prev_aux, self.AUX_SPLIT_SIZE,
+                                         self.device)
     tup_tx_obs = (obs, *batch_prev_aux_split)
 
     with torch.no_grad():

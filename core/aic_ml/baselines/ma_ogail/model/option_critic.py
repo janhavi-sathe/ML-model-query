@@ -8,7 +8,6 @@ from omegaconf import DictConfig
 
 
 class Critic(torch.nn.Module):
-
   def __init__(self, config: DictConfig, dim_s):
     super(Critic, self).__init__()
     self.dim_s = dim_s
@@ -29,7 +28,6 @@ class Critic(torch.nn.Module):
 
 
 class OptionCritic(torch.nn.Module):
-
   def __init__(self, config, dim_s, dim_c):
     super(OptionCritic, self).__init__()
     self.dim_s = dim_s
@@ -58,7 +56,7 @@ class OptionCritic(torch.nn.Module):
     if c is None:
       return vs
     else:
-      return vs.gather(dim=-1, index=c)
+      return vs.gather(dim=-1, index=c.long())
 
   def get_param(self):
     return list(self.parameters())

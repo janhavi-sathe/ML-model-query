@@ -75,8 +75,8 @@ def learn(config: omegaconf.DictConfig,
       load_multiagent_data_w_labels(env.agents, dict_agents, demo_path, n_traj,
                                     n_labeled, seed))
 
-  # add others' actions to each sample
-  epi_joint_actions = []
+  # ----- add others' actions to each sample (for MA-GAIL critic)
+  epi_vec_actions = []
   n_traj = len(dict_expert_trajs[env.agents[0]]["states"])
   for i_e in range(n_traj):
     list_joint_actions = []
@@ -85,16 +85,23 @@ def learn(config: omegaconf.DictConfig,
       for a_name in env.agents:
         joint_a.append(dict_expert_trajs[a_name]["actions"][i_e][i_t])
 
-      list_joint_actions.append(np.hstack(joint_a))
-    epi_joint_actions.append(np.vstack(list_joint_actions))
+      list_joint_actions.append(joint_a)
+    vec_actions = list(zip(*list_joint_actions))
+    vec_actions = [np.vstack(item) for item in vec_actions]
+    epi_vec_actions.append(vec_actions)
 
   for i_a in range(len(env.agents)):
     a_name = env.agents[i_a]
     expert_trajs = dict_expert_trajs[a_name]
+    agent = dict_agents[a_name]
+    agent.action_dim
+    agent.discrete_act
+    agent.OTHERS_ACTION_SPLIT_SIZE
     list_others_actions = []
     for i_e in range(n_traj):
-      joint_acts = epi_joint_actions[i_e]
-      others_actions = np.hstack([joint_acts[:, :i_a], joint_acts[:, i_a + 1:]])
+      vec_acts = epi_vec_actions[i_e]
+
+      others_actions = np.hstack(vec_acts[:i_a] + vec_acts[i_a + 1:])
       list_others_actions.append(others_actions)
 
     expert_trajs["others_actions"] = list_others_actions
@@ -176,8 +183,8 @@ def learn(config: omegaconf.DictConfig,
           else:
             joint_aux[a_name] = dict_agents[a_name].PREV_AUX
 
-          others_actions = np.hstack(
-              [list_actions[:i_agent], list_actions[i_agent + 1:]])
+          others_actions = np.hstack(list_actions[:i_agent] +
+                                     list_actions[i_agent + 1:])
           episode_rewards[a_name] += rewards[a_name]
           episode_tuples[a_name].append(
               (joint_prev_lat[a_name], joint_prev_aux[a_name],

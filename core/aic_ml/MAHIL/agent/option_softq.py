@@ -12,7 +12,6 @@ USE_TARGET = False
 
 
 class OptionSoftQ(AbstractPolicyLeaner):
-
   def __init__(self, config: DictConfig, tup_obs_dim, action_dim, option_dim,
                tup_discrete_obs, q_net_base: Type[nn.Module]):
     super().__init__(config)

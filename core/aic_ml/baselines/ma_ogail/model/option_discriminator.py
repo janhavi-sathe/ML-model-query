@@ -8,7 +8,6 @@ from omegaconf import DictConfig
 
 
 class Discriminator(torch.nn.Module):
-
   def __init__(self, config: DictConfig, dim_s, dim_a):
     super(Discriminator, self).__init__()
     self.dim_a = dim_a
@@ -42,7 +41,6 @@ class Discriminator(torch.nn.Module):
 
 
 class OptionDiscriminator(torch.nn.Module):
-
   def __init__(self, config: DictConfig, dim_s, dim_a, dim_c):
     super(OptionDiscriminator, self).__init__()
     self.dim_a = dim_a
@@ -74,6 +72,7 @@ class OptionDiscriminator(torch.nn.Module):
       d = self.discriminator(s_a)
     if self.with_c:
       d = d.view(-1, self.dim_c + 1, self.dim_c)
-      ct_1 = ct_1.view(-1, 1, 1).expand(-1, 1, self.dim_c)
-      d = d.gather(dim=-2, index=ct_1).squeeze(dim=-2).gather(dim=-1, index=ct)
+      ct_1 = ct_1.long().view(-1, 1, 1).expand(-1, 1, self.dim_c)
+      d = d.gather(dim=-2, index=ct_1).squeeze(dim=-2).gather(dim=-1,
+                                                              index=ct.long())
     return d
