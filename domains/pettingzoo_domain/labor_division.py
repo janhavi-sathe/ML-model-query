@@ -278,21 +278,25 @@ class LaborDivision(ParallelEnv):
 
 
 class DyadLaborDivision(LaborDivision):
+
   def __init__(self, targets, render_mode=None):
     super().__init__(targets, n_agents=2, render_mode=render_mode)
 
 
 class TwoTargetDyadLaborDivision(DyadLaborDivision):
+
   def __init__(self, render_mode=None):
     super().__init__([(-4, 0), (4, 0)], render_mode)
 
 
 class ThreeTargetDyadLaborDivision(DyadLaborDivision):
+
   def __init__(self, render_mode=None):
     super().__init__([(-4, -3), (4, -3), (0, 4)], render_mode)
 
 
 class LDExpert:
+
   def __init__(self, env, tolerance) -> None:
     self.PREV_LATENT = None
     self.env = env
@@ -400,16 +404,16 @@ class LDExpert:
             # no remaining target --> either stay here or go to other
             else:
               # if i am closer to the current latent target --> go to that one
-              if (np.linalg.norm(self.np_targets[prev_latent] - pos) <
-                  np.linalg.norm(self.np_targets[prev_latent] - pos_fr)):
+              if (np.linalg.norm(self.np_targets[prev_latent] - pos)
+                  < np.linalg.norm(self.np_targets[prev_latent] - pos_fr)):
                 return prev_latent
               else:
                 return len(self.np_targets) - 1 - prev_latent
         # not near target
         else:
           # if friend is already near my target
-          if (np.linalg.norm(self.np_targets[prev_latent] - pos_fr) <=
-              self.env.tolerance):
+          if (np.linalg.norm(self.np_targets[prev_latent] - pos_fr)
+              <= self.env.tolerance):
             IMMEDIATE_CHANGE = False
             if IMMEDIATE_CHANGE:
               # friend is going to my target / staying there --> i go to the other one
@@ -425,8 +429,8 @@ class LDExpert:
             # friend goes to my target
             if fr_tidx == prev_latent:
               # if friend is closer to the target
-              if (np.linalg.norm(self.np_targets[prev_latent] - pos_fr) <
-                  np.linalg.norm(self.np_targets[prev_latent] - pos)):
+              if (np.linalg.norm(self.np_targets[prev_latent] - pos_fr)
+                  < np.linalg.norm(self.np_targets[prev_latent] - pos)):
                 return sample_from_not_prev
               else:
                 return prev_latent
@@ -444,8 +448,8 @@ class LDExpert:
 
     pos_fr = pos + rel_pos
     # if friend is near the target while im not --> wait with some distance
-    if observed == 1 and (np.linalg.norm(self.np_targets[latent] - pos_fr) <=
-                          self.env.tolerance):
+    if observed == 1 and (np.linalg.norm(self.np_targets[latent] - pos_fr)
+                          <= self.env.tolerance):
       target = self.np_targets[latent]
       vec_dir = target - pos
       len_dir = np.linalg.norm(vec_dir)
@@ -474,9 +478,9 @@ class LDExpert:
 
 def generate_data(save_dir, env_name, n_traj, render=False, render_delay=10):
   expert_trajs = defaultdict(list)
-  if env_name == "LaborDivision2-v0":
+  if env_name == "LaborDivision2":
     env = TwoTargetDyadLaborDivision(render_mode="human")
-  elif env_name == "LaborDivision3-v0":
+  elif env_name == "LaborDivision3":
     env = ThreeTargetDyadLaborDivision(render_mode="human")
   else:
     raise NotImplementedError()
@@ -487,11 +491,13 @@ def generate_data(save_dir, env_name, n_traj, render=False, render_delay=10):
       for aname in env.possible_agents
   }
 
+  list_total_reward = []
   for _ in range(n_traj):
     obs, infos = env.reset()
     prev_latents = {aname: agents[aname].PREV_LATENT for aname in env.agents}
     episode_reward = {aname: 0 for aname in env.agents}
 
+    total_reward = 0
     samples = []
     while True:
       actions = {}
@@ -508,6 +514,7 @@ def generate_data(save_dir, env_name, n_traj, render=False, render_delay=10):
 
       for aname in env.agents:
         episode_reward[aname] += rewards[aname]
+        total_reward += rewards[aname]
 
       prev_latents = latents
       obs = next_obs
@@ -518,8 +525,9 @@ def generate_data(save_dir, env_name, n_traj, render=False, render_delay=10):
       if all(truncs.values()) or all(dones.values()):
         break
 
+    list_total_reward.append(total_reward)
     if render:
-      print(episode_reward, len(samples))
+      print(episode_reward, total_reward, len(samples))
 
     # structure: (traj_length, num_agents, value_dim)
     all_obs, all_act, all_n_obs, all_lat, all_rew, all_don = list(zip(*samples))
@@ -536,6 +544,7 @@ def generate_data(save_dir, env_name, n_traj, render=False, render_delay=10):
     expert_trajs["dones"].append(transpose_impl(all_don))
     expert_trajs["lengths"].append(len(all_obs))
 
+  print("Mean:", np.mean(list_total_reward))
   if save_dir is not None:
     file_path = os.path.join(save_dir, f"{env_name}_{n_traj}.pkl")
     with open(file_path, 'wb') as f:
@@ -547,5 +556,5 @@ def generate_data(save_dir, env_name, n_traj, render=False, render_delay=10):
 if __name__ == "__main__":
   cur_dir = os.path.dirname(__file__)
 
-  # traj = generate_data(cur_dir, "LaborDivision2-v0", 100, False, 300)
-  traj = generate_data(None, "LaborDivision2-v0", 1, True, 100)
+  # traj = generate_data(cur_dir, "LaborDivision2", 100, False, 300)
+  traj = generate_data(None, "LaborDivision2", 10, False, 100)

@@ -214,13 +214,13 @@ def learn(config: omegaconf.DictConfig,
     ret_sum = np.zeros_like(all_episode_rewards[env.agents[0]])
     for a_name in env.agents:
       ret_sum = ret_sum + np.array(all_episode_rewards[a_name])
-      logger.log_train(f"episode_reward/{a_name}",
+      logger.log_train(f"returns/{a_name}",
                        np.mean(all_episode_rewards[a_name]), explore_step)
     avg_return = np.mean(ret_sum)
     avg_epi_step = explore_step_cur / (n_epi + 1)
-    logger.log_train("episode_reward/sum", avg_return, explore_step)
+    logger.log_train("episode_reward", avg_return, explore_step)
     logger.log_train("episode_step", avg_epi_step, explore_step)
-    print(f"{explore_step}: episode_reward/sum={avg_return}, "
+    print(f"{explore_step}: episode_reward={avg_return}, "
           f"episode_step={avg_epi_step} ; {env_name}_{run_name}")
 
     # ----- replace rewards with discriminator rewards
@@ -252,11 +252,11 @@ def learn(config: omegaconf.DictConfig,
       ret_sum = np.zeros_like(dict_eval_returns[env.agents[0]])
       for a_name in env.agents:
         ret_sum = ret_sum + np.array(dict_eval_returns[a_name])
-        logger.log_eval(f"episode_reward/{a_name}",
-                        np.mean(dict_eval_returns[a_name]), explore_step)
+        logger.log_eval(f"returns/{a_name}", np.mean(dict_eval_returns[a_name]),
+                        explore_step)
 
       mean_ret_sum = np.mean(ret_sum)
-      logger.log_eval('episode_reward/sum', mean_ret_sum, explore_step)
+      logger.log_eval('episode_reward', mean_ret_sum, explore_step)
       logger.log_eval('episode_step', np.mean(eval_timesteps), explore_step)
 
       if mean_ret_sum >= best_reward:

@@ -5,6 +5,10 @@ from pettingzoo_domain.labor_division import (TwoTargetDyadLaborDivision,
 from pettingzoo.mpe import (simple_crypto_v3, simple_push_v3,
                             simple_adversary_v3, simple_speaker_listener_v4,
                             simple_spread_v3, simple_tag_v3)
+from pettingzoo_domain.conv_gym_domain import ConvGymDomain
+import gym
+from stable_baselines3.common.monitor import Monitor
+import gym_custom
 
 
 def env_generator(config):
@@ -18,6 +22,8 @@ def env_generator(config):
     return Movers, {}
   elif env_name == "ma_rescue":
     return Rescue, {}
+  elif env_name == "MultiGoals2D_2-v0":
+    return ConvGymDomain, {"env_name": env_name}
   elif env_name == "LaborDivision2":
     return TwoTargetDyadLaborDivision, {}
   elif env_name == "LaborDivision3":

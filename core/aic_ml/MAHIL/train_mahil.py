@@ -264,11 +264,11 @@ def train(config: omegaconf.DictConfig,
         ret_sum = np.zeros_like(dict_eval_returns[env.agents[0]])
         for a_name in env.agents:
           ret_sum = ret_sum + np.array(dict_eval_returns[a_name])
-          logger.log(f'eval/episode_reward/{a_name}',
+          logger.log(f'eval/returns/{a_name}',
                      np.mean(dict_eval_returns[a_name]), explore_steps)
 
         mean_ret_sum = np.mean(ret_sum)
-        logger.log('eval/episode_reward/sum', mean_ret_sum, explore_steps)
+        logger.log('eval/episode_reward', mean_ret_sum, explore_steps)
         logger.log('eval/episode_step', np.mean(eval_timesteps), explore_steps)
 
         logger.dump(explore_steps, ty='eval')
@@ -360,8 +360,8 @@ def train(config: omegaconf.DictConfig,
       ret_sum = np.zeros_like(dict_rewards_window[env.agents[0]])
       for a_name in env.agents:
         ret_sum = ret_sum + np.array(dict_rewards_window[a_name])
-        logger.log(f'train/episode_reward/{a_name}',
+        logger.log(f'train/returns/{a_name}',
                    np.mean(dict_rewards_window[a_name]), explore_steps)
-      logger.log('train/episode_reward/sum', np.mean(ret_sum), explore_steps)
+      logger.log('train/episode_reward', np.mean(ret_sum), explore_steps)
 
       logger.dump(explore_steps, save=begin_learn)

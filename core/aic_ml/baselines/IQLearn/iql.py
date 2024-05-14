@@ -98,7 +98,7 @@ def trainer_impl(config: omegaconf.DictConfig,
   only_observabtion_based = False
 
   # device
-  device_name = "cuda:0" if torch.cuda.is_available() else "cpu"
+  device_name = config.device
   cuda_deterministic = False
 
   # set seeds

@@ -115,7 +115,7 @@ def train(config: DictConfig,
   alg_type = 'iq'
 
   # device
-  device_name = "cuda:0" if torch.cuda.is_available() else "cpu"
+  device_name = config.device
   cuda_deterministic = False
 
   # set seeds
