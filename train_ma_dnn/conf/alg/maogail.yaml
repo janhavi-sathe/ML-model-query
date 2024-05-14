@@ -1,6 +1,6 @@
 # @package _global_
 
-alg_name: ogail
+alg_name: maogail
 n_epoch: 5000
 use_state_filter: False
 activation: relu

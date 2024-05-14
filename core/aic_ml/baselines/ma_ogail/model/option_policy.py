@@ -140,7 +140,7 @@ class OptionPolicy(torch.nn.Module):
       logstd = torch.stack([m.expand_as(mean[:, 0, :]) for m in self.a_log_std],
                            dim=-2)
     if ct is not None:
-      ind = ct.view(-1, 1, 1).expand(-1, 1, self.dim_a)
+      ind = ct.long().view(-1, 1, 1).expand(-1, 1, self.dim_a)
       mean = mean.gather(dim=-2, index=ind).squeeze(dim=-2)
       logstd = logstd.gather(dim=-2, index=ind).squeeze(dim=-2)
     return mean.clamp(-10, 10), logstd.clamp(self.log_clamp[0],
@@ -174,7 +174,7 @@ class OptionPolicy(torch.nn.Module):
       return log_pcs
     else:
       return log_pcs.gather(dim=-2,
-                            index=ct_1.view(-1, 1, 1).expand(
+                            index=ct_1.long().view(-1, 1, 1).expand(
                                 -1, 1, self.dim_c)).squeeze(dim=-2)
 
   def a_log_softmax(self, low_obs, ct):
@@ -185,7 +185,7 @@ class OptionPolicy(torch.nn.Module):
     log_pas = logits.log_softmax(dim=-1)
     if ct is not None:
       log_pas = log_pas.gather(dim=-2,
-                               index=ct.view(-1, 1, 1).expand(
+                               index=ct.long().view(-1, 1, 1).expand(
                                    -1, 1, self.dim_a)).squeeze(dim=-2)
     return log_pas
 
@@ -195,7 +195,7 @@ class OptionPolicy(torch.nn.Module):
       log_pas = self.a_log_softmax(low_obs, ct)
       at = at.long()
       if ct is None:
-        at = at.view(-1, 1, 1).expand(-1, self.dim_c, 1)
+        at = at.long().view(-1, 1, 1).expand(-1, self.dim_c, 1)
       return log_pas.gather(dim=-1, index=at)
     else:
       mean, logstd = self.a_mean_logstd(low_obs, ct)
@@ -206,7 +206,7 @@ class OptionPolicy(torch.nn.Module):
 
   def log_prob_option(self, high_obs, ct_1, ct):
     log_tr = self.log_trans(high_obs, ct_1)
-    return log_tr.gather(dim=-1, index=ct)
+    return log_tr.gather(dim=-1, index=ct.long())
 
   def sample_action(self, low_obs, ct, fixed=False):
     if self.discrete_a:
@@ -260,6 +260,6 @@ class OptionPolicy(torch.nn.Module):
   def option_log_prob_entropy(self, high_obs, ct_1, ct):
     # c1 can be dim_c, c2 should always < dim_c
     log_tr = self.log_trans(high_obs, ct_1)
-    log_opt = log_tr.gather(dim=-1, index=ct)
+    log_opt = log_tr.gather(dim=-1, index=ct.long())
     entropy = -(log_tr * log_tr.exp()).sum(dim=-1, keepdim=True)
     return log_opt, entropy
