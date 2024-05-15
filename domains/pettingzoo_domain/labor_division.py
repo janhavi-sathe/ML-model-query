@@ -309,7 +309,7 @@ class LDExpert:
     #   --> maintain current target regardless of other agent
     # near target / not progressing
     #   --> need to change target. predict where the other agent goes.
-    #     --> if it comes to current one / stays --> i go the other one (easy)
+    #     --> if it comes to current one / stays --> i go the other one
     #     --> if it goes the other one
     #       -->if there is remaining target --> go to the remaining one
     #       --> no remaining target --> either stay here or go to other
