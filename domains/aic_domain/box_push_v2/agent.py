@@ -13,7 +13,6 @@ from aic_domain.box_push_v2.agent_model import (
 
 
 class BoxPushAIAgent_PartialObs(AIAgent_PartialObs):
-
   def observed_states(self, tup_states):
     box_states, a1_pos, a2_pos = tup_states
 
@@ -62,10 +61,12 @@ class BoxPushAIAgent_PartialObs(AIAgent_PartialObs):
         if max_dist(my_pos, coord) <= 1:
           bstate = conv_box_idx_2_state(box_states[idx], num_drops, num_goals)
           if bstate[0] != BoxState.Original:
+            # if not at the original location, first assume it's at goal
             assumed_box_states[idx] = conv_box_state_2_idx(
                 (BoxState.OnGoalLoc, 0), num_drops)
 
       for idx, bidx in enumerate(box_states):
+        # get box position (coordinates). if box is at goal, it will be None
         bpos = None
         bstate = conv_box_idx_2_state(bidx, num_drops, num_goals)
         if bstate[0] == BoxState.Original:
@@ -81,14 +82,18 @@ class BoxPushAIAgent_PartialObs(AIAgent_PartialObs):
 
         prev_bstate = conv_box_idx_2_state(prev_box_states[idx], num_drops,
                                            num_goals)
+        # if previously box was with me but now it's at the goal --> goal
         if (prev_bstate[0] in [e_boxstate_with_me, BoxState.WithBoth]
             and bpos is None):
           assumed_box_states[idx] = conv_box_state_2_idx(
               (BoxState.OnGoalLoc, 0), num_drops)
+        # if previously box was at goal held by friend, i'm close to the goal.
+        # now it's placed at goal
         elif (agent_dist <= 1 and prev_mate_pos == mdp.goals[0]
               and prev_bstate[0] == e_boxstate_with_mate and bpos is None):
           assumed_box_states[idx] = conv_box_state_2_idx(
               (BoxState.OnGoalLoc, 0), num_drops)
+        # box position is not at goal. update only if it's visible by me
         elif bpos is not None:
           if max_dist(my_pos, bpos) <= 1:
             assumed_box_states[idx] = bidx
@@ -122,7 +127,6 @@ class BoxPushAIAgent_PartialObs(AIAgent_PartialObs):
 
 
 class BoxPushAIAgent_PO_Team(BoxPushAIAgent_PartialObs):
-
   def __init__(self,
                init_tup_states,
                policy_model: CachedPolicyInterface,
@@ -137,7 +141,6 @@ class BoxPushAIAgent_PO_Team(BoxPushAIAgent_PartialObs):
 
 
 class BoxPushAIAgent_PO_Indv(BoxPushAIAgent_PartialObs):
-
   def __init__(self,
                init_tup_states,
                policy_model: CachedPolicyInterface,
@@ -151,7 +154,6 @@ class BoxPushAIAgent_PO_Indv(BoxPushAIAgent_PartialObs):
 
 
 class BoxPushAIAgent_Team(AIAgent_Abstract):
-
   def __init__(self,
                policy_model: CachedPolicyInterface,
                has_mind: bool = True,
@@ -165,7 +167,6 @@ class BoxPushAIAgent_Team(AIAgent_Abstract):
 
 
 class BoxPushAIAgent_Indv(AIAgent_Abstract):
-
   def __init__(self,
                policy_model: CachedPolicyInterface,
                has_mind: bool = True,
@@ -178,7 +179,6 @@ class BoxPushAIAgent_Indv(AIAgent_Abstract):
 
 
 class BoxPushAIAgent_BTIL(AIAgent_Abstract):
-
   def __init__(self,
                np_tx: np.ndarray,
                mask_sas: Sequence[bool],
@@ -193,7 +193,6 @@ class BoxPushAIAgent_BTIL(AIAgent_Abstract):
     super().__init__(policy_model, True, agent_idx)
 
   def _create_agent_model(self, policy_model: CachedPolicyInterface):
-
     def init_latents(obstate_idx):
       if self.np_bx is None:
         return assumed_initial_mental_distribution(self.agent_idx, obstate_idx,
@@ -239,7 +238,6 @@ class BoxPushAIAgent_BTIL(AIAgent_Abstract):
 
 
 class BoxPushAIAgent_BTIL_ABS(AIAgent_Abstract):
-
   def __init__(self,
                np_tx: np.ndarray,
                mask_sas: Sequence[bool],
@@ -257,7 +255,6 @@ class BoxPushAIAgent_BTIL_ABS(AIAgent_Abstract):
     super().__init__(policy_model, True, agent_idx)
 
   def _create_agent_model(self, policy_model: CachedPolicyInterface):
-
     def init_latents(obstate_idx):
       if self.np_bx is None:
         return assumed_initial_mental_distribution(self.agent_idx, obstate_idx,
@@ -370,7 +367,6 @@ class BoxPushAIAgent_BTIL_ABS(AIAgent_Abstract):
 
 
 class AIAgent_NoMind(AIAgent_Abstract):
-
   def __init__(self,
                policy_model: NoMindCachedPolicy,
                agent_idx: int = 0) -> None:

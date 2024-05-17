@@ -12,7 +12,7 @@ from aic_core.utils.mdp_utils import StateSpace
 from aic_domain.box_push.define import BoxState
 
 
-class Movers(ParallelEnv):
+class PO_Movers(ParallelEnv):
   metadata = {"render_modes": ["human"], "name": "ma_movers"}
 
   def __init__(self, render_mode=None):

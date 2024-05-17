@@ -1,4 +1,4 @@
-from pettingzoo_domain.movers import Movers
+from pettingzoo_domain.po_movers import PO_Movers
 from pettingzoo_domain.rescue import Rescue
 from pettingzoo_domain.labor_division import (TwoTargetDyadLaborDivision,
                                               ThreeTargetDyadLaborDivision)
@@ -19,7 +19,7 @@ def env_generator(config):
   '''
   env_name = config.env_name
   if env_name == "ma_movers":
-    return Movers, {}
+    return PO_Movers, {}
   elif env_name == "ma_rescue":
     return Rescue, {}
   elif env_name == "MultiGoals2D_2-v0":

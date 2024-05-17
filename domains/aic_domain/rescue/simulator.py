@@ -4,7 +4,7 @@ import numpy as np
 from aic_domain.simulator import Simulator
 from aic_domain.agent import SimulatorAgent, InteractiveAgent
 from aic_domain.rescue import (E_EventType, Route, Location, Work, Place,
-                               T_Connections, is_work_done)
+                               T_Connections, is_work_done, get_score)
 from aic_domain.rescue.transition import transition
 
 
@@ -65,18 +65,7 @@ class RescueSimulator(Simulator):
     self.changed_state = set()
 
   def update_score(self):
-    rescued_place = []
-    for idx in range(len(self.work_states)):
-      if is_work_done(idx, self.work_states, self.work_info[idx].coupled_works):
-        place_id = self.work_info[idx].rescue_place
-        if place_id not in rescued_place:
-          rescued_place.append(place_id)
-
-    score = 0
-    for place_id in rescued_place:
-      score += self.places[place_id].helps
-
-    self.score = score
+    self.score = get_score(self.work_states, self.work_info, self.places)
 
   def get_score(self):
     return self.score

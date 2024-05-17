@@ -1,4 +1,5 @@
 import os
+from typing import Type
 import pickle
 import functools
 from collections import defaultdict
@@ -35,7 +36,7 @@ class LaborDivision(ParallelEnv):
     WORLD_HALF_SIZE_X = 5
     WORLD_HALF_SIZE_Y = 5
 
-    self.vis_rad = 3
+    self.vis_rad = 2
     self.world_low = np.array([-WORLD_HALF_SIZE_X, -WORLD_HALF_SIZE_Y])
     self.world_high = np.array([WORLD_HALF_SIZE_X, WORLD_HALF_SIZE_Y])
 
@@ -278,25 +279,21 @@ class LaborDivision(ParallelEnv):
 
 
 class DyadLaborDivision(LaborDivision):
-
   def __init__(self, targets, render_mode=None):
     super().__init__(targets, n_agents=2, render_mode=render_mode)
 
 
 class TwoTargetDyadLaborDivision(DyadLaborDivision):
-
   def __init__(self, render_mode=None):
     super().__init__([(-4, 0), (4, 0)], render_mode)
 
 
 class ThreeTargetDyadLaborDivision(DyadLaborDivision):
-
   def __init__(self, render_mode=None):
     super().__init__([(-4, -3), (4, -3), (0, 4)], render_mode)
 
 
 class LDExpert:
-
   def __init__(self, env, tolerance) -> None:
     self.PREV_LATENT = None
     self.env = env
@@ -404,16 +401,16 @@ class LDExpert:
             # no remaining target --> either stay here or go to other
             else:
               # if i am closer to the current latent target --> go to that one
-              if (np.linalg.norm(self.np_targets[prev_latent] - pos)
-                  < np.linalg.norm(self.np_targets[prev_latent] - pos_fr)):
+              if (np.linalg.norm(self.np_targets[prev_latent] - pos) <
+                  np.linalg.norm(self.np_targets[prev_latent] - pos_fr)):
                 return prev_latent
               else:
                 return len(self.np_targets) - 1 - prev_latent
         # not near target
         else:
           # if friend is already near my target
-          if (np.linalg.norm(self.np_targets[prev_latent] - pos_fr)
-              <= self.env.tolerance):
+          if (np.linalg.norm(self.np_targets[prev_latent] - pos_fr) <=
+              self.env.tolerance):
             IMMEDIATE_CHANGE = False
             if IMMEDIATE_CHANGE:
               # friend is going to my target / staying there --> i go to the other one
@@ -429,8 +426,8 @@ class LDExpert:
             # friend goes to my target
             if fr_tidx == prev_latent:
               # if friend is closer to the target
-              if (np.linalg.norm(self.np_targets[prev_latent] - pos_fr)
-                  < np.linalg.norm(self.np_targets[prev_latent] - pos)):
+              if (np.linalg.norm(self.np_targets[prev_latent] - pos_fr) <
+                  np.linalg.norm(self.np_targets[prev_latent] - pos)):
                 return sample_from_not_prev
               else:
                 return prev_latent
@@ -448,8 +445,8 @@ class LDExpert:
 
     pos_fr = pos + rel_pos
     # if friend is near the target while im not --> wait with some distance
-    if observed == 1 and (np.linalg.norm(self.np_targets[latent] - pos_fr)
-                          <= self.env.tolerance):
+    if observed == 1 and (np.linalg.norm(self.np_targets[latent] - pos_fr) <=
+                          self.env.tolerance):
       target = self.np_targets[latent]
       vec_dir = target - pos
       len_dir = np.linalg.norm(vec_dir)
@@ -476,7 +473,62 @@ class LDExpert:
       return vec_dir
 
 
-def generate_data(save_dir, env_name, n_traj, render=False, render_delay=10):
+class LDExpert_V2(LDExpert):
+  def choose_mental_state(self, obs, prev_latent, sample=False):
+    if prev_latent is self.PREV_LATENT:
+      return np.random.choice(range(len(self.np_targets)))
+
+    pos = obs[0:2]
+    act = obs[2:4]
+    progressing = obs[4]
+
+    # let's think about only dyad setting
+    observed = obs[5]
+    rel_pos = obs[6:8]
+    act_fr = obs[8:10]
+
+    # find the closest target
+    clst_tidx = -1
+    min_dist = 999999
+    for tidx, target in enumerate(self.np_targets):
+      dist = np.linalg.norm(target - pos)
+      if min_dist > dist:
+        min_dist = dist
+        clst_tidx = tidx
+
+    not_clst_tidx = [
+        tidx for tidx in range(len(self.np_targets)) if tidx != clst_tidx
+    ]
+
+    prev_neq_clst = prev_latent != clst_tidx
+    sample_from_not_clst = prev_latent if prev_neq_clst else np.random.choice(
+        not_clst_tidx)
+
+    # no nearby agent
+    if observed == 0:
+      # near a target but not progressing
+      if min_dist <= self.env.tolerance and progressing == 0:
+        return sample_from_not_clst
+      else:
+        return prev_latent
+    # agents exist nearby
+    else:
+      # progressing  --> maintain current target regardless of friend
+      if progressing == 1:
+        return prev_latent
+      # not progressing --> may need changing target.
+      #                     no prediction regarding other agent action
+      else:
+        # all random sample
+        return np.random.choice(range(len(self.np_targets)))
+
+
+def generate_data(save_dir,
+                  expert_class: Type[LDExpert],
+                  env_name,
+                  n_traj,
+                  render=False,
+                  render_delay=10):
   expert_trajs = defaultdict(list)
   if env_name == "LaborDivision2":
     env = TwoTargetDyadLaborDivision(render_mode="human")
@@ -487,7 +539,7 @@ def generate_data(save_dir, env_name, n_traj, render=False, render_delay=10):
 
   env.set_render_delay(render_delay)
   agents = {
-      aname: LDExpert(env, env.tolerance)
+      aname: expert_class(env, env.tolerance)
       for aname in env.possible_agents
   }
 
@@ -556,5 +608,6 @@ def generate_data(save_dir, env_name, n_traj, render=False, render_delay=10):
 if __name__ == "__main__":
   cur_dir = os.path.dirname(__file__)
 
-  # traj = generate_data(cur_dir, "LaborDivision2", 100, False, 300)
-  traj = generate_data(None, "LaborDivision2", 10, False, 100)
+  # traj = generate_data(cur_dir, LDExpert, "LaborDivision2", 100, False, 300)
+  # traj = generate_data(None, LDExpert, "LaborDivision2", 10, False, 100)
+  traj = generate_data(None, LDExpert_V2, "LaborDivision2", 10, True, 100)
