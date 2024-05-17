@@ -1,5 +1,5 @@
-from pettingzoo_domain.po_movers import PO_Movers
-from pettingzoo_domain.rescue import Rescue
+from pettingzoo_domain.po_movers_v2 import PO_Movers_V2
+from pettingzoo_domain.po_flood_v2 import PO_Flood_V2
 from pettingzoo_domain.labor_division import (TwoTargetDyadLaborDivision,
                                               ThreeTargetDyadLaborDivision)
 from pettingzoo.mpe import (simple_crypto_v3, simple_push_v3,
@@ -19,9 +19,9 @@ def env_generator(config):
   '''
   env_name = config.env_name
   if env_name == "ma_movers":
-    return PO_Movers, {}
-  elif env_name == "ma_rescue":
-    return Rescue, {}
+    return PO_Movers_V2, {}
+  elif env_name == "ma_flood":
+    return PO_Flood_V2, {}
   elif env_name == "MultiGoals2D_2-v0":
     return ConvGymDomain, {"env_name": env_name}
   elif env_name == "LaborDivision2":

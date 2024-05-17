@@ -151,37 +151,31 @@ class MultiGoals2D(gym.Env):
 
 
 class MultiGoals2D_1(MultiGoals2D):
-
   def __init__(self):
     super().__init__([(-4, 4)])
 
 
 class MultiGoals2D_2(MultiGoals2D):
-
   def __init__(self):
     super().__init__([(-4, 4), (4, 4)])
 
 
 class MultiGoals2D_3(MultiGoals2D):
-
   def __init__(self):
     super().__init__([(-4, 4), (4, 4), (0, -4)])
 
 
 class MultiGoals2D_4(MultiGoals2D):
-
   def __init__(self):
     super().__init__([(-4, 4), (4, 4), (4, -4), (-4, -4)])
 
 
 class MultiGoals2D_5(MultiGoals2D):
-
   def __init__(self):
     super().__init__([(-2.5, 4), (2.5, 4), (0, -4), (-4, -0.5), (4, -0.5)])
 
 
 class MGExpert:
-
   def __init__(self, env: MultiGoals2D, tolerance) -> None:
     self.PREV_LATENT = None
     self.PREV_ACTION = float("nan")
@@ -280,4 +274,4 @@ if __name__ == "__main__":
 
   # for idx in range(2, 6):
   #   traj = generate_data(cur_dir, f"MultiGoals2D_{idx}-v0", 50, False)
-  traj = generate_data(cur_dir, "MultiGoals2D_2-v0", 500, False, 1000)
+  traj = generate_data(None, "MultiGoals2D_2-v0", 5, True, 10)

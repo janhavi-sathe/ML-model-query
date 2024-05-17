@@ -610,4 +610,4 @@ if __name__ == "__main__":
 
   # traj = generate_data(cur_dir, LDExpert, "LaborDivision2", 100, False, 300)
   # traj = generate_data(None, LDExpert, "LaborDivision2", 10, False, 100)
-  traj = generate_data(None, LDExpert_V2, "LaborDivision2", 10, True, 100)
+  traj = generate_data(cur_dir, LDExpert_V2, "LaborDivision2", 100, False, 100)
