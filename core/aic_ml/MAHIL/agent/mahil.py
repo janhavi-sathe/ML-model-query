@@ -223,7 +223,10 @@ class MAHIL:
     'for compatibility with OptionIQL evaluate function'
 
     option = self.choose_mental_state(obs, prev_option, prev_aux, sample)
-    action = self.choose_policy_action(obs, option, sample, avail_actions=None)
+    action = self.choose_policy_action(obs,
+                                       option,
+                                       sample,
+                                       avail_actions=avail_actions)
     return option, action
 
   def choose_policy_action(self, obs, option, sample=False, avail_actions=None):
