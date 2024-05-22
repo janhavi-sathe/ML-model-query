@@ -35,6 +35,7 @@ multirun/
 *.csv
 *.orig
 *.mp4
+*.pt
 
 aws_data*
 data_old/

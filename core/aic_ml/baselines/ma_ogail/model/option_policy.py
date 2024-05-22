@@ -48,9 +48,11 @@ class Policy(torch.nn.Module):
       return (-((a - mean)**2) / (2 * (logstd * 2).exp()) - logstd -
               math.log(math.sqrt(2 * math.pi))).sum(dim=-1, keepdim=True)
 
-  def sample_action(self, s, fixed=False):
+  def sample_action(self, s, fixed=False, avail_actions=None):
     if self.discrete_a:
       log_pas = self.a_log_softmax(s)
+      if avail_actions is not None:
+        log_pas[avail_actions.reshape(log_pas.shape) == 0] = -1e10
       # if fixed:
       #   return log_pas.argmax(dim=-1, keepdim=True)[0]
       # else:
@@ -208,9 +210,11 @@ class OptionPolicy(torch.nn.Module):
     log_tr = self.log_trans(high_obs, ct_1)
     return log_tr.gather(dim=-1, index=ct.long())
 
-  def sample_action(self, low_obs, ct, fixed=False):
+  def sample_action(self, low_obs, ct, fixed=False, avail_actions=None):
     if self.discrete_a:
       log_pas = self.a_log_softmax(low_obs, ct)
+      if avail_actions is not None:
+        log_pas[avail_actions.reshape(log_pas.shape) == 0] = -1e10
       # if fixed:
       #   return log_pas.argmax(dim=-1, keepdim=True)[0]
       # else:

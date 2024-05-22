@@ -144,6 +144,7 @@ def learn(config: omegaconf.DictConfig,
     explore_step_cur = 0
     all_episode_rewards = {a_name: [] for a_name in env.agents}
     dict_online_trajs = {a_name: defaultdict(list) for a_name in env.agents}
+    list_wins = []
 
     for n_epi in count():
       episode_rewards = {a_name: 0 for a_name in env.agents}
@@ -164,11 +165,17 @@ def learn(config: omegaconf.DictConfig,
         joint_latents = {}
         list_actions = []
         for a_name in env.agents:
+          if "avail_actions" in infos[a_name]:
+            available_actions = np.array(infos[a_name]["avail_actions"])
+          else:
+            available_actions = None
+
           option, action = dict_agents[a_name].choose_action(
               joint_obs[a_name],
               joint_prev_lat[a_name],
               joint_prev_aux[a_name],
-              sample=True)
+              sample=True,
+              avail_actions=available_actions)
           joint_latents[a_name] = option
           joint_actions[a_name] = action
           list_actions.append(action)
@@ -214,6 +221,11 @@ def learn(config: omegaconf.DictConfig,
           dict_online_trajs[a_name][EPI_ITEM_KEYS[idx]].append(epi_item)
 
         dict_online_trajs[a_name]["lengths"].append(len(episode_tuples[a_name]))
+      if 'won' in infos[env.agents[a_name]]:
+        if infos[env.agents[a_name]]['won']:
+          list_wins.append(1)
+        else:
+          list_wins.append(0)
 
       if explore_step_cur >= n_sample:
         break
@@ -227,6 +239,7 @@ def learn(config: omegaconf.DictConfig,
     avg_epi_step = explore_step_cur / (n_epi + 1)
     logger.log_train("episode_reward", avg_return, explore_step)
     logger.log_train("episode_step", avg_epi_step, explore_step)
+    logger.log_train("win_rate", np.mean(list_wins), explore_step)
     print(f"{explore_step}: episode_reward={avg_return}, "
           f"episode_step={avg_epi_step} ; {env_name}_{run_name}")
 
@@ -252,10 +265,11 @@ def learn(config: omegaconf.DictConfig,
     if cnt_evals >= eval_interval:
       cnt_evals = 0
 
-      dict_eval_returns, eval_timesteps = evaluate(dict_agents,
-                                                   eval_env,
-                                                   config.use_auxiliary_obs,
-                                                   num_episodes=num_episodes)
+      dict_eval_returns, eval_timesteps, wins = evaluate(
+          dict_agents,
+          eval_env,
+          config.use_auxiliary_obs,
+          num_episodes=num_episodes)
       ret_sum = np.zeros_like(dict_eval_returns[env.agents[0]])
       for a_name in env.agents:
         ret_sum = ret_sum + np.array(dict_eval_returns[a_name])
@@ -266,6 +280,7 @@ def learn(config: omegaconf.DictConfig,
       mean_eval_step = np.mean(eval_timesteps)
       logger.log_eval('episode_reward', mean_ret_sum, explore_step)
       logger.log_eval('episode_step', mean_eval_step, explore_step)
+      logger.log_eval('win_rate', np.mean(wins), explore_step)
       print(f"{explore_step}[Eval]: episode_reward={mean_ret_sum}, "
             f"episode_step={mean_eval_step} ; {env_name}_{run_name}")
 

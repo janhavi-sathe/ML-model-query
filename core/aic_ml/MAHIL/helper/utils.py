@@ -216,7 +216,7 @@ def load_trajectories(expert_location: str,
   for i_agent in range(num_agents):
     each_agent = {}
     for k, v in trajs.items():
-      if k == "lengths":
+      if k == "lengths" or k == "wons":
         each_agent[k] = v
       else:
         each_agent[k] = []
@@ -240,9 +240,11 @@ def save(dict_agents, env_name, output_dir='results', suffix=""):
 def evaluate(dict_agents, env: ParallelEnv, use_auxiliary_obs, num_episodes=10):
   total_timesteps = []
   total_returns = {a_name: [] for a_name in env.agents}
+  wins = []
 
   while len(total_timesteps) < num_episodes:
     done = False
+    is_win = False
     episode_rewards = {a_name: 0 for a_name in env.agents}
     episode_step = 0
 
@@ -261,10 +263,15 @@ def evaluate(dict_agents, env: ParallelEnv, use_auxiliary_obs, num_episodes=10):
       joint_aux = {}
       for a_name in env.agents:
         agent = dict_agents[a_name]
+        if "avail_actions" in infos[a_name]:
+          available_actions = np.array(infos[a_name]["avail_actions"])
+        else:
+          available_actions = None
         latent, action = agent.choose_action(joint_obs[a_name],
                                              joint_prev_lat[a_name],
                                              joint_prev_aux[a_name],
-                                             sample=False)
+                                             sample=False,
+                                             avail_actions=available_actions)
         joint_latent[a_name] = latent
         joint_actions[a_name] = action
 
@@ -281,6 +288,9 @@ def evaluate(dict_agents, env: ParallelEnv, use_auxiliary_obs, num_episodes=10):
         if dones[a_name] or truncates[a_name]:
           done = True
 
+        if "won" in infos[a_name] and infos[a_name]["won"]:
+          is_win = True
+
       joint_obs = joint_next_obs
       joint_prev_lat = joint_latent
       joint_prev_aux = joint_aux
@@ -288,5 +298,6 @@ def evaluate(dict_agents, env: ParallelEnv, use_auxiliary_obs, num_episodes=10):
     for a_name in env.agents:
       total_returns[a_name].append(episode_rewards[a_name])
     total_timesteps.append(episode_step)
+    wins.append(int(is_win))
 
-  return total_returns, total_timesteps
+  return total_returns, total_timesteps, wins

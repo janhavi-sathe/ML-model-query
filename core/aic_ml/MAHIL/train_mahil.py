@@ -192,6 +192,7 @@ def train(config: omegaconf.DictConfig,
       for a_name in env.agents
   }  # last N rewards
   epi_step_window = deque(maxlen=eps_window)
+  epi_win_window = deque(maxlen=eps_window)
   cnt_steps = 0
 
   begin_learn = False
@@ -201,6 +202,7 @@ def train(config: omegaconf.DictConfig,
   for epoch in count():
     episode_rewards = {a_name: 0 for a_name in env.agents}
     env_done = False
+    is_win = False
 
     joint_obs, infos = env.reset()
     joint_prev_lat = {}
@@ -222,9 +224,15 @@ def train(config: omegaconf.DictConfig,
       for a_name in env.agents:
         agent = dict_agents[a_name]
         with eval_mode(agent):
+          if "avail_actions" in infos[a_name]:
+            available_actions = np.array(infos[a_name]["avail_actions"])
+          else:
+            available_actions = None
+
           action = agent.choose_policy_action(joint_obs[a_name],
                                               joint_latent[a_name],
-                                              sample=True)
+                                              sample=True,
+                                              avail_actions=available_actions)
           joint_actions[a_name] = action
 
       joint_next_obs, rewards, dones, truncates, infos = env.step(joint_actions)
@@ -257,10 +265,11 @@ def train(config: omegaconf.DictConfig,
           env_done = True
 
       if explore_steps % eval_interval == 0 and begin_learn:
-        dict_eval_returns, eval_timesteps = evaluate(dict_agents,
-                                                     eval_env,
-                                                     config.use_auxiliary_obs,
-                                                     num_episodes=num_episodes)
+        dict_eval_returns, eval_timesteps, wins = evaluate(
+            dict_agents,
+            eval_env,
+            config.use_auxiliary_obs,
+            num_episodes=num_episodes)
         ret_sum = np.zeros_like(dict_eval_returns[env.agents[0]])
         for a_name in env.agents:
           ret_sum = ret_sum + np.array(dict_eval_returns[a_name])
@@ -270,6 +279,7 @@ def train(config: omegaconf.DictConfig,
         mean_ret_sum = np.mean(ret_sum)
         logger.log('eval/episode_reward', mean_ret_sum, explore_steps)
         logger.log('eval/episode_step', np.mean(eval_timesteps), explore_steps)
+        logger.log('eval/win_rate', np.mean(wins), explore_steps)
 
         logger.dump(explore_steps, ty='eval')
 
@@ -341,6 +351,8 @@ def train(config: omegaconf.DictConfig,
                                 global_step=explore_steps)
 
       if env_done:
+        if 'won' in infos[env.agents[0]]:
+          is_win = infos[env.agents[0]]['won']
         break
 
       joint_obs = joint_next_obs
@@ -351,11 +363,13 @@ def train(config: omegaconf.DictConfig,
     for a_name in env.agents:
       dict_rewards_window[a_name].append(episode_rewards[a_name])
     epi_step_window.append(episode_step + 1)
+    epi_win_window.append(int(is_win))
     cnt_steps += episode_step + 1
     if cnt_steps >= log_interval:
       cnt_steps = 0
       logger.log('train/episode', epoch, explore_steps)
       logger.log('train/episode_step', np.mean(epi_step_window), explore_steps)
+      logger.log('train/win_rate', np.mean(epi_win_window), explore_steps)
 
       ret_sum = np.zeros_like(dict_rewards_window[env.agents[0]])
       for a_name in env.agents:

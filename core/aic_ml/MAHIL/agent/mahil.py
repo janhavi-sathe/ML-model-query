@@ -27,6 +27,7 @@ def get_tx_pi_config(config: DictConfig):
 
 
 class MAHIL:
+
   def __init__(self, config: DictConfig, obs_dim, action_dim, lat_dim,
                tup_aux_dim, discrete_obs, discrete_act, tup_discrete_aux):
     self.obs_dim = obs_dim
@@ -213,15 +214,23 @@ class MAHIL:
                                              self.pi_agent.method_div)
     return loss_1, loss_2
 
-  def choose_action(self, obs, prev_option, prev_aux, sample=False):
+  def choose_action(self,
+                    obs,
+                    prev_option,
+                    prev_aux,
+                    sample=False,
+                    avail_actions=None):
     'for compatibility with OptionIQL evaluate function'
 
     option = self.choose_mental_state(obs, prev_option, prev_aux, sample)
-    action = self.choose_policy_action(obs, option, sample)
+    action = self.choose_policy_action(obs, option, sample, avail_actions=None)
     return option, action
 
-  def choose_policy_action(self, obs, option, sample=False):
-    return self.pi_agent.choose_action((obs, ), option, sample)
+  def choose_policy_action(self, obs, option, sample=False, avail_actions=None):
+    if self.discrete_act:
+      return self.pi_agent.choose_action((obs, ), option, sample, avail_actions)
+    else:
+      return self.pi_agent.choose_action((obs, ), option, sample)
 
   def choose_mental_state(self, obs, prev_option, prev_aux, sample=False):
     batch_prev_aux_split = split_by_size(prev_aux, self.AUX_SPLIT_SIZE,

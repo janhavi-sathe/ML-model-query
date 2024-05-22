@@ -12,6 +12,7 @@ USE_TARGET = False
 
 
 class OptionSoftQ(AbstractPolicyLeaner):
+
   def __init__(self, config: DictConfig, tup_obs_dim, action_dim, option_dim,
                tup_discrete_obs, q_net_base: Type[nn.Module]):
     super().__init__(config)
@@ -66,7 +67,7 @@ class OptionSoftQ(AbstractPolicyLeaner):
   def critic_target_net(self):
     return self.target_net
 
-  def choose_action(self, tup_obs, option, sample=False):
+  def choose_action(self, tup_obs, option, sample=False, avail_actions=None):
 
     obs = self.conv_tuple_input(tup_obs, self.tup_discrete_obs,
                                 self.tup_obs_dim)
@@ -74,6 +75,8 @@ class OptionSoftQ(AbstractPolicyLeaner):
 
     with torch.no_grad():
       q = self.q_net(obs, option)
+      if avail_actions is not None:
+        q[avail_actions.reshape(q.shape) == 0] = -1e10
       dist = F.softmax(q / self.alpha, dim=-1)
       dist = Categorical(dist)
       action = dist.sample()
