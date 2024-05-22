@@ -11,7 +11,7 @@ mahil_alter_update_n_pi_tx: [10, 5]
 mahil_order_update_pi_ratio: 0.5
 # tx
 mahil_tx_activation: relu
-mahil_tx_hidden_critic: [256, 256]
+mahil_tx_hidden_critic: [128, 128]
 mahil_tx_optimizer_lr_critic: 3.e-4
 mahil_tx_method_loss: value
 mahil_tx_method_regularize: False
@@ -23,7 +23,7 @@ mahil_tx_num_critic_update: 1
 # pi
 mahil_pi_activation: relu
 # pi - Q-network
-mahil_pi_hidden_critic: [256, 256]
+mahil_pi_hidden_critic: [128, 128]
 mahil_pi_optimizer_lr_critic: 3.e-4
 mahil_pi_method_loss: value
 mahil_pi_method_regularize: True
@@ -31,7 +31,7 @@ mahil_pi_method_div: ""
 mahil_pi_num_critic_update: 1
 mahil_pi_single_critic: True
 # pi - actor
-mahil_pi_hidden_policy: [256, 256]
+mahil_pi_hidden_policy: [128, 128]
 mahil_pi_optimizer_lr_policy: 3.e-4
 mahil_pi_log_std_bounds: [-5., 2.]
 mahil_pi_num_actor_update: 1

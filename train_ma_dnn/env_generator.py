@@ -18,9 +18,9 @@ def env_generator(config):
       env_kwargs: a dictionary of kwargs for the env
   '''
   env_name = config.env_name
-  if env_name == "ma_movers":
+  if env_name == "PO_Movers-v2":
     return PO_Movers_V2, {}
-  elif env_name == "ma_flood":
+  elif env_name == "PO_Flood-v2":
     return PO_Flood_V2, {}
   elif env_name == "MultiGoals2D_2-v0":
     return ConvGymDomain, {"env_name": env_name}

@@ -9,7 +9,7 @@ from pettingzoo.utils.env import ParallelEnv
 def conv_input(batch_input, is_onehot_needed, dimension, device):
   if is_onehot_needed:
     if not isinstance(batch_input, torch.Tensor):
-      batch_input = torch.tensor(batch_input,
+      batch_input = torch.tensor(np.array(batch_input),
                                  dtype=torch.float).reshape(-1).to(device)
     else:
       batch_input = batch_input.reshape(-1)

@@ -116,7 +116,7 @@ def train(config: omegaconf.DictConfig,
   batch_size = config.mini_batch_size
   max_explore_step = config.max_explore_step
   eps_window = 10
-  num_episodes = 10
+  num_episodes = config.num_eval_episodes
   num_trajs = config.n_traj
 
   dict_config = omegaconf.OmegaConf.to_container(config,

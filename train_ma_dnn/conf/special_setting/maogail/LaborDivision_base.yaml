@@ -1,14 +1,10 @@
 # @package _global_
 
-hidden_policy: [256, 256]
-hidden_option: [256, 256]
-hidden_critic: [256, 256]
-hidden_discriminator: [256, 256]
 n_sample: 4096
 log_std_bounds: [-20, 0]
 
 n_epoch: 4000
-mini_batch_size: 64
+mini_batch_size: 256
 
 # critic
 optimizer_lr_critic: 3.e-4

@@ -21,7 +21,7 @@ from aic_domain.box_push_v2 import (conv_box_idx_2_state, conv_box_state_2_idx,
 
 
 class PO_Movers_V2(ParallelEnv):
-  metadata = {"render_modes": ["human"], "name": "ma_movers"}
+  metadata = {"render_modes": ["human"], "name": "PO_Movers-v2"}
 
   def __init__(self, render_mode=None):
     """
@@ -79,6 +79,7 @@ class PO_Movers_V2(ParallelEnv):
     }
 
   def conv_state_to_obs(self, state_idx, joint_prev_action=None):
+
     def get_is_neighboring_and_rel_pos(pos_me, pos_target):
       x = pos_target[0] - pos_me[0]
       y = pos_target[1] - pos_me[1]
@@ -245,6 +246,7 @@ class PO_Movers_V2(ParallelEnv):
 
 
 class PO_Movers_AIAgent(BoxPushAIAgent_PO_Team):
+
   def __init__(self,
                init_tup_states,
                policy_model: CachedPolicyInterface,
@@ -434,4 +436,4 @@ def generate_data(save_dir, env_name, n_traj, render):
 if __name__ == "__main__":
   cur_dir = os.path.dirname(__file__)
 
-  traj = generate_data(None, "PO_Movers-v2", 1, True)
+  traj = generate_data(cur_dir, "PO_Movers-v2", 100, False)

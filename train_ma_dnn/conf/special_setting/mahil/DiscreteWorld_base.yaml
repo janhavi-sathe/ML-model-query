@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - mahil/LaborDivision_base
+
+mahil_pi_method_div: chi
+mahil_pi_method_loss: value
+mahil_pi_method_regularize: False

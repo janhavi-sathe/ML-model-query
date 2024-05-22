@@ -2,24 +2,21 @@ import os
 import pickle
 import functools
 from collections import defaultdict
-from aic_core.models.policy import CachedPolicyInterface
 import gymnasium
 from gymnasium.spaces import Discrete, Box
 from gymnasium.utils import seeding
 import numpy as np
 from pettingzoo import ParallelEnv
 
-from aic_domain.rescue.agent import (assumed_initial_mental_distribution)
 from aic_domain.rescue.agent import AIAgent_Rescue_PartialObs
 from aic_domain.rescue.maps import MAP_RESCUE
 from aic_domain.rescue.policy import Policy_Rescue
 from aic_domain.rescue.mdp import MDP_Rescue_Agent, MDP_Rescue_Task
-from aic_domain.rescue import (Location, E_Type, Place, is_work_done, get_score,
-                               AGENT_ACTIONSPACE)
+from aic_domain.rescue import (Location, E_Type, get_score, AGENT_ACTIONSPACE)
 
 
 class PO_Flood_V2(ParallelEnv):
-  metadata = {"render_modes": ["human"], "name": "ma_flood"}
+  metadata = {"render_modes": ["human"], "name": "PO_Flood-v2"}
   SAME_LOC = "SAME_LOCATION"
 
   def __init__(self, render_mode=None):
@@ -84,6 +81,7 @@ class PO_Flood_V2(ParallelEnv):
     my_loc, my_a, fr_o, fr_loc,    fr_a, w1, w2, w3, w4
     32      6     1     n_lm + 1   6     1   1   1   1
     '''
+
     def one_hot(n, dim):
       np_oh = np.zeros(dim)
       np_oh[n] = 1
@@ -94,7 +92,6 @@ class PO_Flood_V2(ParallelEnv):
     w_state = mdp.work_states_space.idx_to_state[state_vec[2]]
 
     def get_obs(aidx):
-      aidx = 0
       fidx = 1 - aidx
 
       my_locidx = state_vec[aidx]
@@ -105,12 +102,12 @@ class PO_Flood_V2(ParallelEnv):
       # unless observed, fr_locidx and fr_a are set to 0 (like a dummy value)
       fr_locidx = 0
       fr_a = 0
-      if my_loc == fr_loc:
-        fr_o = 1
-        fr_locidx = self.dict_location_to_idx[self.SAME_LOC]
-      elif fr_loc in self.dict_location_to_idx:
+      if fr_loc in self.dict_location_to_idx:
         fr_o = 1
         fr_locidx = self.dict_location_to_idx[fr_loc]
+      elif my_loc == fr_loc:
+        fr_o = 1
+        fr_locidx = self.dict_location_to_idx[self.SAME_LOC]
 
       if fr_o == 1:
         fr_locidx = one_hot(fr_locidx, len(self.possible_locations))
@@ -228,6 +225,7 @@ class PO_Flood_V2(ParallelEnv):
 
 
 class PO_Flood_AIAgent(AIAgent_Rescue_PartialObs):
+
   def __init__(self, init_tup_states, agent_idx, policy_model,
                possible_locations) -> None:
     super().__init__(init_tup_states, agent_idx, policy_model, True)
@@ -262,7 +260,6 @@ class PO_Flood_AIAgent(AIAgent_Rescue_PartialObs):
           if asm_my_pos != asm_loc:
             asm_fr_pos = asm_loc
             break
-          print("test- same")
       return asm_my_pos, asm_fr_pos
 
     if self.agent_idx == 0:
@@ -338,7 +335,8 @@ def generate_data(save_dir, env_name, n_traj, render):
       samples.append((obs, actions, next_obs, latents, rewards, dones))
 
       for aname in env.agents:
-        agents[aname].update_mental_state(obs[aname], None, next_obs[aname])
+        if not (all(truncs.values()) or all(dones.values())):
+          agents[aname].update_mental_state(obs[aname], None, next_obs[aname])
         episode_reward[aname] += rewards[aname]
         total_reward += rewards[aname]
 
@@ -381,4 +379,4 @@ def generate_data(save_dir, env_name, n_traj, render):
 if __name__ == "__main__":
   cur_dir = os.path.dirname(__file__)
 
-  traj = generate_data(None, "PO_Flood-v2", 10, True)
+  traj = generate_data(cur_dir, "PO_Flood-v2", 100, False)

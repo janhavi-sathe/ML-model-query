@@ -1,0 +1,11 @@
+# @package _global_
+
+max_explore_step: 5e5
+n_traj: 50
+
+env_name: PO_Movers-v2
+data_path: data/PO_Movers-v2_100.pkl
+dim_c: [4, 4]
+
+log_interval: 1000
+eval_interval: 10000

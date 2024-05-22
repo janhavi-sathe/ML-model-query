@@ -30,7 +30,7 @@ def learn(config: omegaconf.DictConfig,
   max_exp_step = config.max_explore_step
   seed = config.seed
   env_name = config.env_name
-  num_episodes = 10
+  num_episodes = config.num_eval_episodes
 
   # env_type = config.env_type
   # use_pretrain = config.use_pretrain
@@ -263,8 +263,11 @@ def learn(config: omegaconf.DictConfig,
                         explore_step)
 
       mean_ret_sum = np.mean(ret_sum)
+      mean_eval_step = np.mean(eval_timesteps)
       logger.log_eval('episode_reward', mean_ret_sum, explore_step)
-      logger.log_eval('episode_step', np.mean(eval_timesteps), explore_step)
+      logger.log_eval('episode_step', mean_eval_step, explore_step)
+      print(f"{explore_step}[Eval]: episode_reward={mean_ret_sum}, "
+            f"episode_step={mean_eval_step} ; {env_name}_{run_name}")
 
       if mean_ret_sum >= best_reward:
         best_reward = mean_ret_sum

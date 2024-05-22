@@ -52,9 +52,9 @@ class Policy(torch.nn.Module):
     if self.discrete_a:
       log_pas = self.a_log_softmax(s)
       if fixed:
-        return log_pas.argmax(dim=-1, keepdim=True)
+        return log_pas.argmax(dim=-1, keepdim=True)[0]
       else:
-        return F.gumbel_softmax(log_pas, hard=False).multinomial(1).long()
+        return F.gumbel_softmax(log_pas, hard=False).multinomial(1).long()[0]
     else:
       action_mean, action_log_std = self.a_mean_logstd(s)
       if fixed:
@@ -212,9 +212,9 @@ class OptionPolicy(torch.nn.Module):
     if self.discrete_a:
       log_pas = self.a_log_softmax(low_obs, ct)
       if fixed:
-        return log_pas.argmax(dim=-1, keepdim=True)
+        return log_pas.argmax(dim=-1, keepdim=True)[0]
       else:
-        return F.gumbel_softmax(log_pas, hard=False).multinomial(1).long()
+        return F.gumbel_softmax(log_pas, hard=False).multinomial(1).long()[0]
     else:
       action_mean, action_log_std = self.a_mean_logstd(low_obs, ct)
       if fixed:
