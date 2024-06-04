@@ -298,11 +298,12 @@ class ThreeTargetDyadLaborDivision(DyadLaborDivision):
 
 class LDExpert:
 
-  def __init__(self, env, tolerance) -> None:
+  def __init__(self, env, tolerance, name) -> None:
     self.PREV_LATENT = None
     self.env = env
     self.n_agents = len(env.possible_agents)
     self.np_targets = env.np_targets
+    self.name = name
 
   def choose_mental_state(self, obs, prev_latent, sample=False):
     # NOTE:
@@ -324,7 +325,7 @@ class LDExpert:
     #     --> friend go to other target --> maintain my target
     #     --> friend go to my target --> i change target only if i am further.
 
-    if prev_latent is self.PREV_LATENT:
+    if prev_latent == self.PREV_LATENT:
       return np.random.choice(range(len(self.np_targets)))
 
     pos = obs[0:2]
@@ -480,7 +481,7 @@ class LDExpert:
 class LDExpert_V2(LDExpert):
 
   def choose_mental_state(self, obs, prev_latent, sample=False):
-    if prev_latent is self.PREV_LATENT:
+    if prev_latent == self.PREV_LATENT:
       return np.random.choice(range(len(self.np_targets)))
 
     pos = obs[0:2]
@@ -544,7 +545,7 @@ def generate_data(save_dir,
 
   env.set_render_delay(render_delay)
   agents = {
-      aname: expert_class(env, env.tolerance)
+      aname: expert_class(env, env.tolerance, aname)
       for aname in env.possible_agents
   }
 
@@ -615,5 +616,5 @@ if __name__ == "__main__":
 
   # traj = generate_data(cur_dir, LDExpert, "LaborDivision2", 100, False, 300)
   # traj = generate_data(None, LDExpert, "LaborDivision2", 10, False, 100)
-  traj = generate_data(None, LDExpert_V2, "LaborDivision2", 100, False, 100)
-  traj = generate_data(None, LDExpert_V2, "LaborDivision3", 100, False, 100)
+  traj = generate_data(None, LDExpert_V2, "LaborDivision2", 100, True, 100)
+  # traj = generate_data(None, LDExpert_V2, "LaborDivision3", 100, False, 100)

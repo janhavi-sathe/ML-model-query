@@ -33,6 +33,11 @@ def run_alg(config):
   log_dir, output_dir = get_dirs(config.base_dir, alg_name, config.env_name,
                                  msg)
   pretrain_name = os.path.join(config.base_dir, config.pretrain_path)
+
+  # fix dim_c to 1 for independent iql
+  if alg_name == "iiql":
+    config.dim_c = [1] * len(config.dim_c)
+
   # save config
   config_path = os.path.join(log_dir, "config.yaml")
   with open(config_path, "w") as outfile:
@@ -46,7 +51,7 @@ def run_alg(config):
 
   fn_env_factory, env_kwargs = envgen.env_generator(config)
 
-  if alg_name == "mahil":
+  if alg_name == "mahil" or alg_name == "iiql":
     from aic_ml.MAHIL.train_mahil import train
     train(config, demo_path, log_dir, output_dir, fn_env_factory, log_interval,
           eval_interval, env_kwargs)
