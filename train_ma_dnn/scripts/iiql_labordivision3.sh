@@ -1,4 +1,4 @@
-env="LaborDivision3"
+env="LaborDivision3-v2"
 base="LaborDivision_base"
 alg="iiql"
 

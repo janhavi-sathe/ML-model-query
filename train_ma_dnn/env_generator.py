@@ -2,6 +2,8 @@ from pettingzoo_domain.po_movers_v2 import PO_Movers_V2
 from pettingzoo_domain.po_flood_v2 import PO_Flood_V2
 from pettingzoo_domain.labor_division import (TwoTargetDyadLaborDivision,
                                               ThreeTargetDyadLaborDivision)
+from pettingzoo_domain.labor_division_v2 import (TwoTargetDyadLaborDivisionV2,
+                                                 ThreeTargetDyadLaborDivisionV2)
 from pettingzoo.mpe import (simple_crypto_v3, simple_push_v3,
                             simple_adversary_v3, simple_speaker_listener_v4,
                             simple_spread_v3, simple_tag_v3)
@@ -33,6 +35,10 @@ def env_generator(config):
     return TwoTargetDyadLaborDivision, {}
   elif env_name == "LaborDivision3":
     return ThreeTargetDyadLaborDivision, {}
+  elif env_name == "LaborDivision2-v2":
+    return TwoTargetDyadLaborDivisionV2, {}
+  elif env_name == "LaborDivision3-v2":
+    return ThreeTargetDyadLaborDivisionV2, {}
   # Multi Particle Environments (MPE)
   elif env_name == "simple_crypto":
     kwargs = {"continuous_actions": False}

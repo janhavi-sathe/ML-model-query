@@ -306,6 +306,17 @@ class LDExpert:
     self.np_targets = env.np_targets
     self.name = name
 
+  def conv_obs(self, obs):
+    pos = obs[0:2]
+    act = obs[2:4]
+    progressing = obs[4]
+
+    # let's think about only dyad setting
+    observed = obs[5]
+    rel_pos = obs[6:8]
+    act_fr = obs[8:10]
+    return pos, act, progressing, observed, rel_pos, act_fr
+
   def choose_mental_state(self, obs, prev_latent, sample=False):
     # NOTE:
     # near target / progressing
@@ -329,14 +340,7 @@ class LDExpert:
     if prev_latent == self.PREV_LATENT:
       return np.random.choice(range(len(self.np_targets)))
 
-    pos = obs[0:2]
-    act = obs[2:4]
-    progressing = obs[4]
-
-    # let's think about only dyad setting
-    observed = obs[5]
-    rel_pos = obs[6:8]
-    act_fr = obs[8:10]
+    pos, act, progressing, observed, rel_pos, act_fr = self.conv_obs(obs)
 
     # find the closest target
     clst_tidx = -1
@@ -442,12 +446,8 @@ class LDExpert:
               return prev_latent
 
   def choose_policy_action(self, obs, latent, sample=False):
-    pos = obs[0:2]
 
-    # let's think about only dyad setting
-    observed = obs[5]
-    rel_pos = obs[6:8]
-    act_fr = obs[8:10]
+    pos, act, progressing, observed, rel_pos, act_fr = self.conv_obs(obs)
 
     pos_fr = pos + rel_pos
     # if friend is near the target while im not --> wait with some distance
@@ -490,14 +490,7 @@ class LDExpert_V2(LDExpert):
     if prev_latent == self.PREV_LATENT:
       return np.random.choice(range(len(self.np_targets)))
 
-    pos = obs[0:2]
-    act = obs[2:4]
-    progressing = obs[4]
-
-    # let's think about only dyad setting
-    observed = obs[5]
-    rel_pos = obs[6:8]
-    act_fr = obs[8:10]
+    pos, act, progressing, observed, rel_pos, act_fr = self.conv_obs(obs)
 
     # find the closest target
     clst_tidx = -1

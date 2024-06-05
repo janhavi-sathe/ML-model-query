@@ -1,4 +1,4 @@
-env="LaborDivision2"
+env="LaborDivision2-v2"
 base="LaborDivision_base"
 alg="mahil"
 
