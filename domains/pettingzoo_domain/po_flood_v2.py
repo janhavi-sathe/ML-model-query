@@ -230,6 +230,21 @@ class PO_Flood_AIAgent(AIAgent_Rescue_PartialObs):
                possible_locations) -> None:
     super().__init__(init_tup_states, agent_idx, policy_model, True)
     self.possible_locations = possible_locations
+    self.PREV_LATENT = None
+    self.PREV_AUX = None
+
+  def choose_action(self, obs, prev_latent, sample=False, **kwargs):
+    if prev_latent == self.PREV_LATENT:
+      self.init_latent(obs)
+    else:
+      self.update_mental_state(None, None, obs)
+
+    latent = self.get_current_latent()
+    action = self.get_action(obs)
+
+    latent_idx = self.conv_latent_to_idx(latent)
+    action_idx = self.conv_action_to_idx((action, ))[0]
+    return latent_idx, action_idx
 
   # replace virtual functions
   def observed_states(self, obs):

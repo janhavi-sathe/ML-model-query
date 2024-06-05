@@ -300,6 +300,7 @@ class LDExpert:
 
   def __init__(self, env, tolerance, name) -> None:
     self.PREV_LATENT = None
+    self.PREV_AUX = None  # for compatibility with MAHIL agent
     self.env = env
     self.n_agents = len(env.possible_agents)
     self.np_targets = env.np_targets
@@ -476,6 +477,11 @@ class LDExpert:
         vec_dir /= len_dir
 
       return vec_dir
+
+  def choose_action(self, obs, prev_latent, sample=False, **kwargs):
+    option = self.choose_mental_state(obs, prev_latent, sample)
+    action = self.choose_policy_action(obs, option, sample)
+    return option, action
 
 
 class LDExpert_V2(LDExpert):

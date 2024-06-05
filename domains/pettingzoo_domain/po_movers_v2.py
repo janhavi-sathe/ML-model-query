@@ -254,6 +254,21 @@ class PO_Movers_AIAgent(BoxPushAIAgent_PO_Team):
                agent_idx: int = 0) -> None:
     super().__init__(init_tup_states, policy_model, True, agent_idx)
     self.possible_box_state = possible_box_state
+    self.PREV_LATENT = None
+    self.PREV_AUX = None
+
+  def choose_action(self, obs, prev_latent, sample=False, **kwargs):
+    if prev_latent == self.PREV_LATENT:
+      self.init_latent(obs)
+    else:
+      self.update_mental_state(None, None, obs)
+
+    latent = self.get_current_latent()
+    action = self.get_action(obs)
+
+    latent_idx = self.conv_latent_to_idx(latent)
+    action_idx = self.conv_action_to_idx((action, ))[0]
+    return latent_idx, action_idx
 
   # replace virtual functions
   def observed_states(self, obs):
