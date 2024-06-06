@@ -159,7 +159,7 @@ def train_bc(config, demo_path, log_dir, output_dir, cb_env_factory,
            rng=np.random.default_rng(seed),
            demonstrations=list_transitions[aname],
            custom_logger=bc_logger,
-           device="cpu",
+           device="auto",
            batch_size=config.mini_batch_size,
            optimizer_cls=torch.optim.Adam,
            optimizer_kwargs={'lr': config.optimizer_lr_policy}))
