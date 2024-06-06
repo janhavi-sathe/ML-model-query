@@ -9,7 +9,8 @@ import functools
 from omegaconf import OmegaConf, DictConfig
 from onpolicy.algorithms.r_mappo.algorithm.r_actor_critic import R_Actor
 from collections import defaultdict
-from gym.spaces import Box
+from gymnasium.spaces import Box, Discrete
+# from gym.spaces import Box
 
 
 def parse_smacv2_distribution(n_allies, n_enemies, map_name):
@@ -63,7 +64,9 @@ class SMAC_V2(ParallelEnv):
     for size in self.env.observation_space:
       self.observation_spaces.append(
           Box(low=-np.ones(size[0]), high=np.ones(size[0])))
-    self.action_spaces = self.env.action_space
+    self.action_spaces = []
+    for aspace in self.env.action_space:
+      self.action_spaces.append(Discrete(aspace.n))
 
   @functools.lru_cache(maxsize=None)
   def observation_space(self, agent):

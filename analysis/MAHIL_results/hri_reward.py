@@ -68,7 +68,7 @@ def compute_hri_reward(env_name, alg_name, learnt_agent_idx, supervision,
 
 if __name__ == "__main__":
   env_names = [
-      "LaborDivision3", "LaborDivision2", "PO_Movers-v2", "PO_Flood-v2"
+      "LaborDivision3-v2", "LaborDivision2-v2", "PO_Movers-v2", "PO_Flood-v2"
   ]
   alg_supervision = [("iiql", 0.0), ("mahil", 0.0), ("mahil", 0.2),
                      ("magail", 0.0), ("maogail", 0.0), ("maogail", 0.2)]
@@ -100,5 +100,5 @@ if __name__ == "__main__":
   df = pd.DataFrame(list_results, columns=columns)
 
   cur_dir = os.path.dirname(__file__)
-  save_name = os.path.join(cur_dir, "hri_reward.csv")
+  save_name = os.path.join(cur_dir, "hri_reward_2.csv")
   df.to_csv(save_name, index=False)

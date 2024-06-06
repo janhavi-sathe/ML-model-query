@@ -64,6 +64,10 @@ def run_alg(config):
     learn(config, False, demo_path, log_dir, output_dir, fn_env_factory,
           pretrain_name, eval_interval, env_kwargs)
   # add (multi-agent) bc
+  elif alg_name == "bc":
+    import train_bc
+    train_bc.train_bc(config, demo_path, log_dir, output_dir, fn_env_factory,
+                      log_interval, eval_interval, env_kwargs)
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")

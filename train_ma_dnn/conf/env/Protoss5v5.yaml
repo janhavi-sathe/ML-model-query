@@ -6,6 +6,3 @@ n_traj: 100
 env_name: Protoss5v5
 data_path: data/Protoss5v5_100.pkl
 dim_c: [3, 3, 3, 3, 3]
-
-log_interval: 1000
-eval_interval: 10000

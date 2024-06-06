@@ -239,6 +239,80 @@ def load_agent(env_name, alg_name, aname, sv, number):
         raise ValueError(f"Supervision {sv} is not supported")
     else:
       raise ValueError(f"Algorithm {alg_name} is not supported")
+  elif env_name == "LaborDivision2-v2":
+    # iiql
+    if alg_name == "iiql":
+      list_log_dir.append("iiql/Seed1/2024-06-05_08-56-35")
+      list_log_dir.append("iiql/Seed2/2024-06-05_11-23-35")
+      list_log_dir.append("iiql/Seed3/2024-06-05_13-30-15")
+    # mahil
+    elif alg_name == "mahil":
+      if sv == 0.0:
+        list_log_dir.append("mahil/Seed1Sv0.0/2024-06-05_09-00-51")
+        list_log_dir.append("mahil/Seed2Sv0.0/2024-06-05_11-40-02")
+        list_log_dir.append("mahil/Seed3Sv0.0/2024-06-05_13-52-37")
+      elif sv == 0.2:
+        list_log_dir.append("mahil/Seed1Sv0.2/2024-06-05_09-01-10")
+        list_log_dir.append("mahil/Seed2Sv0.2/2024-06-05_11-39-17")
+        list_log_dir.append("mahil/Seed3Sv0.2/2024-06-05_13-52-12")
+      else:
+        raise ValueError(f"Supervision {sv} is not supported")
+    # magail
+    elif alg_name == "magail":
+      list_log_dir.append("magail/Seed1/2024-06-05_08-59-58")
+      list_log_dir.append("magail/Seed2/2024-06-05_09-40-12")
+      list_log_dir.append("magail/Seed3/2024-06-05_10-21-07")
+    # maogail
+    elif alg_name == "maogail":
+      if sv == 0.0:
+        list_log_dir.append("maogail/Seed1Sv0.0/2024-06-05_09-02-09")
+        list_log_dir.append("maogail/Seed2Sv0.0/2024-06-05_10-28-22")
+        list_log_dir.append("maogail/Seed3Sv0.0/2024-06-05_11-53-45")
+      elif sv == 0.2:
+        list_log_dir.append("maogail/Seed1Sv0.2/2024-06-05_09-02-26")
+        list_log_dir.append("maogail/Seed2Sv0.2/2024-06-05_10-28-44")
+        list_log_dir.append("maogail/Seed3Sv0.2/2024-06-05_11-54-17")
+      else:
+        raise ValueError(f"Supervision {sv} is not supported")
+    else:
+      raise ValueError(f"Algorithm {alg_name} is not supported")
+  elif env_name == "LaborDivision3-v2":
+    # iiql
+    if alg_name == "iiql":
+      list_log_dir.append("iiql/Seed1/2024-06-05_08-59-33")
+      list_log_dir.append("iiql/Seed2/2024-06-05_11-32-16")
+      list_log_dir.append("iiql/Seed3/2024-06-05_13-38-38")
+    # mahil
+    elif alg_name == "mahil":
+      if sv == 0.0:
+        list_log_dir.append("mahil/Seed1Sv0.0/2024-06-05_09-01-27")
+        list_log_dir.append("mahil/Seed2Sv0.0/2024-06-05_11-46-11")
+        list_log_dir.append("mahil/Seed3Sv0.0/2024-06-05_14-05-35")
+      elif sv == 0.2:
+        list_log_dir.append("mahil/Seed1Sv0.2/2024-06-05_09-01-41")
+        list_log_dir.append("mahil/Seed2Sv0.2/2024-06-05_11-45-14")
+        list_log_dir.append("mahil/Seed3Sv0.2/2024-06-05_14-04-14")
+      else:
+        raise ValueError(f"Supervision {sv} is not supported")
+    # magail
+    elif alg_name == "magail":
+      list_log_dir.append("magail/Seed1/2024-06-05_09-00-27")
+      list_log_dir.append("magail/Seed2/2024-06-05_09-41-10")
+      list_log_dir.append("magail/Seed3/2024-06-05_10-22-05")
+    # maogail
+    elif alg_name == "maogail":
+      if sv == 0.0:
+        list_log_dir.append("maogail/Seed1Sv0.0/2024-06-05_09-02-46")
+        list_log_dir.append("maogail/Seed2Sv0.0/2024-06-05_10-40-41")
+        list_log_dir.append("maogail/Seed3Sv0.0/2024-06-05_12-18-46")
+      elif sv == 0.2:
+        list_log_dir.append("maogail/Seed1Sv0.2/2024-06-05_09-03-09")
+        list_log_dir.append("maogail/Seed2Sv0.2/2024-06-05_10-41-10")
+        list_log_dir.append("maogail/Seed3Sv0.2/2024-06-05_12-20-25")
+      else:
+        raise ValueError(f"Supervision {sv} is not supported")
+    else:
+      raise ValueError(f"Algorithm {alg_name} is not supported")
   else:
     raise ValueError(f"{env_name} is not supported")
 
