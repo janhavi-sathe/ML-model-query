@@ -17,6 +17,7 @@ from aic_domain.rescue.mdp import MDP_Rescue_Agent, MDP_Rescue_Task
 
 from aic_ml.baselines.ma_ogail.model.agent import make_agent
 from aic_ml.MAHIL.agent import make_mahil_agent
+import bc_loader
 
 
 def load_env(env_name):
@@ -126,6 +127,10 @@ def load_agent(env_name, alg_name, aname, sv, number):
         list_log_dir.append("maogail/tr2Seed3Sv0.2/2024-05-22_09-10-09")
       else:
         raise ValueError(f"Supervision {sv} is not supported")
+    elif alg_name == "bc":
+      list_log_dir.append("bc/Seed1/2024-06-06_01-38-46")
+      list_log_dir.append("bc/Seed2/2024-06-06_01-44-27")
+      list_log_dir.append("bc/Seed3/2024-06-06_01-50-05")
     else:
       raise ValueError(f"Algorithm {alg_name} is not supported")
   elif env_name == "PO_Movers-v2":
@@ -163,6 +168,10 @@ def load_agent(env_name, alg_name, aname, sv, number):
         list_log_dir.append("maogail/Seed3Sv0.2/2024-05-22_08-06-09")
       else:
         raise ValueError(f"Supervision {sv} is not supported")
+    elif alg_name == "bc":
+      list_log_dir.append("bc/Seed1/2024-06-06_01-38-52")
+      list_log_dir.append("bc/Seed2/2024-06-06_01-45-24")
+      list_log_dir.append("bc/Seed3/2024-06-06_01-51-53")
     else:
       raise ValueError(f"Algorithm {alg_name} is not supported")
   elif env_name == "LaborDivision2":
@@ -274,6 +283,13 @@ def load_agent(env_name, alg_name, aname, sv, number):
         list_log_dir.append("maogail/Seed3Sv0.2/2024-06-05_11-54-17")
       else:
         raise ValueError(f"Supervision {sv} is not supported")
+    elif alg_name == "bc":
+      list_log_dir.append("bc/reSeed1/2024-06-06_14-46-58")
+      list_log_dir.append("bc/reSeed2/2024-06-06_14-49-47")
+      list_log_dir.append("bc/reSeed3/2024-06-06_14-52-38")
+      # list_log_dir.append("bc/Seed1/2024-06-06_01-38-03")
+      # list_log_dir.append("bc/Seed2/2024-06-06_01-44-02")
+      # list_log_dir.append("bc/Seed3/2024-06-06_01-50-05")
     else:
       raise ValueError(f"Algorithm {alg_name} is not supported")
   elif env_name == "LaborDivision3-v2":
@@ -311,6 +327,13 @@ def load_agent(env_name, alg_name, aname, sv, number):
         list_log_dir.append("maogail/Seed3Sv0.2/2024-06-05_12-20-25")
       else:
         raise ValueError(f"Supervision {sv} is not supported")
+    elif alg_name == "bc":
+      list_log_dir.append("bc/reSeed1/2024-06-06_14-47-52")
+      list_log_dir.append("bc/reSeed2/2024-06-06_14-50-42")
+      list_log_dir.append("bc/reSeed3/2024-06-06_14-53-35")
+      # list_log_dir.append("bc/Seed1/2024-06-06_01-38-41")
+      # list_log_dir.append("bc/Seed2/2024-06-06_01-44-48")
+      # list_log_dir.append("bc/Seed3/2024-06-06_01-50-53")
     else:
       raise ValueError(f"Algorithm {alg_name} is not supported")
   else:
@@ -335,6 +358,8 @@ def load_agent(env_name, alg_name, aname, sv, number):
     agent = make_agent(config, env, aname, False)
   elif alg_name == "maogail":
     agent = make_agent(config, env, aname, True)
+  elif alg_name == "bc":
+    agent = bc_loader.load_bc_agent(config, env, aname, model_path)
   else:
     raise ValueError(f"Algorithm {alg_name} is not supported")
   agent.load(model_path)

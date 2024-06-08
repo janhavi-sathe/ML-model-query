@@ -70,7 +70,7 @@ if __name__ == "__main__":
   env_names = [
       "LaborDivision3-v2", "LaborDivision2-v2", "PO_Movers-v2", "PO_Flood-v2"
   ]
-  alg_supervision = [("iiql", 0.0), ("mahil", 0.0), ("mahil", 0.2),
+  alg_supervision = [("bc", 0.0), ("iiql", 0.0), ("mahil", 0.0), ("mahil", 0.2),
                      ("magail", 0.0), ("maogail", 0.0), ("maogail", 0.2)]
   learnt_agent_idx = [0, 1]
   model_number = [1, 2, 3]
@@ -100,5 +100,5 @@ if __name__ == "__main__":
   df = pd.DataFrame(list_results, columns=columns)
 
   cur_dir = os.path.dirname(__file__)
-  save_name = os.path.join(cur_dir, "hri_reward_2.csv")
+  save_name = os.path.join(cur_dir, "hri_reward_4.csv")
   df.to_csv(save_name, index=False)
