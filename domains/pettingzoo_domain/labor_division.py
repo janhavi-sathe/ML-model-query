@@ -57,6 +57,20 @@ class LaborDivision(ParallelEnv):
     self.unit_scr_sz = 30
     self.delay = 10
 
+    curdir = os.path.dirname(__file__)
+    img_location = cv2.imread(curdir + '/images/conveyor.png',
+                              cv2.IMREAD_UNCHANGED)[:, :, :3]
+    img_man = cv2.imread(curdir + '/images/man.png',
+                         cv2.IMREAD_UNCHANGED)[:, :, :3]
+    img_woman = cv2.imread(curdir + '/images/woman.png',
+                           cv2.IMREAD_UNCHANGED)[:, :, :3]
+
+    self.img_location = cv2.resize(img_location, (50, 50))
+    self.img_agents = [
+        cv2.resize(img_man, (30, 40)),
+        cv2.resize(img_woman, (30, 40))
+    ]
+
   @functools.lru_cache(maxsize=None)
   def observation_space(self, agent):
     # gymnasium spaces are defined and documented here:
@@ -86,9 +100,15 @@ class LaborDivision(ParallelEnv):
     canvas_new = np.copy(canvas)
     for idx, target in enumerate(self.np_targets):
       target_pt = self.env_pt_2_scr_pt(target)
-      color = (255, 0, 0)
-      canvas_new = cv2.circle(canvas_new, target_pt,
-                              int(self.tolerance * self.unit_scr_sz), color, -1)
+
+      x_p = int(target_pt[0] - self.img_location.shape[1] / 2)
+      y_p = int(target_pt[1] - self.img_location.shape[0] / 2)
+      canvas_new[y_p:y_p + self.img_location.shape[0],
+                 x_p:x_p + self.img_location.shape[1]] = self.img_location
+
+      # color = (255, 0, 0)
+      # canvas_new = cv2.circle(canvas_new, target_pt,
+      #                         int(self.tolerance * self.unit_scr_sz), color, -1)
 
     return canvas_new
 
@@ -96,12 +116,18 @@ class LaborDivision(ParallelEnv):
     cnvs_sz = self.unit_scr_sz * (self.world_high - self.world_low)
     canvas = np.ones((*cnvs_sz, 3), dtype=np.uint8) * 255
     canvas = self._draw_background(canvas)
-    colors = [(0, 0, 255), (0, 255, 0), (255, 255, 0)]
+    colors = [(0, 0, 255), (255, 0, 0), (255, 255, 0)]
     for aidx, agent in enumerate(self.possible_agents):
       pos = self.dict_agent_pos[agent]
       pos_pt = self.env_pt_2_scr_pt(pos)
+
+      x_p = int(pos_pt[0] - self.img_agents[aidx].shape[1] / 2)
+      y_p = int(pos_pt[1] - self.img_agents[aidx].shape[0] / 2)
+      canvas[y_p:y_p + self.img_agents[aidx].shape[0],
+             x_p:x_p + self.img_agents[aidx].shape[1]] = self.img_agents[aidx]
+
       color = colors[aidx]
-      canvas = cv2.circle(canvas, pos_pt, 10, color, -1)
+      # canvas = cv2.circle(canvas, pos_pt, 10, color, -1)
       canvas = cv2.circle(canvas, pos_pt, int(self.vis_rad * self.unit_scr_sz),
                           color, 1)
 
@@ -615,5 +641,5 @@ if __name__ == "__main__":
 
   # traj = generate_data(cur_dir, LDExpert, "LaborDivision2", 100, False, 300)
   # traj = generate_data(None, LDExpert, "LaborDivision2", 10, False, 100)
-  traj = generate_data(None, LDExpert_V2, "LaborDivision2", 100, True, 100)
-  # traj = generate_data(None, LDExpert_V2, "LaborDivision3", 100, False, 100)
+  # traj = generate_data(None, LDExpert_V2, "LaborDivision2", 100, True, 100)
+  traj = generate_data(None, LDExpert_V2, "LaborDivision3", 100, True, 100)

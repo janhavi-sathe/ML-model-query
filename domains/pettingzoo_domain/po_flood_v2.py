@@ -45,7 +45,7 @@ class PO_Flood_V2(ParallelEnv):
 
   def _init_obs_act_spaces(self):
     '''
-    n_lm: num accessible landmarks = 5
+    n_lm: num accessible landmarks = 6
     my_loc, my_a, fr_o, fr_loc,    fr_a, w1, w2, w3, w4
     32      6     1     n_lm + 1   6     1   1   1   1
     '''

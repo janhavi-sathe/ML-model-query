@@ -11,7 +11,7 @@ from pettingzoo_domain.conv_gym_domain import ConvGymDomain
 import gym
 from stable_baselines3.common.monitor import Monitor
 import gym_custom
-import sc2_env
+import pettingzoo_domain.sc2_env as sc2_env
 
 
 def env_generator(config):

@@ -170,6 +170,6 @@ if __name__ == "__main__":
   cur_dir = os.path.dirname(__file__)
 
   # traj = generate_data(cur_dir, LDv2Expert, "LaborDivision2-v2", 100, False, 10)
-  traj = generate_data(cur_dir, LDv2Expert, "LaborDivision3-v2", 50, False, 10)
-  # traj = generate_data(None, LDv2Expert, "LaborDivision2-v2", 50, True, 100)
-  # traj = generate_data(None, LDv2Expert, "LaborDivision3-v2", 50, True, 100)
+  # traj = generate_data(cur_dir, LDv2Expert, "LaborDivision3-v2", 50, False, 10)
+  traj = generate_data(None, LDv2Expert, "LaborDivision2-v2", 1, True, 5000)
+  # traj = generate_data(None, LDv2Expert, "LaborDivision3-v2", 50, True, 1000)

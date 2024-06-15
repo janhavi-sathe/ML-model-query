@@ -124,6 +124,9 @@ class SMAC_V2(ParallelEnv):
     return np.array(obs), np.array(rewards).reshape(
         -1), dones, truncs, new_infos
 
+  def save_replay(self):
+    self.env.save_replay()
+
 
 class Protoss5v5(SMAC_V2):
 
@@ -269,5 +272,5 @@ if __name__ == "__main__":
 
   # traj = generate_data(cur_dir, LDExpert, "LaborDivision2", 100, False, 300)
   # traj = generate_data(None, LDExpert, "LaborDivision2", 10, False, 100)
-  traj = generate_data(cur_dir, "Protoss5v5", 100)
+  # traj = generate_data(cur_dir, "Protoss5v5", 100)
   traj = generate_data(cur_dir, "Terran5v5", 100)

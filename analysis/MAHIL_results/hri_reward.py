@@ -20,10 +20,16 @@ def run_env(env: ParallelEnv, dict_agents, num_episodes, max_steps, seed):
       jo_action = {}
       for a_name in env.agents:
         agent = dict_agents[a_name]
+        if "avail_actions" in infos[a_name]:
+          available_actions = np.array(infos[a_name]["avail_actions"])
+        else:
+          available_actions = None
+
         latent, action = agent.choose_action(jo_obs[a_name],
                                              jo_p_lat[a_name],
                                              prev_aux=dummy_aux[a_name],
-                                             sample=False)
+                                             sample=False,
+                                             avail_actions=available_actions)
         jo_lat[a_name] = latent
         jo_action[a_name] = action
 
