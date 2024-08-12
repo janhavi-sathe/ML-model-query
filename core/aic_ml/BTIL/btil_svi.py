@@ -274,10 +274,10 @@ class BTIL_SVI:
         tp = t - 1
         state_p, joint_a_p, _ = traj[tp]
         state, joint_a, _ = traj[t]
-        tx_index = (slice(None), *joint_a_p, state, slice(None))
         for idx_a in range(self.num_agents):
           q_xx = list_q_xx[idx_a]
           q_x = list_q_x[idx_a]
+          tx_index = self.list_Tx[idx_a].get_index(state_p, joint_a_p, state)
           list_param_tx_hat[idx_a][tx_index] += q_xx[tp]
           list_param_pi_hat[idx_a][:, state, joint_a[idx_a]] += q_x[t]
 
