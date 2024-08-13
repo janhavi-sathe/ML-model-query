@@ -3,6 +3,7 @@ import os
 import numpy as np
 import itertools
 import pickle
+import click
 from aic_core.utils.mdp_utils import StateSpace
 from aic_domain.box_push_v2 import AGENT_ACTIONSPACE as MOVERS_ACTIONSPACE
 from aic_domain.rescue import AGENT_ACTIONSPACE as FLOOD_ACTIONSPACE
@@ -278,8 +279,11 @@ class Converter_PO_Flood(Converter_for_BTIL):
     return obs
 
 
-if __name__ == "__main__":
-  env_name = "PO_Flood-v2"
+@click.command()
+@click.option("--env-name", type=str, default="PO_Movers-v2")
+@click.option("--seed", type=int, default=1)
+def main(env_name, seed):
+  print(f"Running BTIL for {env_name} with seed {seed}")
 
   if env_name == "PO_Movers-v2":
     converter = Converter_PO_Movers()
@@ -288,7 +292,6 @@ if __name__ == "__main__":
   else:
     raise NotImplementedError()
 
-  seed = 0
   num_trajs = 50
   supervision = 0.2
   n_labeled = int(num_trajs * supervision)
@@ -296,7 +299,6 @@ if __name__ == "__main__":
   data_path = os.path.join(cur_dir, f"data/{env_name}_100.pkl")
 
   list_expert_trajs = load_trajectories(data_path, num_trajs, seed + 42)
-
   btil_trajs = converter.convert_trajectories(list_expert_trajs, n_labeled)
 
   # use btil
@@ -331,3 +333,7 @@ if __name__ == "__main__":
     bx_file_name = env_name + "_btil_svi_bx"
     bx_file_name = os.path.join(save_dir, bx_file_name)
     np.save(bx_file_name + f"_a{i_a + 1}_s{seed}", btil_models.list_bx[0])
+
+
+if __name__ == "__main__":
+  main()
