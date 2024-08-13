@@ -36,6 +36,10 @@ class Converter_for_BTIL(abc.ABC):
   def convert_obs_2_sidx(self, obs):
     pass
 
+  @abc.abstractmethod
+  def convert_sidx_2_obs(self, sidx):
+    pass
+
   def init_statespace_helper_vars(self):
 
     # Retrieve number of states and state factors.
@@ -63,7 +67,7 @@ class Converter_for_BTIL(abc.ABC):
       np_idx_to_state[idx] = state
     self.np_idx_to_state = np_idx_to_state
 
-  def convert_trajectories(self, trajectories, n_labeled):
+  def convert_trajectories(self, trajectories, n_labeled=None):
 
     btil_trajs = []
     for each_agent_trajs in trajectories:
@@ -84,7 +88,7 @@ class Converter_for_BTIL(abc.ABC):
           act = each_agent_trajs["actions"][i_e][i_t]
           btil_actions.append((act, ))
 
-          if i_e < n_labeled:
+          if n_labeled is None or i_e < n_labeled:
             lat = each_agent_trajs["latents"][i_e][i_t]
             btil_latents.append((lat, ))
           else:
@@ -313,7 +317,7 @@ def main(env_name, seed):
                            converter.num_states, (4, ), (6, ),
                            (False, False, True),
                            500,
-                           epsilon=0.01,
+                           epsilon=0.1,
                            lr=1,
                            decay=0,
                            no_gem=True)
