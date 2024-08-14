@@ -1,4 +1,5 @@
 import os
+import random
 from typing import Type
 import pickle
 import functools
@@ -149,7 +150,9 @@ class LaborDivision(ParallelEnv):
     pass
 
   def _seed(self, seed=None):
-    self.np_random, seed = seeding.np_random(seed)
+    # self.np_random, seed = seeding.np_random(seed)
+    np.random.seed(seed)
+    random.seed(seed)
 
   def _closest_target(self, agent):
     tidx = -1
@@ -236,11 +239,14 @@ class LaborDivision(ParallelEnv):
     self.cur_step = 0
 
     margin = 0.5
-    self.dict_agent_pos = {
-        aname: np.random.uniform(self.world_low + margin,
-                                 self.world_high - margin)
-        for aname in range(n_agents)
-    }
+    if options is not None:
+      self.dict_agent_pos = options
+    else:
+      self.dict_agent_pos = {
+          aname:
+          np.random.uniform(self.world_low + margin, self.world_high - margin)
+          for aname in range(n_agents)
+      }
     self.target_status = np.zeros((len(self.np_targets), n_agents))
 
     actions = {agent: np.zeros(2) for agent in self.agents}
@@ -343,7 +349,7 @@ class LDExpert:
     act_fr = obs[8:10]
     return pos, act, progressing, observed, rel_pos, act_fr
 
-  def choose_mental_state(self, obs, prev_latent, sample=False):
+  def choose_mental_state(self, obs, prev_latent, aux=None, sample=False):
     # NOTE:
     # near target / progressing
     #   --> maintain current target regardless of other agent
@@ -505,14 +511,14 @@ class LDExpert:
       return vec_dir
 
   def choose_action(self, obs, prev_latent, sample=False, **kwargs):
-    option = self.choose_mental_state(obs, prev_latent, sample)
+    option = self.choose_mental_state(obs, prev_latent, sample=sample)
     action = self.choose_policy_action(obs, option, sample)
     return option, action
 
 
 class LDExpert_V2(LDExpert):
 
-  def choose_mental_state(self, obs, prev_latent, sample=False):
+  def choose_mental_state(self, obs, prev_latent, aux=None, sample=False):
     if prev_latent == self.PREV_LATENT:
       return np.random.choice(range(len(self.np_targets)))
 

@@ -203,5 +203,5 @@ if __name__ == "__main__":
     df = pd.DataFrame(list_results, columns=columns)
 
     cur_dir = os.path.dirname(__file__)
-    save_name = os.path.join(cur_dir, "infer_latent_result_btil.csv")
+    save_name = os.path.join(cur_dir, "infer_latent_result_btil2.csv")
     df.to_csv(save_name, index=False)
