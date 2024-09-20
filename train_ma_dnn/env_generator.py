@@ -11,7 +11,7 @@ from pettingzoo_domain.conv_gym_domain import ConvGymDomain
 import gym
 from stable_baselines3.common.monitor import Monitor
 import gym_custom
-import pettingzoo_domain.sc2_env as sc2_env
+import pettingzoo_domain.smac_v2_env as smac_v2_env
 
 
 def env_generator(config):
@@ -26,9 +26,9 @@ def env_generator(config):
   elif env_name == "PO_Flood-v2":
     return PO_Flood_V2, {}
   elif env_name == "Protoss5v5":
-    return sc2_env.Protoss5v5, {}
+    return smac_v2_env.Protoss5v5, {}
   elif env_name == "Terran5v5":
-    return sc2_env.Terran5v5, {}
+    return smac_v2_env.Terran5v5, {}
   elif env_name == "MultiGoals2D_2-v0":
     return ConvGymDomain, {"env_name": env_name}
   elif env_name == "LaborDivision2":

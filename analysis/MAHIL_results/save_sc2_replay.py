@@ -1,6 +1,6 @@
 import os
 from omegaconf import OmegaConf
-from pettingzoo_domain.sc2_env import Protoss5v5, Terran5v5
+from pettingzoo_domain.smac_v2_env import Protoss5v5, Terran5v5
 
 from aic_ml.baselines.ma_ogail.model.agent import make_agent
 from aic_ml.MAHIL.agent import make_mahil_agent

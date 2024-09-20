@@ -140,12 +140,6 @@ class Terran5v5(SMAC_V2):
     super().__init__(5, 5, '10gen_terran', 200)
 
 
-def restore(actor, model_dir):
-  """Restore policy's networks from a saved model."""
-  policy_actor_state_dict = torch.load(str(model_dir) + '/actor.pt')
-  actor.load_state_dict(policy_actor_state_dict)
-
-
 class MAPPO_Expert:
 
   def __init__(self, model_dir, obs_space, act_space) -> None:
@@ -165,7 +159,11 @@ class MAPPO_Expert:
     device = "cpu"
 
     self.actor = R_Actor(args, obs_space, act_space, device)
-    restore(self.actor, model_dir)
+
+    # Restore policy's networks from a saved model.
+    policy_actor_state_dict = torch.load(str(model_dir) + '/actor.pt')
+    self.actor.load_state_dict(policy_actor_state_dict)
+
     self.actor.eval()
 
   def choose_action(self, obs, available_actions):
@@ -180,7 +178,7 @@ class Protoss_Expert(MAPPO_Expert):
 
   def __init__(self, obs_space, act_space):
     model_dir = (
-        "/home/sangwon/Projects/ai_coach/train_ma_dnn/StarCraft2v2_res/"
+        "/home/sangwon/Projects/ai_coach/domains/pettingzoo_domain/models/"
         "StarCraft2v2/10gen_protoss/mappo/protoss/run1/models")
     super().__init__(model_dir, obs_space, act_space)
 
@@ -189,7 +187,7 @@ class Terran_Expert(MAPPO_Expert):
 
   def __init__(self, obs_space, act_space):
     model_dir = (
-        "/home/sangwon/Projects/ai_coach/train_ma_dnn/StarCraft2v2_res/"
+        "/home/sangwon/Projects/ai_coach/domains/pettingzoo_domain/models/"
         "StarCraft2v2/10gen_terran/mappo/terran/run1/models")
     super().__init__(model_dir, obs_space, act_space)
 

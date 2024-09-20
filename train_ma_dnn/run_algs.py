@@ -6,10 +6,7 @@ from omegaconf import OmegaConf, DictConfig
 import env_generator as envgen
 
 
-def get_dirs(base_dir="",
-             alg_name="gail",
-             env_name="HalfCheetah-v2",
-             msg="default"):
+def get_dirs(base_dir, alg_name, env_name, msg="default"):
 
   base_log_dir = os.path.join(base_dir, "result/")
 

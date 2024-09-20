@@ -12,7 +12,7 @@ setup(name="aic_algorithms",
       long_description_content_type="text/markdown",
       packages=find_packages(
           exclude=["tests", "tests.*", "examples", "examples.*"]),
-      python_requires='>=3.8',
+      python_requires='>=3.10',
       install_requires=[
           'numpy',
           'tqdm',
