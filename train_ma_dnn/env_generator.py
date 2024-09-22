@@ -11,8 +11,6 @@ from pettingzoo_domain.conv_gym_domain import ConvGymDomain
 import gym
 from stable_baselines3.common.monitor import Monitor
 import gym_custom
-import pettingzoo_domain.smac_v2_env as smac_v2_env
-from pettingzoo_domain.smac_v1_env import SMAC_V1
 
 
 def env_generator(config):
@@ -26,10 +24,12 @@ def env_generator(config):
     return PO_Movers_V2, {}
   elif env_name == "PO_Flood-v2":
     return PO_Flood_V2, {}
-  elif env_name == "Protoss5v5":
-    return smac_v2_env.Protoss5v5, {}
-  elif env_name == "Terran5v5":
-    return smac_v2_env.Terran5v5, {}
+  elif env_name in ["Protoss5v5", "Terran5v5"]:
+    import pettingzoo_domain.smac_v2_env as smac_v2_env
+    if env_name == "Protoss5v5":
+      return smac_v2_env.Protoss5v5, {}
+    elif env_name == "Terran5v5":
+      return smac_v2_env.Terran5v5, {}
   elif env_name == "MultiGoals2D_2-v0":
     return ConvGymDomain, {"env_name": env_name}
   elif env_name == "LaborDivision2":
@@ -41,6 +41,7 @@ def env_generator(config):
   elif env_name == "LaborDivision3-v2":
     return ThreeTargetDyadLaborDivisionV2, {}
   elif env_name[:4] == "sc2_":
+    from pettingzoo_domain.smac_v1_env import SMAC_V1
     return SMAC_V1, {"map_name": env_name[4:]}
   # Multi Particle Environments (MPE)
   elif env_name == "simple_crypto":

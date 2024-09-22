@@ -21,6 +21,8 @@ def conv_input(batch_input, is_onehot_needed, dimension, device):
     if not isinstance(batch_input, torch.Tensor):
       batch_input = torch.tensor(np.array(batch_input).reshape(-1, dimension),
                                  dtype=torch.float).to(device)
+    else:
+      batch_input = batch_input.reshape(-1, dimension).to(device)
 
   return batch_input  # TODO: consider to(device) here too. anything to lose?
 

@@ -73,6 +73,8 @@ class SMAC_V1(ParallelEnv):
       new_info[aname] = {}
       # copy same info to all agents
       for key, val in info.items():
+        if key == "battle_won":
+          key = "won"
         new_info[aname][key] = val
 
       new_info[aname]["avail_actions"] = np.array(avail_actions[aname])
@@ -99,9 +101,10 @@ if __name__ == "__main__":
   cur_dir = os.path.dirname(__file__)
 
   env = SMAC_V1("2s3z")
+  env_eval = SMAC_V1("2s3z")
 
   epi_step = 0
-  obs, infos = env.reset()
+  obs, infos = env.reset(seed=0)
   done = False
   while not done:
     actions = {}

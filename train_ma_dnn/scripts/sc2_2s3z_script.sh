@@ -30,10 +30,12 @@ determine_base() {
 }
 
 # Variables
-envs=("PO_Movers-v2" "LaborDivision2-v2" "PO_Flood-v2")
-algs=("iiql" "magail" "mahil" "maogail" "bc")
+# envs=("PO_Movers-v2" "LaborDivision2-v2" "PO_Flood-v2")
+# envs=("sc2_2s3z" "sc2_3s5z")
+envs=("sc2_2s3z")
+algs=("maogail" "magail" "iiql" "mahil" "bc")
 
-exp="test_script"
+exp="test"
 seed_max=3
 
 # Loop through combinations of env, alg, and sv
