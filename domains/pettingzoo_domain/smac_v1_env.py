@@ -4,17 +4,17 @@ import functools
 from gymnasium.spaces import Box, Discrete
 from pettingzoo_domain.haven_envs.starcraft2.starcraft2 import StarCraft2Env
 from pettingzoo.utils.env import ParallelEnv
+from smac.env.starcraft2.maps import get_map_params
 
 
 class SMAC_V1(ParallelEnv):
   metadata = {"render_modes": ["human"], "name": "smac_v1"}
 
-  def __init__(self, map_name, seed, max_length) -> None:
+  def __init__(self, map_name) -> None:
     super().__init__()
+    self.env = StarCraft2Env(map_name=map_name)
 
-    self.env = StarCraft2Env(map_name=map_name, seed=seed)
-
-    self.max_length = max_length
+    self.max_length = get_map_params(map_name)["limit"]
     self.possible_agents = list(range(self.env.n_agents))
     self.agents = self.possible_agents[:]
 
@@ -43,7 +43,9 @@ class SMAC_V1(ParallelEnv):
     self.env.close()
 
   def reset(self, seed=None, options=None):
-    # seed cannot be set here in SMACv1
+    if seed is not None:
+      self.env._seed = seed
+
     obs, state = self.env.reset()
 
     self.agents = self.possible_agents[:]
@@ -71,7 +73,7 @@ class SMAC_V1(ParallelEnv):
       new_info[aname] = {}
       # copy same info to all agents
       for key, val in info.items():
-        new_info[aname][key] = val[aname]
+        new_info[aname][key] = val
 
       new_info[aname]["avail_actions"] = np.array(avail_actions[aname])
 
@@ -95,3 +97,22 @@ class SMAC_V1(ParallelEnv):
 
 if __name__ == "__main__":
   cur_dir = os.path.dirname(__file__)
+
+  env = SMAC_V1("2s3z")
+
+  epi_step = 0
+  obs, infos = env.reset()
+  done = False
+  while not done:
+    actions = {}
+    for agent in env.agents:
+      avail_actions = infos[agent]["avail_actions"]
+      avail_actions_ind = np.nonzero(avail_actions)[0]
+      action = np.random.choice(avail_actions_ind)
+      actions[agent] = action
+
+    obs, rewards, dones, truncs, infos = env.step(actions)
+    done = all(dones.values())
+    epi_step += 1
+  env.close()
+  print(epi_step)

@@ -12,6 +12,7 @@ import gym
 from stable_baselines3.common.monitor import Monitor
 import gym_custom
 import pettingzoo_domain.smac_v2_env as smac_v2_env
+from pettingzoo_domain.smac_v1_env import SMAC_V1
 
 
 def env_generator(config):
@@ -39,6 +40,8 @@ def env_generator(config):
     return TwoTargetDyadLaborDivisionV2, {}
   elif env_name == "LaborDivision3-v2":
     return ThreeTargetDyadLaborDivisionV2, {}
+  elif env_name[:4] == "sc2_":
+    return SMAC_V1, {"map_name": env_name[4:]}
   # Multi Particle Environments (MPE)
   elif env_name == "simple_crypto":
     kwargs = {"continuous_actions": False}
