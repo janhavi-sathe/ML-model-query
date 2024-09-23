@@ -6,7 +6,7 @@ We recommend you use `conda` environment. You can set up the virtual environment
 gym 0.21 installation is broken with recent versions of setuptools and wheel (ref: https://stackoverflow.com/a/77205046).
 Please downgrade them to the following versions:
 ```
-    pip install setuptools==65.5.1 wheel==0.38.0
+    pip install setuptools==65.5.1 pip==21 wheel==0.38.0
 ```
 
 Then, please install `core` and `domains` packages as follows:
