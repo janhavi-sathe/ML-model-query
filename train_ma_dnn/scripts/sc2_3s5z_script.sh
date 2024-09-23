@@ -9,11 +9,14 @@ determine_base() {
         base=""  # If alg is 'bc', base should be empty
     else
         case "$env" in
-            "PO_Flood-v2"|"PO_Movers-v2"|"sc2_2s3z"|"sc2_3s5z")
+            "PO_Flood-v2"|"PO_Movers-v2")
                 base="DiscreteWorld_base"
                 ;;
             "LaborDivision2-v2"|"LaborDivision3-v2")
                 base="LaborDivision_base"
+                ;;
+            "sc2_2s3z"|"sc2_3s5z")
+                base="SC2_base"
                 ;;
             *)
                 base=""  # Default value if env doesn't match the specified ones
@@ -32,7 +35,7 @@ determine_base() {
 # Variables
 # envs=("PO_Movers-v2" "LaborDivision2-v2" "PO_Flood-v2")
 envs=("sc2_3s5z")
-algs=("maogail" "magail" "iiql" "mahil" "bc")
+algs=("mahil" "iiql" "magail" "maogail" "bc")
 
 exp="test"
 seed_max=3

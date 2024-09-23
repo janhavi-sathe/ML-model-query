@@ -9,11 +9,14 @@ determine_base() {
         base=""  # If alg is 'bc', base should be empty
     else
         case "$env" in
-            "PO_Flood-v2"|"PO_Movers-v2"|"sc2_2s3z"|"sc2_3s5z")
+            "PO_Flood-v2"|"PO_Movers-v2")
                 base="DiscreteWorld_base"
                 ;;
             "LaborDivision2-v2"|"LaborDivision3-v2")
                 base="LaborDivision_base"
+                ;;
+            "sc2_2s3z"|"sc2_3s5z")
+                base="SC2_base"
                 ;;
             *)
                 base=""  # Default value if env doesn't match the specified ones
@@ -46,6 +49,11 @@ for env in "${envs[@]}"; do
 
         for sv in "${svs[@]}"; do
             for seed in `seq ${seed_max}`; do
+                # Skip the case where alg=maogail, sv=0.0, and seed=1
+                if [[ "$alg" == "maogail" && "$sv" == "0.0" && "$seed" == "1" ]]; then
+                    continue
+                fi
+
                 echo "env: ${env}, alg: ${alg}, exp: ${exp}, base: ${base}, supervision: ${sv}, seed: ${seed}"
                 python train_ma_dnn/run_algs.py alg=${alg} env=${env} \
                 base=${base} tag="${exp}Seed${seed}Sv${sv}" supervision=${sv} seed=${seed}
