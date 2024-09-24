@@ -48,9 +48,14 @@ for env in "${envs[@]}"; do
 
         for sv in "${svs[@]}"; do
             for seed in `seq ${seed_max}`; do
-                echo "env: ${env}, alg: ${alg}, exp: ${exp}, base: ${base}, supervision: ${sv}, seed: ${seed}"
-                python train_ma_dnn/run_algs.py alg=${alg} env=${env} \
-                base=${base} tag="${exp}Seed${seed}Sv${sv}" supervision=${sv} seed=${seed}
+
+                # Create a unique tmux session name for each experiment
+                session_name="${env}_${alg}_sv${sv}_seed${seed}"
+
+                echo "Running in tmux session: ${session_name}"
+
+                # Run the experiment in a new detached tmux session, activating the virtual environment first
+                tmux new-session -d -s ${session_name} "source ~/venvs/aicoach38/bin/activate && python train_ma_dnn/run_algs.py alg=${alg} env=${env} base=${base} tag='${exp}Seed${seed}Sv${sv}' supervision=${sv} seed=${seed}"
             done
         done
     done

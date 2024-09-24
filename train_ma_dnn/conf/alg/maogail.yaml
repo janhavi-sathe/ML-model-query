@@ -1,13 +1,12 @@
 # @package _global_
 
 alg_name: maogail
-n_epoch: 5000
 use_state_filter: False
 activation: relu
 use_d_info_gail: False
 clip_grad_val: null
 
-n_update_rounds: 30
+n_update_rounds: 10
 n_sample: 4096
 mini_batch_size: 256
 # critic
