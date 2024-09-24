@@ -7,6 +7,7 @@ activation: relu
 use_d_info_gail: False
 clip_grad_val: null
 
+n_update_rounds: 30
 n_sample: 4096
 mini_batch_size: 256
 # critic

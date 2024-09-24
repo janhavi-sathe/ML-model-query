@@ -255,8 +255,10 @@ def learn(config: omegaconf.DictConfig,
     # ----- update models
     for a_name in env.agents:
       dict_agents[a_name].gail_update(dict_online_trajs[a_name],
-                                      dict_expert_trajs[a_name])
-      dict_agents[a_name].ppo_update(dict_online_trajs[a_name])
+                                      dict_expert_trajs[a_name],
+                                      n_step=config.n_update_rounds)
+      dict_agents[a_name].ppo_update(dict_online_trajs[a_name],
+                                     n_step=config.n_update_rounds)
 
     explore_step += explore_step_cur
 
