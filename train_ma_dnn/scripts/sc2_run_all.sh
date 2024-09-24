@@ -46,7 +46,7 @@ wait_for_free_slot() {
         fi
 
         # Otherwise, wait for a second before checking again
-        sleep 3
+        sleep 5
     done
 }
 
@@ -54,7 +54,7 @@ wait_for_free_slot() {
 envs=("sc2_2s3z" "sc2_3s5z")
 algs=("maogail" "magail" "iiql" "mahil" "bc")
 
-exp="test"
+exp="Sep24"
 seed_max=3
 
 # Skip list for already completed experiments
@@ -64,13 +64,13 @@ skip_experiments() {
     local sv=$3
     local seed=$4
 
-    if [[ "$env" == "sc2_2s3z" && "$alg" == "iiql" && "$sv" == "0.0" && ( "$seed" == "1" || "$seed" == "2" ) ]]; then
-        return 0  # Skip this experiment
-    elif [[ "$env" == "sc2_2s3z" && "$alg" == "maogail" && "$sv" == "0.0" && "$seed" == "2" ]]; then
-        return 0  # Skip this experiment
-    elif [[ "$env" == "sc2_3s5z" && "$alg" == "magail" && "$sv" == "0.0" && ( "$seed" == "1" || "$seed" == "2" ) ]]; then
-        return 0  # Skip this experiment
-    fi
+    # if [[ "$env" == "sc2_2s3z" && "$alg" == "iiql" && "$sv" == "0.0" && ( "$seed" == "1" || "$seed" == "2" ) ]]; then
+    #     return 0  # Skip this experiment
+    # elif [[ "$env" == "sc2_2s3z" && "$alg" == "maogail" && "$sv" == "0.0" && "$seed" == "2" ]]; then
+    #     return 0  # Skip this experiment
+    # elif [[ "$env" == "sc2_3s5z" && "$alg" == "magail" && "$sv" == "0.0" && ( "$seed" == "1" || "$seed" == "2" ) ]]; then
+    #     return 0  # Skip this experiment
+    # fi
     return 1  # Do not skip
 }
 
