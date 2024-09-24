@@ -52,7 +52,7 @@ wait_for_free_slot() {
 
 # Variables
 envs=("sc2_2s3z" "sc2_3s5z")
-algs=("maogail" "magail" "iiql" "mahil" "bc")
+algs=("maogail" "magail" "mahil" "iiql" "bc")
 
 exp="Sep24"
 seed_max=3
@@ -88,11 +88,14 @@ for env in "${envs[@]}"; do
                     continue
                 fi
 
+                # Replace periods in sv with underscores to make valid tmux session names
+                sv_clean=$(echo $sv | sed 's/\./_/g')
+
                 # Wait for an available slot (if running sessions >= MAX_SESSIONS)
                 wait_for_free_slot
 
                 # Create a unique tmux session name for each experiment
-                session_name="${env}_${alg}_sv${sv}_seed${seed}"
+                session_name="${env}_${alg}_sv${sv_clean}_seed${seed}"
 
                 echo "Running in tmux session: ${session_name}"
 
