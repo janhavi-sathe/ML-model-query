@@ -23,5 +23,5 @@ mahil_pi_init_temp: 1e-2
 mahil_pi_learn_temp: False
 
 # exp settings 
-max_explore_step: 2e5
+max_explore_step: 1e5
 eval_interval: 10000

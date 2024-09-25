@@ -1,7 +1,7 @@
 #!/bin/bash
 # Install SC2 and add the custom maps
 
-apt install unzip
+apt install -y unzip vim
 
 export SC2PATH=$HOME/StarCraftII
 cd ~
