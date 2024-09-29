@@ -143,6 +143,9 @@ class MAHIL:
     return pi_loss
 
   def tx_update(self, policy_batch, expert_batch, logger, step):
+    if self.lat_dim == 1:
+      return {}
+
     TX_USE_TARGET, TX_DO_SOFT_UPDATE = False, False
     tx_loss = self.tx_agent.iq_update(policy_batch, expert_batch, logger,
                                       self.tx_update_count, TX_USE_TARGET,
@@ -203,11 +206,13 @@ class MAHIL:
       pi_use_target, pi_soft_update = False, False
     else:
       pi_use_target, pi_soft_update = True, True
-
-    loss_1 = self.tx_agent.iq_offline_update(expert_batch, logger, step,
-                                             TX_USE_TARGET, TX_DO_SOFT_UPDATE,
-                                             self.tx_agent.method_regularize,
-                                             self.tx_agent.method_div)
+    if self.lat_dim == 1:
+      loss_1 = {}
+    else:
+      loss_1 = self.tx_agent.iq_offline_update(expert_batch, logger, step,
+                                               TX_USE_TARGET, TX_DO_SOFT_UPDATE,
+                                               self.tx_agent.method_regularize,
+                                               self.tx_agent.method_div)
     loss_2 = self.pi_agent.iq_offline_update(expert_batch, logger, step,
                                              pi_use_target, pi_soft_update,
                                              self.pi_agent.method_regularize,
@@ -236,6 +241,9 @@ class MAHIL:
       return self.pi_agent.choose_action((obs, ), option, sample)
 
   def choose_mental_state(self, obs, prev_option, prev_aux, sample=False):
+    if self.lat_dim == 1:
+      return 0
+
     batch_prev_aux_split = split_by_size(prev_aux, self.AUX_SPLIT_SIZE,
                                          self.device)
     tup_obs = (obs, ) + batch_prev_aux_split
@@ -254,6 +262,9 @@ class MAHIL:
     return: options with the length of len_demo
     '''
     len_demo = len(obs)
+
+    if self.lat_dim == 1:
+      return np.zeros((len_demo, 1)), 0.0
 
     batch_prev_aux_split = split_by_size(prev_aux, self.AUX_SPLIT_SIZE,
                                          self.device)
