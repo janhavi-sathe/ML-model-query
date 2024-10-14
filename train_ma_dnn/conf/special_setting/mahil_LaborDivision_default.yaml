@@ -1,7 +1,7 @@
 # @package _global_
 
 n_sample: 30000
-update_interval: 5
+update_interval: 10
 mini_batch_size: 256
 demo_latent_infer_interval: 1000
 # tx

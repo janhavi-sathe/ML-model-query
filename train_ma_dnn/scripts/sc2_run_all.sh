@@ -14,7 +14,7 @@ determine_base() {
             "PO_Flood-v2"|"PO_Movers-v2")
                 base="DiscreteWorld_base"
                 ;;
-            "LaborDivision2-v2"|"LaborDivision3-v2")
+            "LaborDivision2-v2"|"LaborDivision3-v2"|"MultiSubTasks2"|"MultiSubTasks3")
                 base="LaborDivision_base"
                 ;;
             "sc2_2s3z"|"sc2_3s5z")
@@ -51,10 +51,10 @@ wait_for_free_slot() {
 }
 
 # Variables
-envs=("sc2_2s3z" "sc2_3s5z")
+envs=("MultiSubTasks2" "MultiSubTasks3")
 algs=("maogail" "magail" "mahil" "iiql" "bc")
 
-exp="Sep24"
+exp="Oct14"
 seed_max=3
 
 # Skip list for already completed experiments
