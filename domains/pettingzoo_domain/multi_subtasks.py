@@ -78,11 +78,14 @@ class MultiSubTasks(ParallelEnv):
   def observation_space(self, agent):
     # gymnasium spaces are defined and documented here:
     #    https://gymnasium.farama.org/api/spaces/
+    self.n_targets
     n_agents = len(self.possible_agents)
     obs_low = np.array([*self.world_low, 0] +
-                       [0, -self.vis_rad, -self.vis_rad] * (n_agents - 1))
+                       [0, -self.vis_rad, -self.vis_rad] * (n_agents - 1) +
+                       [*self.world_low] * self.n_targets)
     obs_high = np.array([*self.world_high, 1] +
-                        [1, self.vis_rad, self.vis_rad] * (n_agents - 1))
+                        [1, self.vis_rad, self.vis_rad] * (n_agents - 1) +
+                        [*self.world_high] * self.n_targets)
 
     return Box(low=obs_low, high=obs_high, dtype=np.float32)
 
@@ -593,5 +596,5 @@ if __name__ == "__main__":
 
   # traj = generate_data(None, MultiSubTasksExpert, "MultiSubTasks3", 100,
   #                      True, 10)
-  traj = generate_data(cur_dir, MultiSubTasksExpert, "MultiSubTasks3", 100,
+  traj = generate_data(cur_dir, MultiSubTasksExpert, "MultiSubTasks2", 100,
                        False, 10)

@@ -1,0 +1,4 @@
+# @package _global_
+
+max_explore_step: 2e5
+n_traj: 100

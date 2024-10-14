@@ -1,8 +1,8 @@
 # @package _global_
 
 defaults:
-  - LaborDivision_common
+  - MultiSubTasks_common
 
 env_name: MultiSubTasks3
 data_path: data/MultiSubTasks3_100.pkl
-dim_c: [2, 2]
+dim_c: [3, 3]
