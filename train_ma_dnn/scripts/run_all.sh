@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MAX_SESSIONS=10
+MAX_SESSIONS=15
 
 determine_base() {
     env=$1
@@ -52,9 +52,9 @@ wait_for_free_slot() {
 
 # Variables
 envs=("MultiSubTasks2" "MultiSubTasks3")
-algs=("maogail" "magail" "mahil" "iiql" "bc")
+algs=("maogail" "magail" "mahil" "iiql")
 
-exp="Oct14"
+exp="1014"
 seed_max=3
 
 # Skip list for already completed experiments
