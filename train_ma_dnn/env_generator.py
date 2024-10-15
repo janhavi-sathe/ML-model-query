@@ -10,6 +10,7 @@ from pettingzoo.mpe import (simple_crypto_v3, simple_push_v3,
                             simple_adversary_v3, simple_speaker_listener_v4,
                             simple_spread_v3, simple_tag_v3)
 from pettingzoo_domain.conv_gym_domain import ConvGymDomain
+from pettingzoo_domain.overcooked import Overcooked
 import gym
 from stable_baselines3.common.monitor import Monitor
 import gym_custom
@@ -46,6 +47,8 @@ def env_generator(config):
     return MultiSubTasksDyadTwoTargets, {}
   elif env_name == "MultiSubTasks3":
     return MultiSubTasksDyadThreeTargets, {}
+  elif env_name == "overcooked":
+    return Overcooked, {}
   elif env_name[:4] == "sc2_":
     from pettingzoo_domain.smac_v1_env import SMAC_V1
     return SMAC_V1, {"map_name": env_name[4:]}

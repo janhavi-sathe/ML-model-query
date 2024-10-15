@@ -221,8 +221,8 @@ def learn(config: omegaconf.DictConfig,
           dict_online_trajs[a_name][EPI_ITEM_KEYS[idx]].append(epi_item)
 
         dict_online_trajs[a_name]["lengths"].append(len(episode_tuples[a_name]))
-      if 'won' in infos[env.agents[a_name]]:
-        if infos[env.agents[a_name]]['won']:
+      if 'won' in infos[env.agents[0]]:
+        if infos[env.agents[0]]['won']:
           list_wins.append(1)
         else:
           list_wins.append(0)
