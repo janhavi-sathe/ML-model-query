@@ -11,6 +11,6 @@ n_sample: 5000
 demo_latent_infer_interval: 200
 
 # exp settings 
-max_explore_step: 1e5
-eval_interval: 2000
-log_interval: 200
+max_explore_step: 2e5
+eval_interval: 5000
+log_interval: 1000

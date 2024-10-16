@@ -11,7 +11,7 @@ determine_base() {
         base=""  # If alg is 'bc', base should be empty
     else
         case "$env" in
-            "PO_Flood-v2"|"PO_Movers-v2")
+            "PO_Flood-v2"|"PO_Movers-v2"|"overcooked")
                 base="DiscreteWorld_base"
                 ;;
             "LaborDivision2-v2"|"LaborDivision3-v2"|"MultiSubTasks2"|"MultiSubTasks3")
@@ -51,10 +51,10 @@ wait_for_free_slot() {
 }
 
 # Variables
-envs=("MultiSubTasks2" "MultiSubTasks3")
-algs=("maogail" "magail" "mahil" "iiql")
+envs=("overcooked")
+algs=("maogail" "magail" "mahil" "iiql" "bc")
 
-exp="1014"
+exp="1015"
 seed_max=3
 
 # Skip list for already completed experiments

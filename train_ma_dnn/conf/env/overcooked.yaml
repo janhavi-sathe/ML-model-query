@@ -1,6 +1,6 @@
 # @package _global_
 
-max_explore_step: 1e5
+max_explore_step: 2e5
 n_traj: 50
 
 env_name: overcooked
