@@ -94,36 +94,36 @@ def eval_policy(env: ParallelEnv, list_policy: Sequence[AbstractActor],
                 num_episodes, device):
   n_agents = len(list_policy)
   total_timesteps = []
-  total_returns = {a_name: [] for a_name in range(n_agents)}
+  total_returns = {a_name: [] for a_name in env.agents}
   wins = []
 
   while len(total_timesteps) < num_episodes:
     done = False
     is_win = False
-    episode_rewards = {a_name: 0 for a_name in range(n_agents)}
+    episode_rewards = {a_name: 0 for a_name in env.agents}
     episode_step = 0
 
     joint_obs, infos = env.reset()
     while not done:
       joint_actions = {}
-      for a_name in range(n_agents):
-        agent = list_policy[a_name]
-        if "avail_actions" in infos[a_name]:
-          available_actions = np.array(infos[a_name]["avail_actions"])
+      for a_idx, aname in enumerate(env.agents):
+        agent = list_policy[a_idx]
+        if "avail_actions" in infos[aname]:
+          available_actions = np.array(infos[aname]["avail_actions"])
         else:
           available_actions = None
 
-        dim_obs, discrete_obs, _, _ = get_obs_act_space_info(env, a_name)
+        dim_obs, discrete_obs, _, _ = get_obs_act_space_info(env, a_idx)
 
         with torch.no_grad():
-          nn_obs = conv_input(joint_obs[a_name], discrete_obs, dim_obs, device)
+          nn_obs = conv_input(joint_obs[aname], discrete_obs, dim_obs, device)
           if isinstance(agent, DiscreteActor):
             action = agent.sample_w_avail_actions(nn_obs, available_actions)
           else:
             action = agent.exploit(nn_obs)
           action = action.cpu().numpy()[0]
 
-        joint_actions[a_name] = action
+        joint_actions[aname] = action
 
       joint_obs, rewards, dones, truncates, infos = env.step(joint_actions)
 
