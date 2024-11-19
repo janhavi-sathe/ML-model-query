@@ -171,6 +171,15 @@ class AppInterface(abc.ABC):
     else:
       self._on_game_end()
 
+  def _debug_before_action_sample(self):
+    pass
+
+  def _debug_before_action_taken(self, action_map):
+    return action_map
+
+  def _debug_after_action_taken(self):
+    pass
+
   def _on_key_pressed(self, key_event):
     if not self._started:
       return
