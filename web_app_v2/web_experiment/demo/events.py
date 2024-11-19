@@ -4,6 +4,7 @@ from web_experiment import socketio
 from web_experiment.define import ExpType
 import web_experiment.exp_common.events_impl as event_impl
 from web_experiment.exp_common.page_base import Exp1UserData
+from web_experiment.exp_common.page_base_surgery import SurgeryUserData
 from web_experiment.demo.define import E_SessionName, GAMEPAGES
 
 g_id_2_user_data = {}  # type: Mapping[str, Exp1UserData]
@@ -12,10 +13,14 @@ for e_session in E_SessionName:
   name_space = '/' + e_session.name
 
   def make_init_canvas(e_session: E_SessionName, name_space=name_space):
+
     def initial_canvas():
       global g_id_2_user_data
       env_id = request.sid
-      user_data = Exp1UserData(user=None)
+      if e_session == E_SessionName.ToolHandover:
+        user_data = SurgeryUserData(user=None)
+      else:
+        user_data = Exp1UserData(user=None)
       g_id_2_user_data[env_id] = user_data
 
       user_data.data[Exp1UserData.EXP_TYPE] = ExpType.Data_collection
@@ -28,6 +33,7 @@ for e_session in E_SessionName:
     return initial_canvas
 
   def make_disconnected():
+
     def disconnected():
       global g_id_2_user_data
       env_id = request.sid
@@ -37,6 +43,7 @@ for e_session in E_SessionName:
     return disconnected
 
   def make_button_clicked(e_session: E_SessionName, name_space=name_space):
+
     def button_clicked(msg):
       global g_id_2_user_data
       button = msg["name"]

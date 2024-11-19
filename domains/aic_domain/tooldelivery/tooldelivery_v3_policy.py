@@ -2,9 +2,9 @@ import numpy as np
 import os
 import pickle
 from aic_core.utils.exceptions import InvalidTransitionError
-from tests.examples.environment import MMDPPolicy
-from tests.examples.tooldelivery_v3_mdp import ToolDeliveryMDP_V3
-import tests.examples.tooldelivery_v3_state_action as T3SA
+from .environment import MMDPPolicy
+from .tooldelivery_v3_mdp import ToolDeliveryMDP_V3
+import aic_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
 
 RATIONALITY_SCALAR = 1
 

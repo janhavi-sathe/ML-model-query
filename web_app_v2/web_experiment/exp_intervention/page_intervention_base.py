@@ -29,8 +29,12 @@ def load_learned_models(domain_type):
   else:
     raise ValueError(f"Intervention page for {domain_type} is not implemented.")
 
-  with open(model_dir + v_value_file, 'rb') as handle:
-    v_values = pickle.load(handle)
+  if os.path.exists(model_dir + v_value_file) is True:
+    with open(model_dir + v_value_file, 'rb') as handle:
+      v_values = pickle.load(handle)
+  else:
+    Warning("Intervention Model files are not found.")
+    return None, None, None
 
   np_policy1 = np.load(model_dir + policy1_file)
   np_policy2 = np.load(model_dir + policy2_file)
@@ -128,6 +132,10 @@ class MixinInterventionBase:
     super()._on_action_taken(user_game_data, dict_prev_game, tuple_actions)
     game = user_game_data.get_game_ref()
     if game.is_finished():
+      return
+
+    if self.intervention_strategy is None:
+      Warning("No intervention strategy is set.")
       return
 
     def policy_nxsa(nidx, xidx, sidx, tuple_aidx):

@@ -1,6 +1,7 @@
 """Defines an abstract MDP class using numpy."""
 
 import abc
+import os
 from typing import Optional, Tuple, Union
 
 import logging
@@ -18,7 +19,10 @@ class MDP:
   # Python 2 style but Python3 is also compatible with this.
   __metaclass__ = abc.ABCMeta
 
-  def __init__(self, fast_cache_mode: bool = False, use_sparse: bool = False):
+  def __init__(self,
+               fast_cache_mode: bool = False,
+               use_sparse: bool = False,
+               cache_file_path: str = ""):
     """Initializes MDP class.
 
       Args:
@@ -28,6 +32,7 @@ class MDP:
     """
     self.fast_cache_mode = fast_cache_mode
     self.use_sparse = use_sparse
+    self.cache_file_path = cache_file_path
 
     # Define state space.
     self.init_statespace()
@@ -85,13 +90,25 @@ class MDP:
     np_list_idx = np.arange(self.num_actual_states, dtype=np.int32)
     self.np_state_to_idx = np_list_idx.reshape(self.list_num_states)
 
+    if self.cache_file_path != "":
+      file_i2s = os.path.join(self.cache_file_path, "idx_to_state.npy")
+      if os.path.exists(file_i2s):
+        self.np_idx_to_state = np.load(file_i2s)
+        logging.info("Loaded np_idx_to_state from file")
+        return
+
     # Create mapping from state index to state.
     # Mapping takes state index as input and outputs a factored state.
     np_idx_to_state = np.zeros((self.num_actual_states, self.num_state_factors),
                                dtype=np.int32)
-    for state, idx in np.ndenumerate(self.np_state_to_idx):
+    for state, idx in tqdm(np.ndenumerate(self.np_state_to_idx),
+                           total=self.num_actual_states):
       np_idx_to_state[idx] = state
     self.np_idx_to_state = np_idx_to_state
+
+    if self.cache_file_path != "":
+      np.save(file_i2s, self.np_idx_to_state)
+      logging.info("Saved np_idx_to_state to file")
 
   def is_dummy_state(self, idx: int):
     """check if it's dummy state or not"""

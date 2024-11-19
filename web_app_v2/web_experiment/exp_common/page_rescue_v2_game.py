@@ -92,6 +92,7 @@ class RescueV2GamePage(RescueV2GamePageBase):
 
 
 class RescueV2GameUserRandom(RescueV2GamePage):
+
   def __init__(self, partial_obs, latent_collection=True) -> None:
     super().__init__(latent_collection)
     self._PARTIAL_OBS = partial_obs

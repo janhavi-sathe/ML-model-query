@@ -13,12 +13,14 @@ class BoxPushV2InterventionPage(MixinInterventionBase, BoxPushV2GamePage):
     self._LIST_POLICIES = MixinInterventionBase.MOVERS_LIST_PI
     self._LIST_TXS = MixinInterventionBase.MOVERS_LIST_TX
 
-    self.intervention_strategy = InterventionValueBased(
-        self._V_VALUES,
-        E_CertaintyHandling.Threshold,
-        inference_threshold=0,
-        intervention_threshold=5,
-        intervention_cost=1)
+    self.intervention_strategy = None
+    if self._V_VALUES is not None:
+      self.intervention_strategy = InterventionValueBased(
+          self._V_VALUES,
+          E_CertaintyHandling.Threshold,
+          inference_threshold=0,
+          intervention_threshold=5,
+          intervention_cost=1)
 
   def _get_action_btn_disabled(self, user_data: Exp1UserData):
 

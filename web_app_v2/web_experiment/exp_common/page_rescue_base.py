@@ -7,10 +7,9 @@ from aic_domain.rescue.simulator import RescueSimulator
 import web_experiment.exp_common.canvas_objects as co
 from web_experiment.define import EDomainType
 from web_experiment.exp_common.page_base import ExperimentPageBase, Exp1UserData
-from web_experiment.exp_common.helper import (location_2_coord,
-                                              rescue_game_scene,
-                                              rescue_game_scene_names,
-                                              RESCUE_PLACE_DRAW_INFO)
+from web_experiment.exp_common.scene_helper import (
+    location_2_coord, rescue_game_scene, rescue_game_scene_names,
+    RESCUE_PLACE_DRAW_INFO)
 
 
 def human_clear_problem(

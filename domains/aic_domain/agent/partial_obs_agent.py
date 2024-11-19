@@ -20,9 +20,11 @@ class AIAgent_PartialObs(AIAgent_Abstract):
 
   @abstractmethod
   def observed_states(self, tup_states):
+    # TODO: might need revision.
     pass
 
   def init_latent(self, tup_state):
+    # TODO: check if this is correct as it is not using the input argument
     self.assumed_tup_states = self.init_tup_states
     return super().init_latent(self.assumed_tup_states)
 

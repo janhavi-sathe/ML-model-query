@@ -473,6 +473,7 @@ class RescueV2GamePageBase(ExperimentPageBase):
 
   def _game_overlay(self, game_env,
                     user_data: Exp1UserData) -> List[co.DrawingObject]:
+
     def coord_2_canvas(coord_x, coord_y):
       x = int(self.GAME_LEFT + coord_x * self.GAME_WIDTH)
       y = int(self.GAME_TOP + coord_y * self.GAME_HEIGHT)
@@ -576,6 +577,7 @@ class RescueV2GamePageBase(ExperimentPageBase):
     return rescue_v2_game_scene(game_env, game_ltwh, include_background)
 
   def _game_scene_names(self, game_env, user_data: Exp1UserData) -> List:
+
     def is_visible(img_name):
       if user_data.data[Exp1UserData.PARTIAL_OBS]:
         if img_name == co.IMG_FIRE_ENGINE:

@@ -26,7 +26,7 @@ def get_imgs(domain_type: EDomainType):
         {'name': co.IMG_ROBOT_BAG, 'src': url_for('static', filename='boxpush_images/robot_bag.svg')},  # noqa: E501
     ]
     # yapf: enable
-  elif domain_type == EDomainType.Rescue:
+  elif domain_type in [EDomainType.Rescue, EDomainType.Blackout]:
     # yapf: disable
     imgs = [
         {'name': co.IMG_WORK, 'src': url_for('static', filename='rescue_images/warning.svg')},  # noqa: E501
@@ -43,6 +43,38 @@ def get_imgs(domain_type: EDomainType):
         {'name': co.IMG_HOSPITAL, 'src': url_for('static', filename='rescue_images/hospital.svg')},  # noqa: E501
         {'name': co.IMG_THUNDER, 'src': url_for('static', filename='rescue_images/thunder.svg')},  # noqa: E501
         {'name': co.IMG_TOWER, 'src': url_for('static', filename='rescue_images/tower.svg')},  # noqa: E501
+    ]
+    # yapf: enable
+  elif domain_type == EDomainType.ToolDelivery:
+    # yapf: disable
+    imgs = [
+        {'name': co.IMG_CABINET, 'src': url_for('static', filename='tooldelivery_images/cabinet.png')},  # noqa: E501
+        {'name': co.IMG_CIRCULATING, 'src': url_for('static', filename='tooldelivery_images/circulating.png')},  # noqa: E501
+        {'name': co.IMG_HUMAN, 'src': url_for('static', filename='tooldelivery_images/human.png')},  # noqa: E501
+        {'name': co.IMG_PERF, 'src': url_for('static', filename='tooldelivery_images/human.png')},  # noqa: E501
+        {'name': co.IMG_ANES, 'src': url_for('static', filename='tooldelivery_images/human.png')},  # noqa: E501
+        {'name': co.IMG_PATIENT, 'src': url_for('static', filename='tooldelivery_images/patient.png')},  # noqa: E501
+        {'name': co.IMG_SCALPEL_STORED, 'src': url_for('static', filename='tooldelivery_images/scalpel.png')},  # noqa: E501
+        {'name': co.IMG_SCALPEL_PREPARED, 'src': url_for('static', filename='tooldelivery_images/scalpel.png')},  # noqa: E501
+        {'name': co.IMG_SUTURE_STORED, 'src': url_for('static', filename='tooldelivery_images/suture.png')},  # noqa: E501
+        {'name': co.IMG_SUTURE_PREPARED, 'src': url_for('static', filename='tooldelivery_images/suture.png')},  # noqa: E501
+        {'name': co.IMG_SCRUB, 'src': url_for('static', filename='tooldelivery_images/scrub.png')},  # noqa: E501
+        {'name': co.IMG_STORAGE, 'src': url_for('static', filename='tooldelivery_images/storage.png')},  # noqa: E501
+        {'name': co.IMG_SURGEON, 'src': url_for('static', filename='tooldelivery_images/surgeon.png')},  # noqa: E501
+        {'name': co.IMG_TABLE, 'src': url_for('static', filename='tooldelivery_images/table.png')},  # noqa: E501
+    ]
+    # yapf: enable
+  elif domain_type == EDomainType.ToolHandover:
+    # yapf: disable
+    imgs = [
+        {'name': co.IMG_FORCEPS, 'src': url_for('static', filename='toolhandover_images/forceps.png')},  # noqa: E501
+        {'name': co.IMG_NURSE, 'src': url_for('static', filename='toolhandover_images/nurse.png')},  # noqa: E501
+        {'name': co.IMG_PATIENT, 'src': url_for('static', filename='toolhandover_images/patient.svg')},  # noqa: E501
+        {'name': co.IMG_SCALPEL, 'src': url_for('static', filename='toolhandover_images/scalpel.png')},  # noqa: E501
+        {'name': co.IMG_SCISSORS, 'src': url_for('static', filename='toolhandover_images/scissors.png')},  # noqa: E501
+        {'name': co.IMG_SURGEON, 'src': url_for('static', filename='toolhandover_images/surgeon.png')},  # noqa: E501
+        {'name': co.IMG_SUTURE, 'src': url_for('static', filename='toolhandover_images/suture.png')},  # noqa: E501
+        {'name': co.IMG_TABLE, 'src': url_for('static', filename='toolhandover_images/table.png')},  # noqa: E501
     ]
     # yapf: enable
   else:

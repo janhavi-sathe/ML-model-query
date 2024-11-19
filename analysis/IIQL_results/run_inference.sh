@@ -17,11 +17,11 @@ python analysis/IIQL_results/infer_latent.py --alg "miql" \
 
 python analysis/IIQL_results/infer_latent.py --alg "miql" \
       --env "CleanupSingle-v0" --ndata 50 --logroot "result_lambda" \
-      --modelpath "sv2/2023-09-24_07-22-36/model/iq_CleanupSingle-v0_n50_l10_best"
+      --modelpath "newsv2seed0/2023-10-07_07-06-36/model/iq_CleanupSingle-v0_n50_l10_best"
 
 python analysis/IIQL_results/infer_latent.py --alg "miql" \
-      --env "EnvMovers-v0" --ndata 22 --logroot "result_lambda" \
-      --modelpath "sv2/2023-09-24_05-11-53/model/iq_EnvMovers-v0_n44_l8_best"
+      --env "EnvMovers-v0" --ndata 22 --logroot "result_lambda2" \
+      --modelpath "newsv2seed0/2023-10-07_07-03-41/model/iq_EnvMovers-v0_n44_l8_1292" 
 #
 # OGAIL
 # python analysis/IIQL_results/infer_latent.py --alg "ogail" \
@@ -71,8 +71,8 @@ python analysis/IIQL_results/infer_latent.py --alg "oiql" \
       --modelpath "sv2/2023-09-24_08-03-29/model/iq_CleanupSingle-v0_n50_l10_best"
 
 python analysis/IIQL_results/infer_latent.py --alg "oiql" \
-      --env "EnvMovers-v0" --ndata 22 --logroot "result_lambda" \
-      --modelpath "sv2/2023-09-24_06-05-01/model/iq_EnvMovers-v0_n44_l8_best"
+      --env "EnvMovers-v0" --ndata 22 --logroot "result_desk" \
+      --modelpath "newsv2seed0/2023-10-07_09-17-02/model/iq_EnvMovers-v0_n44_l8_best"
 
 
 

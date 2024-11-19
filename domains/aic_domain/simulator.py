@@ -51,12 +51,17 @@ class Simulator():
     raise NotImplementedError
 
   def run_simulation(self, num_iter: int, file_name_prefix, *args, **kwargs):
-    for idx in tqdm(range(num_iter)):
+    start = 0
+    if "start" in kwargs:
+      start = int(kwargs["start"])
+    for idx in tqdm(range(start, start+num_iter)):
       while not self.is_finished():
         map_agent_2_action = self.get_joint_action()
         self.take_a_step(map_agent_2_action)
       file_name = file_name_prefix + "%d.txt" % (idx, )
-      self.save_history(file_name, *args, **kwargs)
+      kwargs2 = kwargs.copy()
+      if "start" in kwargs2: del kwargs2["start"]
+      self.save_history(file_name, *args, **kwargs2)
       self.reset_game()
 
   @classmethod
