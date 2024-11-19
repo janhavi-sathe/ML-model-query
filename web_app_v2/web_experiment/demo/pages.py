@@ -1,6 +1,6 @@
 from web_experiment.exp_common.page_base import Exp1UserData
-from web_experiment.exp_common.page_boxpushv2_base import BoxPushV2UserRandom
-from web_experiment.exp_common.page_rescue_game import RescueGameUserRandom
+from web_experiment.exp_common.page_boxpushv2_base import BoxPushV2GamePage
+from web_experiment.exp_common.page_rescue_game import RescueGamePage
 from web_experiment.exp_common.page_rescue_v2_game import RescueV2GameUserRandom
 from web_experiment.exp_common.page_tooldelivery_game import (
     ToolDeliveryUserRandom)
@@ -9,19 +9,14 @@ from web_experiment.exp_common.page_toolhandover_base import (
 from aic_domain.tool_handover_v2.surgery_info import CABG_INFO
 
 
-class BoxPushV2Demo(BoxPushV2UserRandom):
-
+class DemoMixin():
   def _on_game_finished(self, user_game_data: Exp1UserData):
 
+    user_game_data.data[Exp1UserData.PAGE_DONE] = True
     user_game_data.data[Exp1UserData.GAME_DONE] = True
-
-    game = user_game_data.get_game_ref()
-    # update score
-    user_game_data.data[Exp1UserData.SCORE] = game.current_step
 
     # move to start page
     user_game_data.data[Exp1UserData.PAGE_IDX] = 0
-    self.init_user_data(user_game_data)
 
   def _get_score_text(self, user_data: Exp1UserData):
     game = user_data.get_game_ref()
@@ -32,18 +27,14 @@ class BoxPushV2Demo(BoxPushV2UserRandom):
     return "Time Taken: " + str(score)
 
 
-class RescueDemo(RescueGameUserRandom):
+class BoxPushV2Demo(DemoMixin, BoxPushV2GamePage):
+  def __init__(self, domain_type, partial_obs, latent_collection=True) -> None:
+    super().__init__(domain_type, partial_obs, latent_collection)
 
-  def _on_game_finished(self, user_game_data: Exp1UserData):
-    user_game_data.data[Exp1UserData.GAME_DONE] = True
 
-    game = user_game_data.get_game_ref()
-    # update score
-    user_game_data.data[Exp1UserData.SCORE] = game.current_step
-
-    # move to start page
-    user_game_data.data[Exp1UserData.PAGE_IDX] = 0
-    self.init_user_data(user_game_data)
+class RescueDemo(DemoMixin, RescueGamePage):
+  def __init__(self, partial_obs, latent_collection=True) -> None:
+    super().__init__(partial_obs, latent_collection)
 
   def _get_score_text(self, user_data: Exp1UserData):
     game = user_data.get_game_ref()
@@ -51,7 +42,7 @@ class RescueDemo(RescueGameUserRandom):
       score = 0
       time_taken = 0
     else:
-      score = user_data.get_game_ref().get_score()
+      score = user_data.get_game_ref().score
       time_taken = user_data.get_game_ref().current_step
 
     text_score = "Time Taken: " + str(time_taken) + "\n"

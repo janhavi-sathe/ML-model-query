@@ -23,12 +23,13 @@ aws_web_app/venv/
 *_trajectories/
 *_data/
 output/
-human_data/
 result*/
 experts/
 outputs/
-wandb/
 profile*
+wandb/
+venv/
+multirun/
 
 
 *.log
