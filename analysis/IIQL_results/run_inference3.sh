@@ -17,11 +17,11 @@ python analysis/IIQL_results/infer_latent.py --alg "miql" \
 
 python analysis/IIQL_results/infer_latent.py --alg "miql" \
       --env "CleanupSingle-v0" --ndata 50 --logroot "result_lambda" \
-      --modelpath "sv2seed2/2023-10-05_22-10-05/model/iq_CleanupSingle-v0_n50_l10_best"
+      --modelpath "newsv2seed2/2023-10-07_07-07-18/model/iq_CleanupSingle-v0_n50_l10_3531"
 
 python analysis/IIQL_results/infer_latent.py --alg "miql" \
-      --env "EnvMovers-v0" --ndata 22 --logroot "result_desk" \
-      --modelpath "sv2seed2/2023-10-05_21-55-01/model/iq_EnvMovers-v0_n44_l8_best"
+      --env "EnvMovers-v0" --ndata 22 --logroot "result_lambda2" \
+      --modelpath "newsv2seed2/2023-10-07_07-04-49/model/iq_EnvMovers-v0_n44_l8_1727"
 
 # OGAIL
 python analysis/IIQL_results/infer_latent.py --alg "ogail" \

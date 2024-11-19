@@ -218,23 +218,13 @@ class BoxPushAIAgent_BTIL(AIAgent_Abstract):
   def update_mental_state(self, tup_cur_state, tup_actions, tup_nxt_state):
     'tup_actions: tuple of actions'
 
-    mdp = self.agent_model.get_reference_mdp()  # type: LatentMDP
-    sidx_cur = mdp.conv_sim_states_to_mdp_sidx(tup_cur_state)
-    sidx_nxt = mdp.conv_sim_states_to_mdp_sidx(tup_nxt_state)
-
-    list_aidx = []
-    for idx, act in enumerate(tup_actions):
-      if act is None:
-        list_aidx.append(None)
-      else:
-        list_aidx.append(mdp.dict_factored_actionspace[idx].action_to_idx[act])
-
     if self.np_coach is not None:
+      mdp = self.agent_model.get_reference_mdp()  # type: LatentMDP
+      sidx_nxt = mdp.conv_sim_states_to_mdp_sidx(tup_nxt_state)
       xidx = self.get_coaching_x(sidx_nxt)
       self.agent_model.set_init_mental_state_idx(None, init_latent=xidx)
     else:
-      self.agent_model.update_mental_state_idx(sidx_cur, tuple(list_aidx),
-                                               sidx_nxt)
+      super().update_mental_state(tup_cur_state, tup_actions, tup_nxt_state)
 
 
 class BoxPushAIAgent_BTIL_ABS(AIAgent_Abstract):

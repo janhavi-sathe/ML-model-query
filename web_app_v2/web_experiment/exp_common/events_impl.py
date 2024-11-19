@@ -26,7 +26,7 @@ def get_imgs(domain_type: EDomainType):
         {'name': co.IMG_ROBOT_BAG, 'src': url_for('static', filename='boxpush_images/robot_bag.svg')},  # noqa: E501
     ]
     # yapf: enable
-  elif domain_type == EDomainType.Rescue:
+  elif domain_type in [EDomainType.Rescue, EDomainType.Blackout]:
     # yapf: disable
     imgs = [
         {'name': co.IMG_WORK, 'src': url_for('static', filename='rescue_images/warning.svg')},  # noqa: E501
@@ -45,10 +45,56 @@ def get_imgs(domain_type: EDomainType):
         {'name': co.IMG_TOWER, 'src': url_for('static', filename='rescue_images/tower.svg')},  # noqa: E501
     ]
     # yapf: enable
+  elif domain_type == EDomainType.ToolDelivery:
+    # yapf: disable
+    imgs = [
+        {'name': co.IMG_CABINET, 'src': url_for('static', filename='tooldelivery_images/cabinet.png')},  # noqa: E501
+        {'name': co.IMG_CIRCULATING, 'src': url_for('static', filename='tooldelivery_images/circulating.png')},  # noqa: E501
+        {'name': co.IMG_HUMAN, 'src': url_for('static', filename='tooldelivery_images/human.png')},  # noqa: E501
+        {'name': co.IMG_PERF, 'src': url_for('static', filename='tooldelivery_images/human.png')},  # noqa: E501
+        {'name': co.IMG_ANES, 'src': url_for('static', filename='tooldelivery_images/human.png')},  # noqa: E501
+        {'name': co.IMG_PATIENT, 'src': url_for('static', filename='tooldelivery_images/patient.png')},  # noqa: E501
+        {'name': co.IMG_SCALPEL_STORED, 'src': url_for('static', filename='tooldelivery_images/scalpel.png')},  # noqa: E501
+        {'name': co.IMG_SCALPEL_PREPARED, 'src': url_for('static', filename='tooldelivery_images/scalpel.png')},  # noqa: E501
+        {'name': co.IMG_SUTURE_STORED, 'src': url_for('static', filename='tooldelivery_images/suture.png')},  # noqa: E501
+        {'name': co.IMG_SUTURE_PREPARED, 'src': url_for('static', filename='tooldelivery_images/suture.png')},  # noqa: E501
+        {'name': co.IMG_SCRUB, 'src': url_for('static', filename='tooldelivery_images/scrub.png')},  # noqa: E501
+        {'name': co.IMG_STORAGE, 'src': url_for('static', filename='tooldelivery_images/storage.png')},  # noqa: E501
+        {'name': co.IMG_SURGEON, 'src': url_for('static', filename='tooldelivery_images/surgeon.png')},  # noqa: E501
+        {'name': co.IMG_TABLE, 'src': url_for('static', filename='tooldelivery_images/table.png')},  # noqa: E501
+    ]
+    # yapf: enable
+  elif domain_type == EDomainType.ToolHandover:
+    # yapf: disable
+    imgs = [
+        {'name': co.IMG_FORCEPS, 'src': url_for('static', filename='toolhandover_images/forceps.png')},  # noqa: E501
+        {'name': co.IMG_NURSE, 'src': url_for('static', filename='toolhandover_images/nurse.png')},  # noqa: E501
+        {'name': co.IMG_PATIENT, 'src': url_for('static', filename='toolhandover_images/patient.svg')},  # noqa: E501
+        {'name': co.IMG_SCALPEL, 'src': url_for('static', filename='toolhandover_images/scalpel.png')},  # noqa: E501
+        {'name': co.IMG_SCISSORS, 'src': url_for('static', filename='toolhandover_images/scissors.png')},  # noqa: E501
+        {'name': co.IMG_SURGEON, 'src': url_for('static', filename='toolhandover_images/surgeon.png')},  # noqa: E501
+        {'name': co.IMG_SUTURE, 'src': url_for('static', filename='toolhandover_images/suture.png')},  # noqa: E501
+        {'name': co.IMG_TABLE, 'src': url_for('static', filename='toolhandover_images/table.png')},  # noqa: E501
+    ]
+    # yapf: enable
   else:
     raise ValueError("invalid domain")
 
   return imgs
+
+
+def update_created_obj_names(user_data: UserData, commands, drawing_objs):
+  'to keep track of the objects created on javascript side'
+  if commands is not None:
+    if "clear" in commands:
+      user_data.data[UserData.DRAW_OBJ_NAMES].clear()
+    elif "delete" in commands:
+      for obj_name in commands["delete"]:
+        user_data.data[UserData.DRAW_OBJ_NAMES].discard(obj_name)
+
+  if drawing_objs is not None:
+    for key in drawing_objs:
+      user_data.data[UserData.DRAW_OBJ_NAMES].add(key)
 
 
 def initial_canvas(sid, name_space, session_name: str, user_game_data: UserData,
@@ -69,7 +115,11 @@ def initial_canvas(sid, name_space, session_name: str, user_game_data: UserData,
 
   cur_page.init_user_data(user_game_data)
   page_drawing_info = cur_page.get_updated_drawing_info(user_game_data)
-  commands, drawing_objs, drawing_order, animations = page_drawing_info
+  commands, drawing_objs, animations = page_drawing_info
+
+  update_created_obj_names(user_game_data, commands, drawing_objs)
+
+  drawing_order = cur_page.get_drawing_order(user_game_data)
 
   imgs = get_imgs(domain_type)
 
@@ -89,18 +139,25 @@ def button_clicked(sid, name_space, button, user_game_data: UserData,
   dict_prev_game_data = user_game_data.get_data_to_compare()
 
   page_lists[page_idx].button_clicked(user_game_data, button)
-  page_drawing_info = page_lists[page_idx].get_updated_drawing_info(
-      user_game_data, button, dict_prev_game_data)
 
-  new_page_idx = user_game_data.data[UserData.PAGE_IDX]
-  if page_idx != new_page_idx:
-    updated_page = page_lists[new_page_idx]
-    updated_page.init_user_data(user_game_data)
-    page_drawing_info = updated_page.get_updated_drawing_info(user_game_data)
+  new_page_idx = user_game_data.data[UserData.PAGE_IDX]  # type: int
+  page_done = user_game_data.data[UserData.PAGE_DONE]
+
+  page_toshow = page_lists[new_page_idx]
+  if page_done:
+    page_toshow.init_user_data(user_game_data)
+    page_drawing_info = page_toshow.get_updated_drawing_info(user_game_data)
+  else:
+    page_drawing_info = page_toshow.get_updated_drawing_info(
+        user_game_data, button, dict_prev_game_data)
 
   updated_task_done = user_game_data.data[UserData.SESSION_DONE]
 
-  commands, drawing_objs, drawing_order, animations = page_drawing_info
+  commands, drawing_objs, animations = page_drawing_info
+  update_created_obj_names(user_game_data, commands, drawing_objs)
+
+  drawing_order = page_toshow.get_drawing_order(user_game_data)
+
   update_gamedata(commands=commands,
                   drawing_objects=drawing_objs,
                   drawing_order=drawing_order,

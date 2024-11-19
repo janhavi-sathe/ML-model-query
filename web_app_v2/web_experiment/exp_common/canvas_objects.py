@@ -11,13 +11,14 @@ BTN_RIGHT = "Right"
 BTN_STAY = "Stay"
 BTN_PICK_UP = "Pick Up"
 BTN_DROP = "Drop"
+BTN_HANDOVER = "Handover"
 BTN_NEXT = "Next"
 BTN_PREV = "Prev"
 BTN_SELECT = "Select Destination"
 BTN_START = "Start"
 
 ACTION_BUTTONS = [
-    BTN_UP, BTN_DOWN, BTN_LEFT, BTN_RIGHT, BTN_STAY, BTN_PICK_UP, BTN_DROP
+    BTN_UP, BTN_DOWN, BTN_LEFT, BTN_RIGHT, BTN_STAY, BTN_PICK_UP, BTN_DROP, BTN_HANDOVER
 ]
 
 JOYSTICK_BUTTONS = [BTN_UP, BTN_DOWN, BTN_LEFT, BTN_RIGHT, BTN_STAY]
@@ -57,13 +58,38 @@ IMG_AMBULANCE = "ambulance"
 IMG_TOWER = "tower"
 IMG_THUNDER = "thunder"
 
+# images for tooldelivery domain
+IMG_CABINET = "cabinet"
+IMG_CIRCULATING = "circulating"
+IMG_PERF = "perf"
+IMG_ANES = "anes"
+IMG_HUMAN = "human"
+IMG_PATIENT = "patient"
+IMG_SCALPEL_PREPARED = "scalpel_prepared"
+IMG_SCALPEL_STORED = "scalpel_stored"
+IMG_SUTURE_PREPARED = "suture_prepared"
+IMG_SUTURE_STORED = "suture_stored"
+IMG_SCRUB = "scrub"
+IMG_STORAGE = "storage"
+IMG_SURGEON = "surgeon"
+IMG_TABLE = "table"
+
+# images for toolhandover domain
+IMG_NURSE = "nurse"
+IMG_SURGEON = "surgeon"
+IMG_TABLE = "table"
+IMG_PATIENT = "patient"
+IMG_FORCEPS = "forceps"
+IMG_SCALPEL = "scalpel"
+IMG_SCISSORS = "scissors"
+IMG_SUTURE = "suture"
+
 ################################################################################
 # Classes here should always match with corresponding javascript classes
 ################################################################################
 
 
 class DrawingObject:
-
   def __init__(self, name: str):
     self.name = name
 
@@ -72,7 +98,6 @@ class DrawingObject:
 
 
 class ClippedRectangle(DrawingObject):
-
   def __init__(self,
                name: str,
                outer_ltwh: Sequence[int],
@@ -93,7 +118,6 @@ class ClippedRectangle(DrawingObject):
 
 
 class LineSegment(DrawingObject):
-
   def __init__(self,
                name: str,
                start: Sequence[int],
@@ -111,7 +135,6 @@ class LineSegment(DrawingObject):
 
 
 class Curve(DrawingObject):
-
   def __init__(self,
                name: str,
                coords: Sequence[Tuple[int, int]],
@@ -127,7 +150,6 @@ class Curve(DrawingObject):
 
 
 class Primitive(DrawingObject):
-
   def __init__(self,
                name: str,
                fill_color: str = "black",
@@ -146,7 +168,6 @@ class Primitive(DrawingObject):
 
 
 class Rectangle(Primitive):
-
   def __init__(self,
                name: str,
                pos: Sequence[int],
@@ -170,7 +191,6 @@ class Rectangle(Primitive):
 
 
 class Ellipse(Primitive):
-
   def __init__(self,
                name: str,
                pos: Sequence[int],
@@ -194,7 +214,6 @@ class Ellipse(Primitive):
 
 
 class Circle(Primitive):
-
   def __init__(self,
                name: str,
                pos: Sequence[int],
@@ -218,7 +237,6 @@ class Circle(Primitive):
 
 
 class BlinkCircle(Circle):
-
   def __init__(self,
                name: str,
                pos: Sequence[int],
@@ -242,7 +260,6 @@ class BlinkCircle(Circle):
 
 
 class ButtonObject(Primitive):
-
   def __init__(self,
                name: str,
                pos: Sequence[int],
@@ -275,7 +292,6 @@ class ButtonObject(Primitive):
 
 
 class ButtonRect(ButtonObject):
-
   def __init__(self,
                name: str,
                pos: Sequence[int],
@@ -311,7 +327,6 @@ class ButtonRect(ButtonObject):
 
 
 class ButtonCircle(ButtonObject):
-
   def __init__(self,
                name: str,
                pos: Sequence[int],
@@ -347,7 +362,6 @@ class ButtonCircle(ButtonObject):
 
 
 class ThickArrow(ButtonObject):
-
   def __init__(self,
                name: str,
                pos: Sequence[int],
@@ -369,7 +383,6 @@ class ThickArrow(ButtonObject):
 
 
 class JoystickObject(ButtonObject):
-
   def __init__(self,
                name: str,
                pos: Sequence[int],
@@ -388,62 +401,61 @@ class JoystickObject(ButtonObject):
 
 
 class JoystickUp(JoystickObject):
-
   def __init__(self,
                pos: Sequence[int],
                width: int,
                fill_color: str = "black",
-               disable: bool = False):
-    super().__init__(BTN_UP, pos, width, fill_color, disable)
+               disable: bool = False,
+               name: str = BTN_UP):
+    super().__init__(name, pos, width, fill_color, disable)
     self.obj_type = "JoystickUp"
 
 
 class JoystickDown(JoystickObject):
-
   def __init__(self,
                pos: Sequence[int],
                width: int,
                fill_color: str = "black",
-               disable: bool = False):
-    super().__init__(BTN_DOWN, pos, width, fill_color, disable)
+               disable: bool = False,
+               name: str = BTN_DOWN):
+    super().__init__(name, pos, width, fill_color, disable)
     self.obj_type = "JoystickDown"
 
 
 class JoystickLeft(JoystickObject):
-
   def __init__(self,
                pos: Sequence[int],
                width: int,
                fill_color: str = "black",
-               disable: bool = False):
-    super().__init__(BTN_LEFT, pos, width, fill_color, disable)
+               disable: bool = False,
+               name: str = BTN_LEFT):
+    super().__init__(name, pos, width, fill_color, disable)
     self.obj_type = "JoystickLeft"
 
 
 class JoystickRight(JoystickObject):
-
   def __init__(self,
                pos: Sequence[int],
                width: int,
                fill_color: str = "black",
-               disable: bool = False):
-    super().__init__(BTN_RIGHT, pos, width, fill_color, disable)
+               disable: bool = False,
+               name: str = BTN_RIGHT):
+    super().__init__(name, pos, width, fill_color, disable)
     self.obj_type = "JoystickRight"
 
 
 class JoystickStay(JoystickObject):
-
   def __init__(self,
                pos: Sequence[int],
                width: int,
                fill_color: str = "black",
-               disable: bool = False):
-    super().__init__(BTN_STAY, pos, width, fill_color, disable)
+               disable: bool = False,
+               name: str = BTN_STAY):
+    super().__init__(name, pos, width, fill_color, disable)
     self.obj_type = "JoystickStay"
 
 
 class TextObject(DrawingObject):
-
   def __init__(self,
                name: str,
                pos: Sequence[int],
@@ -465,7 +477,6 @@ class TextObject(DrawingObject):
 
 
 class GameObject(DrawingObject):
-
   def __init__(self, name: str, pos: Sequence[int], size: Sequence[int],
                angle: float, img_name: str):
     super().__init__(name)
@@ -477,7 +488,6 @@ class GameObject(DrawingObject):
 
 
 class SelectingCircle(ButtonCircle):
-
   def __init__(self, name: str, pos: Sequence[int], radius: int, font_size: int,
                text: str):
     super().__init__(name,
