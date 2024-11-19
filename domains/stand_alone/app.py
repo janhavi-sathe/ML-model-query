@@ -1,11 +1,14 @@
+import abc
 from typing import Hashable, Tuple
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
 from aic_domain.simulator import Simulator
+from PIL import Image, ImageTk
+import threading
 
 
 # TODO: game configuration ui / logic
-class AppInterface():
+class AppInterface(abc.ABC):
 
   def __init__(self) -> None:
     self.main_window = None
@@ -21,10 +24,13 @@ class AppInterface():
     self._event_based = True
     self._trajectory = None
     self._current_step = 0
+    self.cached_images = {}
+    self._key_timer = None
 
   def run(self):
     self.main_window.mainloop()
 
+  @abc.abstractmethod
   def _init_game(self):
     'define game related variables and objects'
     # self.game = Simulator()
@@ -141,14 +147,29 @@ class AppInterface():
     else:
       self._trajectory = None
 
+  @abc.abstractmethod
   def _conv_key_to_agent_event(self,
                                key_sym) -> Tuple[Hashable, Hashable, Hashable]:
-    pass
+    return None, None, None
 
+  @abc.abstractmethod
   def _conv_mouse_to_agent_event(
       self, is_left: bool,
       cursor_pos: Tuple[float, float]) -> Tuple[Hashable, Hashable, Hashable]:
-    pass
+    return None, None, None
+
+  def _process_key_event_in_game(self):
+    action_map = self.game.get_joint_action()
+    self.game.take_a_step(action_map)
+
+    if not self.game.is_finished():
+      # update canvas
+      self._update_ctrl_ui()
+      self._update_canvas_scene()
+      self._update_canvas_overlay()
+      # pop-up for latent?
+    else:
+      self._on_game_end()
 
   def _on_key_pressed(self, key_event):
     if not self._started:
@@ -156,20 +177,25 @@ class AppInterface():
 
     agent, e_type, e_value = self._conv_key_to_agent_event(key_event.keysym)
     self.game.event_input(agent, e_type, e_value)
-    if self._event_based:
-      action_map = self.game.get_joint_action()
-      self.game.take_a_step(action_map)
 
-      if not self.game.is_finished():
-        # update canvas
-        self._update_ctrl_ui()
-        self._update_canvas_scene()
-        self._update_canvas_overlay()
-        # pop-up for latent?
-      else:
-        self._on_game_end()
-    else:
-      pass
+    if self._key_timer is None or not self._key_timer.is_alive():
+      self._key_timer = threading.Timer(0.03, self._process_key_event_in_game)
+      self._key_timer.start()
+
+    # if self._event_based:
+    #   action_map = self.game.get_joint_action()
+    #   self.game.take_a_step(action_map)
+
+    #   if not self.game.is_finished():
+    #     # update canvas
+    #     self._update_ctrl_ui()
+    #     self._update_canvas_scene()
+    #     self._update_canvas_overlay()
+    #     # pop-up for latent?
+    #   else:
+    #     self._on_game_end()
+    # else:
+    #   pass
 
   def _on_mouse_l_btn_clicked(self, event):
     if not self._started:
@@ -237,8 +263,17 @@ class AppInterface():
                                    y_pos_ed,
                                    fill=color)
 
-  def create_text(self, x_center, y_center, txt, color='black'):
-    return self.canvas.create_text(x_center, y_center, text=txt, fill=color)
+  def create_text(self, x_center, y_center, txt, color='black', font=None):
+    if font is None:
+      font = ("Purisa", 10, 'bold')
+    if color is None:
+      color = 'black'
+
+    return self.canvas.create_text(x_center,
+                                   y_center,
+                                   text=txt,
+                                   fill=color,
+                                   font=font)
 
   def create_triangle(self, x_st, y_st, width, height, color):
     x_pos_1 = x_st

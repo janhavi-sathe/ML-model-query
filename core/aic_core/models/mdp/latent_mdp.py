@@ -10,8 +10,11 @@ from aic_core.utils.mdp_utils import StateSpace
 class LatentMDP(MDP):
   """MDP with one latent state"""
 
-  def __init__(self, fast_cache_mode: bool = False, use_sparse: bool = False):
-    super().__init__(fast_cache_mode, use_sparse)
+  def __init__(self,
+               fast_cache_mode: bool = False,
+               use_sparse: bool = False,
+               cache_file_path: str = ""):
+    super().__init__(fast_cache_mode, use_sparse, cache_file_path)
 
     # Define latent state space.
     self.init_latentspace()

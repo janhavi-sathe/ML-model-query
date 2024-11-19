@@ -667,9 +667,11 @@ class GameObject extends DrawingObject {
 
   draw(context) {
     super.draw(context);
+    // console.log("WE GOT TO THE FUNCTION", this.img);
     if (this.img != null) {
       context.globalAlpha = 1.0;
       if (this.angle == 0.0) {
+        // console.log("printing image , ", this.img, this.name);
         context.drawImage(this.img, this.left, this.top, this.w, this.h);
       } else {
         const x_cen = this.left + 0.5 * this.w;
@@ -835,6 +837,7 @@ class GameData {
     this.dict_imgs = {};
 
     for (const item of obj_json.imgs) {
+      // console.log("this is the img dict", item.name, item.src, JSON.stringify(item));
       this.dict_imgs[item.name] = new Image();
       this.dict_imgs[item.name].src = item.src;
     }
@@ -885,6 +888,7 @@ class GameData {
   update_drawing_objects(obj_json) {
     for (const item of obj_json.drawing_objects) {
       let tmp_obj = null;
+      // console.log("this is of type", item.obj_type);
       if (item.obj_type == "ButtonRect") {
         tmp_obj = new ButtonRect(
           item.name,
@@ -954,6 +958,7 @@ class GameData {
           item.angle,
           this.dict_imgs[item.img_name]
         );
+        // console.log("hi m y name is", item.name, tmp_obj.img, this.dict_imgs);
       }
 
       if (tmp_obj != null) {
@@ -983,9 +988,11 @@ class GameData {
     for (const item of this.drawing_order) {
       if (this.dict_drawing_objs.hasOwnProperty(item)) {
         const obj = this.dict_drawing_objs[item];
+        // console.log("which item", item, obj.name, obj.constructor.name, JSON.stringify(obj));
         if (obj.interactive) {
           obj.draw_with_mouse_move(context, x_mouse, y_mouse);
         } else {
+          // console.log("we drawing dis now");
           obj.draw(context);
         }
       }

@@ -6,9 +6,8 @@ import matplotlib
 import time
 from aic_ml.BTIL.btil_static import BTILStatic
 from aic_core.utils.static_inference import (bayesian_mental_state_inference)
-from tests.examples.environment import RequestEnvironment
-from tests.examples.tooldelivery_v3_env import ToolDeliveryEnv_V3
-
+from aic_domain.tooldelivery.environment import RequestEnvironment
+from aic_domain.tooldelivery.tooldelivery_v3_env import ToolDeliveryEnv_V3
 
 def read_sample(file_name):
   traj = []

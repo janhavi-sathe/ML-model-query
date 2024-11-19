@@ -79,6 +79,7 @@ def get_valid_box_to_pickup(game: BoxPushSimulator):
 # canvas page game
 ###############################################################################
 class BoxPushGamePageBase(ExperimentPageBase):
+
   def __init__(self,
                domain_type: EDomainType,
                game_map,

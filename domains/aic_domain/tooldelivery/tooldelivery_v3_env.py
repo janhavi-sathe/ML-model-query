@@ -1,11 +1,14 @@
+import os
 import numpy as np
-from tests.examples.environment import RequestEnvironment
-from tests.examples.tooldelivery_v3_mdp import ToolDeliveryMDP_V3
-from tests.examples.tooldelivery_v3_policy import ToolDeliveryPolicy_V3
-import tests.examples.tooldelivery_v3_state_action as T3SA
+from aic_domain.tooldelivery.environment import RequestEnvironment
+from aic_domain.tooldelivery.tooldelivery_v3_mdp import ToolDeliveryMDP_V3
+from aic_domain.tooldelivery.tooldelivery_v3_policy import (
+    ToolDeliveryPolicy_V3)
+import aic_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
 
 
 class ToolDeliveryEnv_V3(RequestEnvironment):
+
   def __init__(self, use_policy=True):
     td_mmdp = ToolDeliveryMDP_V3()
     policy = ToolDeliveryPolicy_V3(td_mmdp) if use_policy else None
@@ -91,6 +94,7 @@ class ToolDeliveryEnv_V3(RequestEnvironment):
     return False
 
   def get_latentstate(self, obstate_idx):
+
     def choice_latent_state(np_prior_p_latent):
       lat_state = None
       if np_prior_p_latent[0][0] == 1.0:
@@ -165,10 +169,14 @@ if __name__ == "__main__":
   env = ToolDeliveryEnv_V3()
   np_init_p_state = env.get_initial_state_dist()
   start_idx = np_init_p_state[0][1]
+  data_path = os.path.join(os.path.dirname(__file__), "data/")
+  if not os.path.exists(data_path):
+    os.makedirs(data_path)
+
   list_sequence, list_latent_state = env.generate_sequence(
       start_idx.astype(np.int32),
       timeout=1000,
       save=True,
-      file_name='./examples/sequence4.txt')
+      file_name=data_path + 'sequence4.txt')
 
   print(list_latent_state)

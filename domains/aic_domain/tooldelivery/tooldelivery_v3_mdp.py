@@ -2,10 +2,11 @@ import numpy as np
 from aic_core.models.mdp import MDP
 from aic_core.utils.mdp_utils import StateSpace, ActionSpace
 from aic_core.utils.exceptions import InvalidTransitionError
-import tests.examples.tooldelivery_v3_state_action as T3SA
+import aic_domain.tooldelivery.tooldelivery_v3_state_action as T3SA
 
 
 class ToolDeliveryMDP_V3(MDP):
+
   def __init__(self):
     self.num_tools = len(T3SA.ToolNames)
     self.num_x_grid = 5
@@ -13,8 +14,11 @@ class ToolDeliveryMDP_V3(MDP):
     self.cabinet_loc = (2, 4)
     self.storage_loc = (0, 4)
     self.handover_loc = (4, 1)
-    self.walls = [(1.5, i) for i in range(self.num_y_grid)]
-    self.doors = [(1.5, 1)]
+    self.walls = []
+    for idx in range(self.num_y_grid):
+      if idx != 1:  # y = 1 is a door
+        self.walls.append((1.95, idx))
+
     super().__init__()
     self.num_agents = 3
 
@@ -89,6 +93,7 @@ class ToolDeliveryMDP_V3(MDP):
     self._raise_exception_if_illegal_T(sScal_p, sSut_p, sScal_s, sSut_s, sPat,
                                        sCNPos, sAsk, aCN, aSN, aAS)
 
+    # get distributions of next state for scalpel and suture
     np_next_p_sScal_p = self._T_sTool(tool_nm=T3SA.ToolNames.SCALPEL_P,
                                       sTool=sScal_p,
                                       sCNPos=sCNPos,
@@ -150,6 +155,7 @@ class ToolDeliveryMDP_V3(MDP):
 
     return np_next_p_state_idx
 
+  # get distribution of next patient state based on current state and action
   def _T_sPatient(self, sPat, aAS):
     state = self.sPatient_space.idx_to_state[sPat]
     action = self.aAS_space.idx_to_action[aAS]
@@ -174,6 +180,7 @@ class ToolDeliveryMDP_V3(MDP):
     # otherwise, patient status doesn't change
     return np.array([[1., sPat]])
 
+  # check if valid action given state
   def _raise_exception_if_illegal_T(self, sScal_p, sSut_p, sScal_s, sSut_s,
                                     sPatient, sCNPos, sAsked, aCN, aSN, aAS):
     coord_cn = self.sCNPos_space.idx_to_state[sCNPos]
@@ -229,6 +236,7 @@ class ToolDeliveryMDP_V3(MDP):
     if (act_as == T3SA.ActionAS.USE_SUTURE and suture_p_loc != T3SA.ToolLoc.AS):
       raise InvalidTransitionError
 
+  # for given tool get distributions
   def _T_sTool(self, tool_nm, sTool, sCNPos, aCN, aSN, aAS):
     tool_loc = self.dict_sTools_space[tool_nm].idx_to_state[sTool]
     coord_cn = self.sCNPos_space.idx_to_state[sCNPos]
@@ -274,7 +282,7 @@ class ToolDeliveryMDP_V3(MDP):
       return np.array(list_next_p_sTool)
     else:
       return np.array([[1.0, sTool]])
-
+  # get distribution for next CN pos
   def _T_sCNPos(self, sCNPos, aCN):
     coord_cn = self.sCNPos_space.idx_to_state[sCNPos]
     action_cn = self.aCN_space.idx_to_action[aCN]
@@ -303,12 +311,6 @@ class ToolDeliveryMDP_V3(MDP):
       if y_a > y_b:
         y_a, y_b = y_b, y_a
 
-      for x_d, y_d in self.doors:
-        if y_a == y_b and y_a == y_d and x_a < x_d and x_b > x_d:
-          return True
-        if x_a == x_b and x_a == x_d and y_a < y_d and y_b > y_d:
-          return True
-
       for x_w, y_w in self.walls:
         if y_a == y_b and y_a == y_w and x_a < x_w and x_b > x_w:
           return False
@@ -322,6 +324,7 @@ class ToolDeliveryMDP_V3(MDP):
         T3SA.ActionCN.MOVE_RIGHT
     ]
 
+    # if not a move then next state will have same CN pos
     if action_cn not in cn_move_actions:
       return np.array([[1., sCNPos]])
     else:
@@ -340,6 +343,7 @@ class ToolDeliveryMDP_V3(MDP):
 
       return np.array([[1., self.sCNPos_space.state_to_idx[new_coord]]])
 
+  # get distribution for next asked state
   def _T_sAsked(self, sAsked, aSN):
     state = self.sAsked_space.idx_to_state[sAsked]
     action = self.aSN_space.idx_to_action[aSN]

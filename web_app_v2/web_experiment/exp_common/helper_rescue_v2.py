@@ -1,12 +1,9 @@
-from dataclasses import dataclass
 from typing import Mapping, Any, List, Tuple, Callable, Sequence
-import os
-import time
 import numpy as np
 from aic_domain.rescue_v2 import (Place, Route, Location, E_Type, PlaceName,
                                   Work, is_work_done, T_Connections)
 import web_experiment.exp_common.canvas_objects as co
-from web_experiment.exp_common.helper import DrawInfo
+from web_experiment.exp_common.scene_helper import DrawInfo
 
 RESCUE_V2_PLACE_DRAW_INFO = {
     PlaceName.Fire_stateion:

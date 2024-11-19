@@ -11,13 +11,14 @@ BTN_RIGHT = "Right"
 BTN_STAY = "Stay"
 BTN_PICK_UP = "Pick Up"
 BTN_DROP = "Drop"
+BTN_HANDOVER = "Handover"
 BTN_NEXT = "Next"
 BTN_PREV = "Prev"
 BTN_SELECT = "Select Destination"
 BTN_START = "Start"
 
 ACTION_BUTTONS = [
-    BTN_UP, BTN_DOWN, BTN_LEFT, BTN_RIGHT, BTN_STAY, BTN_PICK_UP, BTN_DROP
+    BTN_UP, BTN_DOWN, BTN_LEFT, BTN_RIGHT, BTN_STAY, BTN_PICK_UP, BTN_DROP, BTN_HANDOVER
 ]
 
 JOYSTICK_BUTTONS = [BTN_UP, BTN_DOWN, BTN_LEFT, BTN_RIGHT, BTN_STAY]
@@ -56,6 +57,32 @@ IMG_HOSPITAL = "hospital"
 IMG_AMBULANCE = "ambulance"
 IMG_TOWER = "tower"
 IMG_THUNDER = "thunder"
+
+# images for tooldelivery domain
+IMG_CABINET = "cabinet"
+IMG_CIRCULATING = "circulating"
+IMG_PERF = "perf"
+IMG_ANES = "anes"
+IMG_HUMAN = "human"
+IMG_PATIENT = "patient"
+IMG_SCALPEL_PREPARED = "scalpel_prepared"
+IMG_SCALPEL_STORED = "scalpel_stored"
+IMG_SUTURE_PREPARED = "suture_prepared"
+IMG_SUTURE_STORED = "suture_stored"
+IMG_SCRUB = "scrub"
+IMG_STORAGE = "storage"
+IMG_SURGEON = "surgeon"
+IMG_TABLE = "table"
+
+# images for toolhandover domain
+IMG_NURSE = "nurse"
+IMG_SURGEON = "surgeon"
+IMG_TABLE = "table"
+IMG_PATIENT = "patient"
+IMG_FORCEPS = "forceps"
+IMG_SCALPEL = "scalpel"
+IMG_SCISSORS = "scissors"
+IMG_SUTURE = "suture"
 
 ################################################################################
 # Classes here should always match with corresponding javascript classes
@@ -378,8 +405,9 @@ class JoystickUp(JoystickObject):
                pos: Sequence[int],
                width: int,
                fill_color: str = "black",
-               disable: bool = False):
-    super().__init__(BTN_UP, pos, width, fill_color, disable)
+               disable: bool = False,
+               name: str = BTN_UP):
+    super().__init__(name, pos, width, fill_color, disable)
     self.obj_type = "JoystickUp"
 
 
@@ -388,8 +416,9 @@ class JoystickDown(JoystickObject):
                pos: Sequence[int],
                width: int,
                fill_color: str = "black",
-               disable: bool = False):
-    super().__init__(BTN_DOWN, pos, width, fill_color, disable)
+               disable: bool = False,
+               name: str = BTN_DOWN):
+    super().__init__(name, pos, width, fill_color, disable)
     self.obj_type = "JoystickDown"
 
 
@@ -398,8 +427,9 @@ class JoystickLeft(JoystickObject):
                pos: Sequence[int],
                width: int,
                fill_color: str = "black",
-               disable: bool = False):
-    super().__init__(BTN_LEFT, pos, width, fill_color, disable)
+               disable: bool = False,
+               name: str = BTN_LEFT):
+    super().__init__(name, pos, width, fill_color, disable)
     self.obj_type = "JoystickLeft"
 
 
@@ -408,8 +438,9 @@ class JoystickRight(JoystickObject):
                pos: Sequence[int],
                width: int,
                fill_color: str = "black",
-               disable: bool = False):
-    super().__init__(BTN_RIGHT, pos, width, fill_color, disable)
+               disable: bool = False,
+               name: str = BTN_RIGHT):
+    super().__init__(name, pos, width, fill_color, disable)
     self.obj_type = "JoystickRight"
 
 
@@ -418,8 +449,9 @@ class JoystickStay(JoystickObject):
                pos: Sequence[int],
                width: int,
                fill_color: str = "black",
-               disable: bool = False):
-    super().__init__(BTN_STAY, pos, width, fill_color, disable)
+               disable: bool = False,
+               name: str = BTN_STAY):
+    super().__init__(name, pos, width, fill_color, disable)
     self.obj_type = "JoystickStay"
 
 
