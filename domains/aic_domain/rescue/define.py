@@ -48,11 +48,14 @@ class Location:
     return f"{self.type.name}, {self.id}, {self.index}"
 
   def __eq__(self, other) -> bool:
-    if self.type == E_Type.Route:
-      return (self.type == other.type and self.id == other.id
-              and self.index == other.index)
-    else:
-      return (self.type == other.type and self.id == other.id)
+    if isinstance(other, Location):
+      if self.type == E_Type.Route:
+        return (self.type == other.type and self.id == other.id
+                and self.index == other.index)
+      else:
+        return (self.type == other.type and self.id == other.id)
+
+    return False
 
   def __hash__(self) -> int:
     return hash(repr(self))
@@ -100,3 +103,18 @@ def is_work_done(widx, work_states: Sequence[int], couples: Sequence):
         return True
 
   return False
+
+
+def get_score(work_states, work_info, places):
+  rescued_place = []
+  for idx in range(len(work_states)):
+    if is_work_done(idx, work_states, work_info[idx].coupled_works):
+      place_id = work_info[idx].rescue_place
+      if place_id not in rescued_place:
+        rescued_place.append(place_id)
+
+  score = 0
+  for place_id in rescued_place:
+    score += places[place_id].helps
+
+  return score

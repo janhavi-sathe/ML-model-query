@@ -36,6 +36,8 @@ multirun/
 *.csv
 *.orig
 *.mp4
+*.pt
+.ipynb_checkpoints/
 
 aws_data*
 data_old/

@@ -20,7 +20,6 @@ miql_tx_init_temp: 1e-4
 miql_tx_clip_grad_val: null
 miql_tx_num_actor_update: 1
 miql_tx_num_critic_update: 1
-miql_tx_tx_batch_size: 64
 # pi
 miql_pi_activation: relu
 # pi - Q-network

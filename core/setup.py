@@ -21,6 +21,5 @@ setup(name="aic_algorithms",
           'torch',
           'termcolor',
           'tensorboard',
-          'gym==0.21.0',
-          "stable-baselines3<=1.8.0,>=1.1.0",
+          "stable-baselines3",
       ])

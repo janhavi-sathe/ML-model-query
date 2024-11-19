@@ -61,10 +61,12 @@ class BoxPushAIAgent_PartialObs(AIAgent_PartialObs):
         if max_dist(my_pos, coord) <= 1:
           bstate = conv_box_idx_2_state(box_states[idx], num_drops, num_goals)
           if bstate[0] != BoxState.Original:
+            # if not at the original location, first assume it's at goal
             assumed_box_states[idx] = conv_box_state_2_idx(
                 (BoxState.OnGoalLoc, 0), num_drops)
 
       for idx, bidx in enumerate(box_states):
+        # get box position (coordinates). if box is at goal, it will be None
         bpos = None
         bstate = conv_box_idx_2_state(bidx, num_drops, num_goals)
         if bstate[0] == BoxState.Original:
@@ -80,14 +82,18 @@ class BoxPushAIAgent_PartialObs(AIAgent_PartialObs):
 
         prev_bstate = conv_box_idx_2_state(prev_box_states[idx], num_drops,
                                            num_goals)
+        # if previously box was with me but now it's at the goal --> goal
         if (prev_bstate[0] in [e_boxstate_with_me, BoxState.WithBoth]
             and bpos is None):
           assumed_box_states[idx] = conv_box_state_2_idx(
               (BoxState.OnGoalLoc, 0), num_drops)
+        # if previously box was at goal held by friend, i'm close to the goal.
+        # now it's placed at goal
         elif (agent_dist <= 1 and prev_mate_pos == mdp.goals[0]
               and prev_bstate[0] == e_boxstate_with_mate and bpos is None):
           assumed_box_states[idx] = conv_box_state_2_idx(
               (BoxState.OnGoalLoc, 0), num_drops)
+        # box position is not at goal. update only if it's visible by me
         elif bpos is not None:
           if max_dist(my_pos, bpos) <= 1:
             assumed_box_states[idx] = bidx
