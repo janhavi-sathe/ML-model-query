@@ -23,13 +23,13 @@ def main(domain):
   # define the domain where trajectories were generated
   ##################################################
   if domain == "movers":
-    from aic_domain.box_push.utils import BoxPushTrajectories
-    from aic_domain.box_push_v2.agent import BoxPushAIAgent_Team
-    from aic_domain.box_push_v2.maps import MAP_MOVERS
-    from aic_domain.box_push_v3.simulator import BoxPushSimulatorV3
-    from aic_domain.box_push_v3.policy import Policy_MoversV3
-    from aic_domain.box_push_v3.mdp import (MDP_MoversV3_Agent,
-                                            MDP_MoversV3_Task)
+    from TMM.domains.box_push_truck.agent import BoxPushAIAgent_Team
+    from TMM.domains.box_push_truck.maps import MAP_MOVERS
+    from aicoach.domains.trajectories.box_push import BoxPushTrajectories
+    from aicoach.domains.box_push_v3.simulator import BoxPushSimulatorV3
+    from aicoach.domains.box_push_v3.policy import Policy_MoversV3
+    from aicoach.domains.box_push_v3.mdp import (MDP_MoversV3_Agent,
+                                                 MDP_MoversV3_Task)
     sim = BoxPushSimulatorV3(False)
     TEMPERATURE = 0.3
     GAME_MAP = MAP_MOVERS
@@ -45,12 +45,13 @@ def main(domain):
     AGENTS = [AGENT_1, AGENT_2]
     train_data = BoxPushTrajectories(MDP_TASK, MDP_AGENT)
   elif domain == "cleanup_v3":
-    from aic_domain.box_push.utils import BoxPushTrajectories
-    from aic_domain.box_push_v2.agent import BoxPushAIAgent_Indv
-    from aic_domain.box_push_v2.simulator import BoxPushSimulatorV2
-    from aic_domain.box_push_v2.maps import MAP_CLEANUP_V3
-    from aic_domain.box_push_v2.policy import Policy_Cleanup
-    from aic_domain.box_push_v2.mdp import (MDP_Cleanup_Agent, MDP_Cleanup_Task)
+    from TMM.domains.box_push_truck.agent import BoxPushAIAgent_Indv
+    from TMM.domains.box_push_truck.simulator import BoxPushSimulatorV2
+    from TMM.domains.box_push_truck.maps import MAP_CLEANUP_V3
+    from TMM.domains.box_push_truck.policy import Policy_Cleanup
+    from TMM.domains.box_push_truck.mdp import (MDP_Cleanup_Agent,
+                                                MDP_Cleanup_Task)
+    from aicoach.domains.trajectories.box_push import BoxPushTrajectories
     sim = BoxPushSimulatorV2(0)
     TEMPERATURE = 0.3
     GAME_MAP = MAP_CLEANUP_V3
@@ -125,7 +126,8 @@ def main(domain):
   #     traj_sa.append((s, a))
 
   #   traj_sa_joint.append(traj_sa)
-  from gym_custom.envs.mdp_env.env_aicoaching import EnvFromLearnedModels
+  from aicoach.gym_custom.envs.mdp_env.env_aicoaching import (
+      EnvFromLearnedModels)
   env = EnvFromLearnedModels(MDP_TASK,
                              np_abs,
                              list_np_pi,

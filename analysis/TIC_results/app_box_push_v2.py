@@ -1,19 +1,19 @@
 import numpy as np
 import os
-from aic_domain.box_push_v2.simulator import BoxPushSimulatorV2
-from aic_domain.box_push_v2.maps import MAP_MOVERS
-from aic_domain.box_push_v2.maps import MAP_CLEANUP_V3 as MAP_CLEANUP
-from aic_domain.box_push_v2.mdp import (MDP_Movers_Task, MDP_Movers_Agent,
-                                        MDP_Cleanup_Task, MDP_Cleanup_Agent)
-from aic_domain.box_push_v2.policy import Policy_Movers, Policy_Cleanup
-from aic_domain.box_push_v2.agent import (
+from TMM.domains.box_push_truck.simulator import BoxPushSimulatorV2
+from TMM.domains.box_push_truck.maps import MAP_MOVERS
+from TMM.domains.box_push_truck.maps import MAP_CLEANUP_V3 as MAP_CLEANUP
+from TMM.domains.box_push_truck.mdp import (MDP_Movers_Task, MDP_Movers_Agent,
+                                            MDP_Cleanup_Task, MDP_Cleanup_Agent)
+from TMM.domains.box_push_truck.policy import Policy_Movers, Policy_Cleanup
+from TMM.domains.box_push_truck.agent import (
     BoxPushAIAgent_PO_Team, BoxPushAIAgent_PO_Indv, BoxPushAIAgent_BTIL,
     BoxPushAIAgent_BTIL_ABS, BoxPushAIAgent_Team, BoxPushAIAgent_Indv)
-from aic_domain.agent import BTILCachedPolicy
-from stand_alone.app_box_push import BoxPushApp
+from TMM.domains.agent import BTILCachedPolicy
+from aicoach.stand_alone.app_box_push import BoxPushApp
 import pickle
-from aic_core.intervention.feedback_strategy import (get_sorted_x_combos)
-from aic_core.utils.mdp_utils import StateSpace
+from aicoach.algs.intervention.feedback_strategy import (get_sorted_x_combos)
+from TMM.models.mdp import StateSpace
 
 TEST_BTIL_AGENT = True
 TEST_BTIL_USE_TRUE_TX = False
@@ -58,6 +58,7 @@ else:
 
 
 class BoxPushV2App(BoxPushApp):
+
   def __init__(self) -> None:
     super().__init__()
 

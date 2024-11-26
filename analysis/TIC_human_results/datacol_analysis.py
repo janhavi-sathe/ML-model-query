@@ -1,12 +1,12 @@
 import os
 import glob
 import numpy as np
-from aic_domain.box_push_v2.maps import MAP_MOVERS
-from aic_domain.rescue.maps import MAP_RESCUE
-from aic_domain.box_push_v2.mdp import MDP_Movers_Agent, MDP_Movers_Task
-from aic_domain.rescue.mdp import MDP_Rescue_Agent, MDP_Rescue_Task
-from aic_domain.box_push.utils import BoxPushTrajectories
-from aic_domain.rescue.utils import RescueTrajectories
+from TMM.domains.box_push_truck.maps import MAP_MOVERS
+from TMM.domains.rescue.maps import MAP_RESCUE
+from TMM.domains.box_push_truck.mdp import MDP_Movers_Agent, MDP_Movers_Task
+from TMM.domains.rescue.mdp import MDP_Rescue_Agent, MDP_Rescue_Task
+from aicoach.domains.trajectories.box_push import BoxPushTrajectories
+from aicoach.domains.trajectories.rescue import RescueTrajectories
 
 if __name__ == "__main__":
   dir_name = "/home/sangwon/Projects/ai_coach/analysis/TIC_results/human_data/"

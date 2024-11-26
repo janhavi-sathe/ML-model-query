@@ -1,22 +1,21 @@
 import os
 from omegaconf import OmegaConf
-from pettingzoo_domain.labor_division import (TwoTargetDyadLaborDivision,
-                                              ThreeTargetDyadLaborDivision,
-                                              LDExpert_V2)
-from pettingzoo_domain.labor_division_v2 import (TwoTargetDyadLaborDivisionV2,
-                                                 ThreeTargetDyadLaborDivisionV2,
-                                                 LDv2Expert)
-from pettingzoo_domain.po_movers_v2 import PO_Movers_V2, PO_Movers_AIAgent
-from pettingzoo_domain.po_flood_v2 import PO_Flood_V2, PO_Flood_AIAgent
-from aic_domain.box_push_v2.maps import MAP_MOVERS
-from aic_domain.box_push_v2.mdp import (MDP_Movers_Agent, MDP_Movers_Task)
-from aic_domain.box_push_v2.policy import Policy_Movers
-from aic_domain.rescue.maps import MAP_RESCUE
-from aic_domain.rescue.policy import Policy_Rescue
-from aic_domain.rescue.mdp import MDP_Rescue_Agent, MDP_Rescue_Task
+from dtil.pettingzoo_envs.labor_division import (TwoTargetDyadLaborDivision,
+                                                 ThreeTargetDyadLaborDivision,
+                                                 LDExpert_V2)
+from dtil.pettingzoo_envs.labor_division_v2 import (
+    TwoTargetDyadLaborDivisionV2, ThreeTargetDyadLaborDivisionV2, LDv2Expert)
+from dtil.pettingzoo_envs.po_movers_v2 import PO_Movers_V2, PO_Movers_AIAgent
+from dtil.pettingzoo_envs.po_flood_v2 import PO_Flood_V2, PO_Flood_AIAgent
+from TMM.domains.box_push_truck.maps import MAP_MOVERS
+from TMM.domains.box_push_truck.mdp import (MDP_Movers_Agent, MDP_Movers_Task)
+from TMM.domains.box_push_truck.policy import Policy_Movers
+from TMM.domains.rescue.maps import MAP_RESCUE
+from TMM.domains.rescue.policy import Policy_Rescue
+from TMM.domains.rescue.mdp import MDP_Rescue_Agent, MDP_Rescue_Task
 
-from aic_ml.baselines.ma_ogail.model.agent import make_agent
-from aic_ml.MAHIL.agent import make_mahil_agent
+from dtil.baselines.ma_ogail.model.agent import make_agent
+from dtil.DTIL.agent import make_mahil_agent
 import bc_loader
 
 

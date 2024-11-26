@@ -1,12 +1,11 @@
-from aic_ml.MentalIQL.agent.make_agent import make_miql_agent
-from aic_ml.OptionIQL.agent.make_agent import make_oiql_agent
-from aic_ml.baselines.option_gail.option_gail_learn import make_gail
-from aic_ml.baselines.IQLearn.utils.utils import make_env
-from aic_ml.MentalIQL.train_miql import (load_expert_data_w_labels)
+from idil.IDIL.agent.make_agent import make_miql_agent
+from idil.IDIL_Joint.agent.make_agent import make_oiql_agent
+from idil.baselines.option_gail.option_gail_learn import make_gail
+from idil.baselines.IQLearn.utils.utils import make_env
+from idil.IDIL.train import (load_expert_data_w_labels)
 import numpy as np
-from aic_core.utils.result_utils import hamming_distance
+from aicoach.algs.utils.result_utils import hamming_distance
 from omegaconf import OmegaConf
-import gym_custom
 import gym
 import torch
 from gym.spaces import Discrete, Box

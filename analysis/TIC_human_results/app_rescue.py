@@ -1,16 +1,16 @@
 from typing import Hashable, Tuple, Sequence
-from stand_alone.app import AppInterface
+from aicoach.stand_alone.app import AppInterface
 import numpy as np
-from aic_domain.rescue import E_EventType, Location, Place, Route, E_Type
-from aic_domain.rescue.maps import MAP_RESCUE
-from aic_domain.rescue.simulator import RescueSimulator
-from aic_domain.agent.cached_agent import BTILCachedPolicy
-from aic_domain.rescue.agent import (AIAgent_Rescue_PartialObs,
-                                     AIAgent_Rescue_BTIL)
-from aic_domain.rescue.policy import Policy_Rescue
-from aic_domain.rescue.mdp import MDP_Rescue_Task, MDP_Rescue_Agent
+from TMM.domains.rescue import E_EventType, Location, Place, Route, E_Type
+from TMM.domains.rescue.maps import MAP_RESCUE
+from TMM.domains.rescue.simulator import RescueSimulator
+from TMM.domains.agent.cached_agent import BTILCachedPolicy
+from TMM.domains.rescue.agent import (AIAgent_Rescue_PartialObs,
+                                      AIAgent_Rescue_BTIL)
+from TMM.domains.rescue.policy import Policy_Rescue
+from TMM.domains.rescue.mdp import MDP_Rescue_Task, MDP_Rescue_Agent
 import pickle
-from aic_core.intervention.feedback_strategy import (get_sorted_x_combos)
+from aicoach.algs.intervention.feedback_strategy import (get_sorted_x_combos)
 
 GAME_MAP = MAP_RESCUE
 
@@ -19,6 +19,7 @@ V_VAL_FILE_NAME = None
 
 
 class RescueApp(AppInterface):
+
   def __init__(self) -> None:
     super().__init__()
 

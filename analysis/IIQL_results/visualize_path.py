@@ -3,11 +3,10 @@ import numpy as np
 from omegaconf import OmegaConf
 import cv2
 from itertools import count
-import gym_custom
-from aic_ml.baselines.IQLearn.utils.utils import make_env
+from idil.baselines.IQLearn.utils.utils import make_env
 from infer_latent import load_model
 import torch
-from gym_custom.envs.multiple_goals_2d import MGExpert
+from idil.gym_envs.envs.multiple_goals_2d import MGExpert
 
 
 def draw_triangle(canvas, pt, dir, color):

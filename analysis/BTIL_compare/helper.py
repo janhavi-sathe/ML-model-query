@@ -3,8 +3,8 @@ import os
 import warnings
 import logging
 import pickle
-from aic_domain.box_push.mdp import BoxPushMDP
-from aic_domain.rescue.mdp import MDP_Rescue
+from TMM.domains.box_push.mdp import BoxPushMDP
+from TMM.domains.rescue.mdp import MDP_Rescue
 
 g_loaded_transition_model = None
 

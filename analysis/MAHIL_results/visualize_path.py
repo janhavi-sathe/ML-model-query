@@ -2,9 +2,8 @@ import os
 import numpy as np
 from omegaconf import OmegaConf
 import cv2
-from pettingzoo_domain.labor_division_v2 import (TwoTargetDyadLaborDivisionV2,
-                                                 ThreeTargetDyadLaborDivisionV2,
-                                                 LDv2Expert)
+from dtil.pettingzoo_envs.labor_division_v2 import (
+    TwoTargetDyadLaborDivisionV2, ThreeTargetDyadLaborDivisionV2, LDv2Expert)
 
 import env_loader
 import itertools

@@ -5,19 +5,19 @@ import pickle
 import click
 import logging
 
-import aic_ml.BTIL.btil_static as var_infer
-from aic_core.utils.static_inference import (bayesian_mental_state_inference)
-from aic_ml.IRL.maxent_irl import MaxEntIRL
-from aic_ml.baselines.tabular_bc import tabular_behavior_cloning
-from aic_core.utils.data_utils import Trajectories
-from aic_core.utils.result_utils import cal_latent_policy_error
-import aic_ml.baselines.ikostrikov_gail as ikostrikov
+import BTIL.btil_static as var_infer
+from aicoach.algs.utils.static_inference import (bayesian_mental_state_inference
+                                                 )
+from aicoach.algs.IRL.maxent_irl import MaxEntIRL
+from aicoach.algs.utils.data_utils import Trajectories
+from aicoach.algs.utils.result_utils import cal_latent_policy_error
+import aicoach.algs.BTIL_baselines.ikostrikov_gail as ikostrikov
 
-from aic_domain.box_push.maps import TUTORIAL_MAP
-from aic_domain.box_push.simulator import BoxPushSimulator_AloneOrTogether
-from aic_domain.box_push_static.mdp import StaticBoxPushMDP
-from aic_domain.box_push_static.agent import (StaticBoxPushPolicy,
-                                              StaticBoxPushAgent)
+from TMM.domains.box_push.maps import TUTORIAL_MAP
+from aicoach.domains.box_push_static.simulator import BoxPushSimulator_AloneOrTogether
+from aicoach.domains.box_push_static.mdp import StaticBoxPushMDP
+from aicoach.domains.box_push_static.agent import (StaticBoxPushPolicy,
+                                                   StaticBoxPushAgent)
 import matplotlib.pyplot as plt
 
 BoxPushSimulator = BoxPushSimulator_AloneOrTogether
@@ -226,38 +226,24 @@ def main(gen_trainset, gen_testset, show_true, show_bc, dnn_bc, show_sl,
         pi_a2 = np.zeros(
             (MDP_AGENT.num_latents, MDP_AGENT.num_states, joint_num_action[1]))
 
-        if dnn_bc:
-          logging.info("BC by DNN")
-          train_data.set_num_samples_to_use(idx)
-          trajectories_bc = train_data.get_trajectories_fragmented_by_latent(
-              include_next_state=False)
+        logging.info("BC by DNN")
+        train_data.set_num_samples_to_use(idx)
+        trajectories_bc = train_data.get_trajectories_fragmented_by_latent(
+            include_next_state=False)
 
-          for xidx in range(MDP_AGENT.num_latents):
-            pi_a1[xidx] = ikostrikov.bc_dnn(MDP_AGENT.num_states,
-                                            joint_num_action[0],
-                                            trajectories_bc[0][xidx],
-                                            demo_batch_size=gail_batch_size,
-                                            ppo_batch_size=ppo_batch_size,
-                                            bc_pretrain_steps=pretrain_steps)
-            pi_a2[xidx] = ikostrikov.bc_dnn(MDP_AGENT.num_states,
-                                            joint_num_action[1],
-                                            trajectories_bc[1][xidx],
-                                            demo_batch_size=gail_batch_size,
-                                            ppo_batch_size=ppo_batch_size,
-                                            bc_pretrain_steps=pretrain_steps)
-        else:
-          logging.info("Tabular BC")
-          train_data.set_num_samples_to_use(idx)
-          trajectories_bc = train_data.get_trajectories_fragmented_by_latent(
-              include_next_state=False)
-
-          for xidx in range(MDP_AGENT.num_latents):
-            pi_a1[xidx] = tabular_behavior_cloning(trajectories_bc[0][xidx],
-                                                   MDP_AGENT.num_states,
-                                                   joint_num_action[0])
-            pi_a2[xidx] = tabular_behavior_cloning(trajectories_bc[1][xidx],
-                                                   MDP_AGENT.num_states,
-                                                   joint_num_action[1])
+        for xidx in range(MDP_AGENT.num_latents):
+          pi_a1[xidx] = ikostrikov.bc_dnn(MDP_AGENT.num_states,
+                                          joint_num_action[0],
+                                          trajectories_bc[0][xidx],
+                                          demo_batch_size=gail_batch_size,
+                                          ppo_batch_size=ppo_batch_size,
+                                          bc_pretrain_steps=pretrain_steps)
+          pi_a2[xidx] = ikostrikov.bc_dnn(MDP_AGENT.num_states,
+                                          joint_num_action[1],
+                                          trajectories_bc[1][xidx],
+                                          demo_batch_size=gail_batch_size,
+                                          ppo_batch_size=ppo_batch_size,
+                                          bc_pretrain_steps=pretrain_steps)
         list_pi_bc = [pi_a1, pi_a2]
         # print(np.sum(pi_a1 != 1 / 6))
 
@@ -392,7 +378,7 @@ def main(gen_trainset, gen_testset, show_true, show_bc, dnn_bc, show_sl,
         [[0] * len(sim.box_states), sim.a1_init, sim.a2_init])
 
     if magail:
-      from aic_ml.baselines.magail import magail_w_ppo
+      from aicoach.algs.BTIL_baselines.magail import magail_w_ppo
 
       def magail_by_latent(trajectories, latent_labels, init_state):
         n_traj = len(trajectories)
@@ -511,7 +497,7 @@ def main(gen_trainset, gen_testset, show_true, show_bc, dnn_bc, show_sl,
         logging.info(policy_errors)
 
     if magail_latent:
-      from aic_ml.baselines.latent_magail import lmagail_w_ppo
+      from aicoach.algs.BTIL_baselines.latent_magail import lmagail_w_ppo
       for idx in list_idx:
         logging.info("#########")
         logging.info("LatentMAGAIL %d" % (idx, ))

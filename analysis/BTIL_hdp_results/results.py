@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import click
-from aic_core.utils.mdp_utils import StateSpace
+from TMM.models.mdp import StateSpace
 
 
 # yapf: disable
@@ -16,14 +16,14 @@ def main(domain, num_runs, learner):
   # define the domain where trajectories were generated
   ##################################################
   if domain == "movers":
-    from aic_domain.box_push_v2.maps import MAP_MOVERS
-    from aic_domain.agent.cached_agent import (BTILCachedPolicy,
-                                               NoMindCachedPolicy)
-    from aic_domain.box_push_v2.agent import (BoxPushAIAgent_BTIL,
-                                              AIAgent_NoMind)
-    from aic_domain.box_push_v3.simulator import BoxPushSimulatorV3
-    from aic_domain.box_push_v3.mdp import (MDP_MoversV3_Agent,
-                                            MDP_MoversV3_Task)
+    from TMM.domains.box_push_truck.maps import MAP_MOVERS
+    from TMM.domains.agent.cached_agent import (BTILCachedPolicy,
+                                                NoMindCachedPolicy)
+    from TMM.domains.box_push_truck.agent import (BoxPushAIAgent_BTIL,
+                                                  AIAgent_NoMind)
+    from aicoach.domains.box_push_v3.simulator import BoxPushSimulatorV3
+    from aicoach.domains.box_push_v3.mdp import (MDP_MoversV3_Agent,
+                                                 MDP_MoversV3_Task)
 
     sim = BoxPushSimulatorV3(False)
     sim.max_steps = 200

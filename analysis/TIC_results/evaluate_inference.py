@@ -3,7 +3,7 @@ import glob
 import numpy as np
 import random
 import pandas as pd
-from aic_core.utils.decoding import forward_inference
+from aicoach.algs.utils.decoding import forward_inference
 import load_domain
 
 

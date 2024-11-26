@@ -3,19 +3,20 @@ import pickle
 import itertools
 from typing import Sequence, Tuple, Mapping
 import numpy as np
-from aic_core.models.mdp import MDP
-from aic_core.utils.mdp_utils import StateSpace
-from aic_core.RL.planning import value_iteration
+from TMM.models.mdp import MDP
+from TMM.models.mdp import StateSpace
+from TMM.algs import value_iteration
 
-from aic_domain.rescue_v2 import (Route, E_EventType, E_Type, Location, Work,
-                                  Place, T_Connections, AGENT_ACTIONSPACE,
-                                  is_work_done)
-from aic_domain.rescue_v2.transition import transition, find_location_index
-from aic_domain.rescue_v2.maps import MAP_RESCUE
-from aic_domain.rescue_v2.simulator import RescueSimulatorV2
+from TMM.domains.rescue_v2 import (Route, E_EventType, E_Type, Location, Work,
+                                   Place, T_Connections, AGENT_ACTIONSPACE,
+                                   is_work_done)
+from TMM.domains.rescue_v2.transition import transition, find_location_index
+from TMM.domains.rescue_v2.maps import MAP_RESCUE
+from TMM.domains.rescue_v2.simulator import RescueSimulatorV2
 
 
 class MMDP_RescueV2(MDP):
+
   def __init__(self, routes: Sequence[Route], places: Sequence[Place],
                connections: Mapping[int, T_Connections],
                work_locations: Sequence[Location], work_info: Sequence[Work],

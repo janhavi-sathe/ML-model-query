@@ -4,10 +4,10 @@ import click
 import logging
 import random
 import numpy as np
-from aic_ml.BTIL.btil_for_two import BTILforTwo
-from aic_domain.box_push.utils import BoxPushTrajectories
-from aic_domain.box_push.agent_model import (assumed_initial_mental_distribution
-                                             )
+from aicoach.algs.BTIL_legacy.btil_for_two import BTILforTwo
+from aicoach.domains.trajectories.box_push import BoxPushTrajectories
+from TMM.domains.box_push.agent_model import (
+    assumed_initial_mental_distribution)
 import compute_dynamic_data_results as tbp
 
 

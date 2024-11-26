@@ -4,8 +4,8 @@ import torch
 import os
 import pandas as pd
 import env_loader
-from aic_core.utils.result_utils import hamming_distance
-from aic_ml.MAHIL.helper.utils import load_trajectories
+from aicoach.algs.utils.result_utils import hamming_distance
+from dtil.helper.utils import load_trajectories
 
 
 def get_stats_about_x(list_inferred_x, list_true_x):

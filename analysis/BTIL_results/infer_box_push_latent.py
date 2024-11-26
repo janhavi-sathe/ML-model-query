@@ -1,17 +1,18 @@
 import numpy as np
 import os
-from aic_core.utils.decoding import (most_probable_sequence, forward_inference)
-from aic_domain.box_push.agent_model import (assumed_initial_mental_distribution
-                                             )
+from aicoach.algs.utils.decoding import (most_probable_sequence,
+                                         forward_inference)
+from TMM.domains.box_push.agent_model import (
+    assumed_initial_mental_distribution)
 
 if __name__ == "__main__":
   import glob
   import os
-  from aic_domain.box_push.utils import BoxPushTrajectories
+  from aicoach.domains.trajectories.box_push import BoxPushTrajectories
 
-  import aic_domain.box_push.maps as bp_maps
-  import aic_domain.box_push.simulator as bp_sim
-  import aic_domain.box_push.mdp as bp_mdp
+  import TMM.domains.box_push.maps as bp_maps
+  import TMM.domains.box_push.simulator as bp_sim
+  import TMM.domains.box_push.mdp as bp_mdp
 
   # Set the domain
   ############################################################################

@@ -8,20 +8,20 @@ import warnings
 import matplotlib.pyplot as plt
 import time
 
-from aic_ml.BTIL.btil_for_two import BTILforTwo
-from aic_core.utils.decoding import (most_probable_sequence)
-from aic_core.utils.result_utils import (norm_hamming_distance,
-                                         alignment_sequence,
-                                         cal_latent_policy_error)
+from aicoach.algs.BTIL_legacy.btil_for_two import BTILforTwo
+from aicoach.algs.utils.decoding import (most_probable_sequence)
+from aicoach.algs.utils.result_utils import (norm_hamming_distance,
+                                             alignment_sequence,
+                                             cal_latent_policy_error)
 
-from aic_domain.helper import TrueModelConverter
-import aic_domain.box_push.maps as bp_maps
-import aic_domain.box_push.simulator as bp_sim
-import aic_domain.box_push.mdp as bp_mdp
-import aic_domain.box_push.policy as bp_policy
-import aic_domain.box_push.agent as bp_agent
-from aic_domain.box_push.utils import BoxPushTrajectories
-from aic_domain.box_push.agent_model import get_holding_box_and_floor_boxes
+from aicoach.domains.helper import TrueModelConverter
+import TMM.domains.box_push.maps as bp_maps
+import TMM.domains.box_push.simulator as bp_sim
+import TMM.domains.box_push.mdp as bp_mdp
+import TMM.domains.box_push.policy as bp_policy
+import TMM.domains.box_push.agent as bp_agent
+from aicoach.domains.trajectories.box_push import BoxPushTrajectories
+from TMM.domains.box_push.agent_model import get_holding_box_and_floor_boxes
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data/")
 

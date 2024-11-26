@@ -3,18 +3,20 @@ import abc
 import pickle
 from typing import Sequence, Tuple, Union
 import numpy as np
-from aic_core.models.mdp import MDP
-from aic_core.utils.mdp_utils import StateSpace
-from aic_core.RL.planning import value_iteration
-from aic_domain.box_push_v2 import BoxState, AGENT_ACTIONSPACE
-from aic_domain.box_push_v2 import (conv_box_state_2_idx, conv_box_idx_2_state)
-from aic_domain.box_push_v2.transition import transition_mixed
-from aic_domain.box_push_v2.maps import (MAP_MOVERS, MAP_CLEANUP_V2,
-                                         MAP_CLEANUP_V3)
-from aic_domain.box_push_v2.simulator import BoxPushSimulatorV2
+from TMM.models.mdp import MDP
+from TMM.models.mdp import StateSpace
+from TMM.algs import value_iteration
+from TMM.domains.box_push_truck import BoxState, AGENT_ACTIONSPACE
+from TMM.domains.box_push_truck import (conv_box_state_2_idx,
+                                        conv_box_idx_2_state)
+from TMM.domains.box_push_truck.transition import transition_mixed
+from TMM.domains.box_push_truck.maps import (MAP_MOVERS, MAP_CLEANUP_V2,
+                                             MAP_CLEANUP_V3)
+from TMM.domains.box_push_truck.simulator import BoxPushSimulatorV2
 
 
 class MMDP_BoxPush(MDP):
+
   def __init__(self, x_grid, y_grid, boxes, goals, walls, drops, box_types,
                a1_init, a2_init, **kwargs):
 
@@ -230,6 +232,7 @@ class MMDP_BoxPush(MDP):
 
 
 class MMDP_Movers(MMDP_BoxPush):
+
   def get_possible_box_states(self):
     box_states = [(BoxState.Original, None), (BoxState.WithBoth, None)]
     num_drops = len(self.drops)
@@ -243,6 +246,7 @@ class MMDP_Movers(MMDP_BoxPush):
 
 
 class MMDP_Cleanup(MMDP_BoxPush):
+
   def get_possible_box_states(self):
     box_states = [(BoxState.Original, None), (BoxState.WithAgent1, None),
                   (BoxState.WithAgent2, None)]
