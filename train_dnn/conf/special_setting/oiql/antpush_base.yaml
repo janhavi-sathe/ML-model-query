@@ -1,6 +1,0 @@
-# @package _global_
-
-defaults:
-  - oiql/mujoco_base
-
-n_traj: 253
