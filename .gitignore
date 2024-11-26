@@ -14,7 +14,6 @@ data/
 *.egg-info/
 
 *.pickle
-*.png
 *.npy
 
 aws_web_app/venv/
@@ -49,3 +48,10 @@ package-lock.json
 .eslintrc.json
 package.json
 
+*.png
+!aicoach/domains/tool_handover/images/*.png
+!aicoach/domains/tooldelivery/images/*.png
+!web_experiment/instruction/static/*.png
+!web_experiment/instruction/static/*.mp4
+!web_experiment/static/tooldelivery_images/*.png
+!web_experiment/static/toolhandover_images/*.png

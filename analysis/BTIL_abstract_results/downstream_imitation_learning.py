@@ -4,9 +4,9 @@ import glob
 import click
 from tqdm import tqdm
 import random
-from aic_core.utils.decoding import (smooth_inference_max_z,
-                                     smooth_inference_zx)
-from aic_ml.baselines.sb3_algorithms import behavior_cloning_sb3
+from aicoach.algs.utils.decoding import (smooth_inference_max_z,
+                                         smooth_inference_zx)
+from aicoach.algs.BTIL_baselines.sb3_algorithms import behavior_cloning_sb3
 import numpy as np
 from datetime import datetime
 # rl algorithm
