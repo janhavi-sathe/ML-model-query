@@ -9,6 +9,7 @@ DEMO_TEMPLATE = {
     E_SessionName.Cleanup_partial_dcol: 'session_b_test.html',
     E_SessionName.Rescue_full_dcol: 'session_b_test.html',
     E_SessionName.Rescue_partial_dcol: 'session_b_test.html',
+    E_SessionName.Movers_full_normal: 'session_a_normal.html',
     E_SessionName.Movers_partial_normal: 'session_a_normal.html',
     E_SessionName.Blackout_full_dcol: 'session_b_test.html',
     E_SessionName.Blackout_partial_dcol: 'session_b_test.html',

@@ -14,17 +14,19 @@ class E_SessionName(Enum):
   Cleanup_partial_dcol = 3
   Rescue_full_dcol = 4
   Rescue_partial_dcol = 5
-  Movers_partial_normal = 6
-  Blackout_full_dcol = 7
-  Blackout_partial_dcol = 8
-  ToolDelivery = 9
-  ToolHandover = 10
+  Blackout_full_dcol = 6
+  Blackout_partial_dcol = 7
+  Movers_full_normal = 8
+  Movers_partial_normal = 9
+  ToolDelivery = 10
+  ToolHandover = 11
 
 
 SESSION_TITLE = {
     E_SessionName.Movers_full_dcol: 'Movers - Fully Observable',
     E_SessionName.Movers_partial_dcol: 'Movers - Partially Observable',
-    E_SessionName.Movers_partial_normal: 'Movers - Normal',
+    E_SessionName.Movers_full_normal: 'Movers - Normal(FO)',
+    E_SessionName.Movers_partial_normal: 'Movers - Normal(PO)',
     E_SessionName.Cleanup_full_dcol: 'Cleanup - Fully Observable',
     E_SessionName.Cleanup_partial_dcol: 'Cleanup - Partially Observable',
     E_SessionName.Rescue_full_dcol: 'Rescue - Fully Observable',
@@ -43,7 +45,11 @@ PAGE_LIST_MOVERS = [
     pgc.CanvasPageStart(EDomainType.Movers),
     BoxPushV2Demo(EDomainType.Movers, True),
 ]
-PAGE_LIST_MOVERS_NORMAL = [
+PAGE_LIST_MOVERS_FO_NORMAL = [
+    pgc.CanvasPageStart(EDomainType.Movers),
+    BoxPushV2Demo(EDomainType.Movers, False, False)
+]
+PAGE_LIST_MOVERS_PO_NORMAL = [
     pgc.CanvasPageStart(EDomainType.Movers),
     BoxPushV2Demo(EDomainType.Movers, True, False)
 ]
@@ -93,7 +99,8 @@ GAMEPAGES = {
     E_SessionName.Cleanup_partial_dcol: PAGE_LIST_CLEANUP,
     E_SessionName.Rescue_full_dcol: PAGE_LIST_RESCUE_FULL_OBS,
     E_SessionName.Rescue_partial_dcol: PAGE_LIST_RESCUE,
-    E_SessionName.Movers_partial_normal: PAGE_LIST_MOVERS_NORMAL,
+    E_SessionName.Movers_full_normal: PAGE_LIST_MOVERS_FO_NORMAL,
+    E_SessionName.Movers_partial_normal: PAGE_LIST_MOVERS_PO_NORMAL,
     E_SessionName.Blackout_full_dcol: PAGE_LIST_BLACKOUT_FULL_OBS,
     E_SessionName.Blackout_partial_dcol: PAGE_LIST_BLACKOUT,
     E_SessionName.ToolDelivery: PAGE_LIST_TOOLDELIVERY,
