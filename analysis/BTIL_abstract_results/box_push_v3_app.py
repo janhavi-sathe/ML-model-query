@@ -1,18 +1,20 @@
 import numpy as np
 import os
-from aic_domain.box_push_v3.simulator import BoxPushSimulatorV3
-from aic_domain.box_push_v2.maps import MAP_MOVERS
-from aic_domain.box_push_v2.maps import MAP_CLEANUP_V3 as MAP_CLEANUP
-from aic_domain.box_push_v3.mdp import (MDP_MoversV3_Task, MDP_MoversV3_Agent,
-                                        MDP_CleanupV3_Task, MDP_CleanupV3_Agent)
-from aic_domain.box_push_v3.policy import Policy_MoversV3, Policy_CleanupV3
-from aic_domain.box_push_v2.agent import (
+from TMM.domains.box_push_truck.maps import MAP_MOVERS
+from TMM.domains.box_push_truck.maps import MAP_CLEANUP_V3 as MAP_CLEANUP
+from TMM.domains.box_push_truck.agent import (
     BoxPushAIAgent_PO_Team, BoxPushAIAgent_PO_Indv, BoxPushAIAgent_BTIL,
     BoxPushAIAgent_BTIL_ABS, BoxPushAIAgent_Team, BoxPushAIAgent_Indv)
-from aic_domain.agent import BTILCachedPolicy
-from stand_alone.app_box_push import BoxPushApp
+from TMM.domains.agent import BTILCachedPolicy
+from TMM.models.mdp import StateSpace
+from aicoach.domains.box_push_v3.simulator import BoxPushSimulatorV3
+from aicoach.domains.box_push_v3.mdp import (MDP_MoversV3_Task,
+                                             MDP_MoversV3_Agent,
+                                             MDP_CleanupV3_Task,
+                                             MDP_CleanupV3_Agent)
+from aicoach.domains.box_push_v3.policy import Policy_MoversV3, Policy_CleanupV3
+from aicoach.stand_alone.app_box_push import BoxPushApp
 import pickle
-from aic_core.utils.mdp_utils import StateSpace
 
 num_train = 1000
 num_x = 4
@@ -52,6 +54,7 @@ manual_latent2 = None
 
 
 class BoxPushV2App(BoxPushApp):
+
   def __init__(self) -> None:
     super().__init__()
 

@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 import scipy.stats as stats
 import csv
-from aic_domain.box_push_v2.simulator import BoxPushSimulatorV2
-from aic_domain.rescue.simulator import RescueSimulator
+from TMM.domains.box_push_truck.simulator import BoxPushSimulatorV2
+from TMM.domains.rescue.simulator import RescueSimulator
 
 sns.set_theme(style="white")
 

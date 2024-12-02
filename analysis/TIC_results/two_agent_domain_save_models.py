@@ -5,8 +5,8 @@ import logging
 import random
 import numpy as np
 # from aic_ml.BTIL import BTIL
-from aic_ml.BTIL.btil_decentral import BTIL_Decen
-from aic_ml.BTIL.btil_svi import BTIL_SVI
+from aicoach.algs.BTIL_legacy.btil_decentral import BTIL_Decen
+from BTIL.btil_svi import BTIL_SVI
 import load_domain
 
 

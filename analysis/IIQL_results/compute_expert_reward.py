@@ -1,7 +1,7 @@
 import random
 import numpy as np
 import torch
-from aic_ml.MentalIQL.train_miql import load_expert_data_w_labels
+from idil.IDIL.train import load_expert_data_w_labels
 import pickle
 
 if __name__ == "__main__":

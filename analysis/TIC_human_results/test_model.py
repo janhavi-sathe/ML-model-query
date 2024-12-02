@@ -1,16 +1,16 @@
 import numpy as np
 import pickle
 import random
-from aic_domain.agent import BTILCachedPolicy
-from aic_domain.box_push_v2.agent import BoxPushAIAgent_BTIL
-from aic_domain.box_push_v2.simulator import BoxPushSimulatorV2
-from aic_domain.box_push_v2.maps import MAP_MOVERS
-from aic_domain.box_push_v2.mdp import (MDP_Movers_Agent, MDP_Movers_Task)
-from aic_domain.rescue.simulator import RescueSimulator
-from aic_domain.rescue.maps import MAP_RESCUE
-from aic_domain.rescue.mdp import MDP_Rescue_Agent, MDP_Rescue_Task
-from aic_domain.rescue.agent import AIAgent_Rescue_BTIL
-from aic_domain.rescue import (Location, E_Type, E_EventType)
+from TMM.domains.agent import BTILCachedPolicy
+from TMM.domains.box_push_truck.agent import BoxPushAIAgent_BTIL
+from TMM.domains.box_push_truck.simulator import BoxPushSimulatorV2
+from TMM.domains.box_push_truck.maps import MAP_MOVERS
+from TMM.domains.box_push_truck.mdp import (MDP_Movers_Agent, MDP_Movers_Task)
+from TMM.domains.rescue.simulator import RescueSimulator
+from TMM.domains.rescue.maps import MAP_RESCUE
+from TMM.domains.rescue.mdp import MDP_Rescue_Agent, MDP_Rescue_Task
+from TMM.domains.rescue.agent import AIAgent_Rescue_BTIL
+from TMM.domains.rescue import (Location, E_Type, E_EventType)
 
 
 def load_models(model_dir, domain):

@@ -4,18 +4,19 @@ import pickle
 import logging
 import click
 from tqdm import tqdm
-from aic_core.intervention.full_mdp import FullMDP
-from aic_core.models.mdp import v_value_from_policy
+from aicoach.algs.intervention.full_mdp import FullMDP
+from TMM.models.mdp import v_value_from_policy
 
-from aic_domain.rescue_v2 import E_EventType
-from aic_domain.rescue_v2 import is_work_done
-from aic_domain.rescue_v2.transition import find_location_index
-from aic_domain.rescue_v2.maps import MAP_RESCUE
-from aic_domain.rescue_v2.mdp import MDP_Rescue_Agent
-from aic_domain.rescue_v2.mdp import MDP_Rescue_Task
+from TMM.domains.rescue_v2 import E_EventType
+from TMM.domains.rescue_v2 import is_work_done
+from TMM.domains.rescue_v2.transition import find_location_index
+from TMM.domains.rescue_v2.maps import MAP_RESCUE
+from TMM.domains.rescue_v2.mdp import MDP_Rescue_Agent
+from TMM.domains.rescue_v2.mdp import MDP_Rescue_Task
 
 
 class FullMDP_Rescue2(FullMDP):
+
   def reward(self, state_idx: int, action_idx: int) -> float:
     if self.is_terminal(state_idx):
       return 0

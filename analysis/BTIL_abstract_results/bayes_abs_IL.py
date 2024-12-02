@@ -5,7 +5,7 @@ import click
 from tqdm import tqdm
 import random
 
-from aic_ml.baselines.ikostrikov_gail import bc_dnn
+from aicoach.algs.BTIL_baselines.ikostrikov_gail import bc_dnn
 import numpy as np
 from datetime import datetime
 
@@ -18,13 +18,13 @@ def main(domain, num_abstates):
   # define the domain where trajectories were generated
   ##################################################
   if domain == "movers":
-    from aic_domain.box_push.utils import BoxPushTrajectories
-    from aic_domain.box_push_v2.agent import BoxPushAIAgent_Team
-    from aic_domain.box_push_v2.maps import MAP_MOVERS
-    from aic_domain.box_push_v3.simulator import BoxPushSimulatorV3
-    from aic_domain.box_push_v3.policy import Policy_MoversV3
-    from aic_domain.box_push_v3.mdp import (MDP_MoversV3_Agent,
-                                            MDP_MoversV3_Task)
+    from TMM.domains.box_push_truck.agent import BoxPushAIAgent_Team
+    from TMM.domains.box_push_truck.maps import MAP_MOVERS
+    from aicoach.domains.trajectories.box_push import BoxPushTrajectories
+    from aicoach.domains.box_push_v3.simulator import BoxPushSimulatorV3
+    from aicoach.domains.box_push_v3.policy import Policy_MoversV3
+    from aicoach.domains.box_push_v3.mdp import (MDP_MoversV3_Agent,
+                                                 MDP_MoversV3_Task)
     sim = BoxPushSimulatorV3(False)
     TEMPERATURE = 0.3
     GAME_MAP = MAP_MOVERS

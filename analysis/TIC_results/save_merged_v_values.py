@@ -4,21 +4,22 @@ import pickle
 import logging
 import click
 from tqdm import tqdm
-from aic_core.intervention.full_mdp import FullMDP
-from aic_core.models.mdp import v_value_from_policy
+from aicoach.algs.intervention.full_mdp import FullMDP
+from TMM.models.mdp import v_value_from_policy
 
-from aic_domain.box_push_v2 import EventType
-from aic_domain.box_push_v2.mdp import MDP_Movers_Task, MDP_Movers_Agent
-from aic_domain.box_push_v2.mdp import MDP_Cleanup_Task, MDP_Cleanup_Agent
-from aic_domain.box_push_v2.maps import MAP_MOVERS, MAP_CLEANUP_V3
+from TMM.domains.box_push_truck import EventType
+from TMM.domains.box_push_truck.mdp import MDP_Movers_Task, MDP_Movers_Agent
+from TMM.domains.box_push_truck.mdp import MDP_Cleanup_Task, MDP_Cleanup_Agent
+from TMM.domains.box_push_truck.maps import MAP_MOVERS, MAP_CLEANUP_V3
 
-from aic_domain.rescue.maps import MAP_RESCUE
-from aic_domain.rescue.mdp import MDP_Rescue_Agent, MDP_Rescue_Task
-from aic_domain.rescue import E_EventType, is_work_done
-from aic_domain.rescue.transition import find_location_index
+from TMM.domains.rescue.maps import MAP_RESCUE
+from TMM.domains.rescue.mdp import MDP_Rescue_Agent, MDP_Rescue_Task
+from TMM.domains.rescue import E_EventType, is_work_done
+from TMM.domains.rescue.transition import find_location_index
 
 
 class FullMDP_Rescue(FullMDP):
+
   def reward(self, state_idx: int, action_idx: int) -> float:
     if self.is_terminal(state_idx):
       return 0

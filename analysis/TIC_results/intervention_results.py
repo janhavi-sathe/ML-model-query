@@ -4,13 +4,13 @@ import numpy as np
 import pickle
 import click
 from tqdm import tqdm
-from aic_core.intervention.feedback_strategy import (
+from aicoach.algs.intervention.feedback_strategy import (
     InterventionValueBased, InterventionRuleBased,
     PartialInterventionValueBased, E_CertaintyHandling)
-import aic_domain.intervention_simulator as intervention_simulator
+import aicoach.domains.intervention_simulator as intervention_simulator
 import pandas as pd
-from aic_domain.agent.agent import AIAgent_Abstract
-from aic_domain.box_push.agent_model import get_holding_box_and_floor_boxes
+from TMM.domains.agent.agent import AIAgent_Abstract
+from TMM.domains.box_push.agent_model import get_holding_box_and_floor_boxes
 import load_domain
 
 VALUE = "Value"

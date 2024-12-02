@@ -17,7 +17,7 @@ from imitation.util import logger as sb3_logger
 from pettingzoo.utils.env import ParallelEnv  # noqa: F401
 import wandb
 import omegaconf
-from aic_ml.MAHIL.helper.utils import load_trajectories
+from dtil.helper.utils import load_trajectories
 
 
 class BCActor:

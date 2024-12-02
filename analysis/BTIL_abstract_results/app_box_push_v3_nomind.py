@@ -1,19 +1,20 @@
 import numpy as np
 import os
-from aic_domain.box_push_v3.simulator import BoxPushSimulatorV3
-from aic_domain.box_push_v2.maps import MAP_MOVERS
-from aic_domain.box_push_v2.maps import MAP_CLEANUP_V3 as MAP_CLEANUP
-from aic_domain.box_push_v3.mdp import (MDP_MoversV3_Task, MDP_MoversV3_Agent,
-                                        MDP_CleanupV3_Task, MDP_CleanupV3_Agent)
-from aic_domain.box_push_v3.policy import Policy_MoversV3, Policy_CleanupV3
-from aic_domain.box_push_v2.agent import (BoxPushAIAgent_PO_Team,
-                                          BoxPushAIAgent_PO_Indv,
-                                          BoxPushAIAgent_BTIL,
-                                          BoxPushAIAgent_BTIL_ABS,
-                                          BoxPushAIAgent_Team,
-                                          BoxPushAIAgent_Indv, AIAgent_NoMind)
-from aic_domain.agent.cached_agent import (BTILCachedPolicy, NoMindCachedPolicy)
-from stand_alone.app_box_push import BoxPushApp
+from TMM.domains.box_push_truck.maps import MAP_MOVERS
+from TMM.domains.box_push_truck.maps import MAP_CLEANUP_V3 as MAP_CLEANUP
+from TMM.domains.box_push_truck.agent import (
+    BoxPushAIAgent_PO_Team, BoxPushAIAgent_PO_Indv, BoxPushAIAgent_BTIL,
+    BoxPushAIAgent_BTIL_ABS, BoxPushAIAgent_Team, BoxPushAIAgent_Indv,
+    AIAgent_NoMind)
+from TMM.domains.agent.cached_agent import (BTILCachedPolicy,
+                                            NoMindCachedPolicy)
+from aicoach.domains.box_push_v3.simulator import BoxPushSimulatorV3
+from aicoach.domains.box_push_v3.mdp import (MDP_MoversV3_Task,
+                                             MDP_MoversV3_Agent,
+                                             MDP_CleanupV3_Task,
+                                             MDP_CleanupV3_Agent)
+from aicoach.domains.box_push_v3.policy import Policy_MoversV3, Policy_CleanupV3
+from aicoach.stand_alone.app_box_push import BoxPushApp
 
 TEST_LEARNED_AGENT = True
 IS_MOVERS = True
@@ -42,6 +43,7 @@ else:
 
 
 class BoxPushV2App(BoxPushApp):
+
   def __init__(self) -> None:
     super().__init__()
 
