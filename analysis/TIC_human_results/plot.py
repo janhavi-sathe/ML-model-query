@@ -159,6 +159,7 @@ def conv_survey_2_df(survey_dir):
         rows.append((domain, ugroup, *list_values))
 
   df = pd.DataFrame(rows, columns=[COL_DOMAIN, COL_GROUP, *SURVEY_KEYS])
+  df.replace({0: 5, 1: 4, 2: 3, 3: 2, 4: 1}, inplace=True)
 
   return df
 
@@ -203,7 +204,12 @@ def stat_num_intervention(df, domain):
   print(df_domain_group_b[column].describe())
 
 
-def get_survey_summary(df, domain, group, proportion=False, keys_to_drop=None):
+def get_survey_summary(df,
+                       domain,
+                       group,
+                       proportion=False,
+                       keys_to_drop=None,
+                       print_stats=False):
   df_sub = df[(df[COL_DOMAIN] == domain) & (df[COL_GROUP] == group)]
   if keys_to_drop is not None:
     df_sub = df_sub.drop(columns=keys_to_drop)
@@ -213,30 +219,36 @@ def get_survey_summary(df, domain, group, proportion=False, keys_to_drop=None):
   np_counts = np.zeros((len(survey_keys), 5), dtype=int)
 
   for idx in range(5):
-    count = df_sub[df_sub == idx].count()
+    count = df_sub[df_sub == (idx + 1)].count()
     np_counts[:, idx] = count[2:]
 
   np_counts = (np_counts / np.sum(np_counts, axis=1, keepdims=True) *
                100 if proportion else np_counts)
 
-  for idx, key in enumerate(survey_keys):
-    midhalf = np_counts[idx, 2] / 2
-    posi = np_counts[idx, 0] + np_counts[idx, 1] + midhalf
-    nega = np_counts[idx, 3] + np_counts[idx, 4] + midhalf
-    print(f"{domain}|{group}|{key}| Positive: {posi}, Negative: {nega}")
+  if print_stats:
+    sum_pos = 0
+    sum_neg = 0
+    for idx, key in enumerate(survey_keys):
+      midhalf = np_counts[idx, 2] / 2
+      nega = np_counts[idx, 0] + np_counts[idx, 1] + midhalf
+      posi = np_counts[idx, 3] + np_counts[idx, 4] + midhalf
+      sum_pos += posi
+      sum_neg += nega
+      print(f"{domain}|{group}|{key}| Positive: {posi}, Negative: {nega}")
+
+    if proportion:
+      sum_pos = sum_pos / len(survey_keys)
+      sum_neg = sum_neg / len(survey_keys)
+
+    print(f"{domain}|{group}|Total| Positive: {sum_pos}, Negative: {sum_neg}")
 
   df_counts = pd.DataFrame(np_counts,
                            columns=[
-                               "Strongly Agree", "Agree", "Neutral", "Disagree",
-                               "Strongly Disagree"
+                               "Strongly Disagree", "Disagree", "Neutral",
+                               "Agree", "Strongly Agree"
                            ],
                            index=survey_keys)
 
-  # change order of categories
-  cat_order = [
-      "Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"
-  ]
-  df_counts = df_counts[cat_order]
   return df_counts
 
 
@@ -666,8 +678,8 @@ if __name__ == "__main__":
   PLOT_SURVEY_COUNT = False
   PLOT_SURVEY_STACKED = False
   PLOT_SURVEY_DIVSTACKED = False
-  PLOT_SURVEY_DIVSTACKED2 = False
-  PLOT_SURVEY_DIVSTACKED3 = True
+  PLOT_SURVEY_DIVSTACKED2 = True
+  PLOT_SURVEY_DIVSTACKED3 = False
   if PLOT_TASK_RESULTS:
     USE_SCORE = True
     df = conv_task_results_2_df(traj_dir, intv_dir)

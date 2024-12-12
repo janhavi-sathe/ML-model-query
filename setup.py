@@ -15,5 +15,5 @@ setup(name="aicoach",
       install_requires=[
           'numpy', 'tqdm', 'scipy', 'sparse', 'torch', 'termcolor',
           'tensorboard', "stable-baselines3", 'matplotlib', 'click',
-          'opencv-python'
+          'opencv-python', 'seaborn'
       ])
