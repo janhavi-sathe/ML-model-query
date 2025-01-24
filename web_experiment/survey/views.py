@@ -360,8 +360,10 @@ def completion():
       user.completed = True
       db.session.commit()
 
-      # return redirect(url_for('survey.thankyou'))
-      return redirect(current_app.config['COMPLETION_REDIRECT'])
+      if current_app.config["CONNECTED_TO_PROLIFIC"]:
+        return redirect(current_app.config['COMPLETION_REDIRECT'])
+      else:
+        return redirect(url_for('survey.thankyou'))
 
     flash(error)
 

@@ -13,6 +13,7 @@ EXP_TYPE = "intervention"  # data_collection | intervention
 
 USE_IDENTIFIABLE_URL = True
 REMOVE_HISTORY = False
+CONNECTED_TO_PROLIFIC = False
 COMPLETION_CODE = 'C1CY2NS8'
 COMPLETION_REDIRECT = ("https://app.prolific.com/submissions/complete?cc=" +
                        COMPLETION_CODE)

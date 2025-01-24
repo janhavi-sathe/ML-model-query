@@ -26,11 +26,12 @@ def consent():
     error = None
     user = User.query.filter_by(userid=userid).first()
 
+    connected_to_prolific = current_app.config['CONNECTED_TO_PROLIFIC']
     account_input = request.form['account']
     if user is None:
       error = 'Unregistered Participation Code'
     # user is not yet associated with prolific id and
-    elif user.account_id == '':
+    elif connected_to_prolific and user.account_id == '':
       # the accessed link doesn't contain prolific info.
       if account_input == '':
         # error
