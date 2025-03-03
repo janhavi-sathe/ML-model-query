@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Query and Visualization</title>
+</head>
+<body>
+    <h1>Enter a class value to retrieve model test data.</h1>
+    <input type="number" id="classValue" placeholder="Enter a class value (0 to 4)" style="width: 220px; padding: 8px; font-size: 16px;">
+    <button onclick="fetchData(1)" style="padding: 8px 16px; font-size: 16px;">Search</button>
+    <!-- ✅ 這裡會顯示查詢結果和「上一頁 / 下一頁」按鈕 -->
+    <div id="result" style="margin-top: 20px;"></div>
+
+    <script>
+        let currentPage = 1;  // ✅ 記錄當前頁數
+        const perPage = 10;   // ✅ 每頁顯示筆數
+
+        function fetchData(page = 1) {
+            let classValue = parseInt(document.getElementById("classValue").value, 10);
+            console.log("📤 送出的 class_value:", classValue, "頁數:", page); // 🐞 除錯
+
+            fetch(`/query?class_value=${classValue}&page=${page}&per_page=${perPage}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("📥 伺服器回傳:", data); // 🐞 除錯
+                    let resultContainer = document.getElementById("result");
+
+                    if (data.error) {
+                        resultContainer.innerText = `❌ ${data.error}`;
+                    } else {
+                        currentPage = data.current_page;  // ✅ 更新當前頁數
+
+                        // ✅ 取得所有特徵名稱，確保 index 在最前面
+                        let headers = Object.keys(data.results[0]).sort((a, b) => {
+                            if (a === "Index") return -1; // 讓 Index 永遠排在最前面
+                            let numA = parseInt(a.replace("Feature ", ""));
+                            let numB = parseInt(b.replace("Feature ", ""));
+                            return numA - numB;
+                        });
+
+                        // ✅ 產生表格 HTML
+                        let tableHTML = "<table border='1' style='border-collapse: collapse; width: 100%; text-align: center;'>";
+                        
+                        // ✅ 表頭
+                        tableHTML += "<tr>";
+                        headers.forEach(header => tableHTML += `<th style='padding: 8px; background-color: #f2f2f2;'>${header}</th>`);
+                        tableHTML += "</tr>";
+
+                        // ✅ 插入數據，每筆資料橫排
+                        data.results.forEach(row => {
+                            tableHTML += "<tr>";
+                            headers.forEach(header => tableHTML += `<td style='padding: 8px;'>${row[header]}</td>`);
+                            tableHTML += "</tr>";
+                        });
+
+                        tableHTML += "</table>";
+
+                        // ✅ 加入「上一頁 / 下一頁」按鈕
+                        tableHTML += `
+                            <div style="margin-top: 20px;">
+                                <button onclick="changePage(-1)" ${currentPage === 1 ? "disabled" : ""}>Previous Page</button>
+                                <span>  ${data.current_page} /  ${data.total_pages}  </span>
+                                <button onclick="changePage(1)" ${currentPage === data.total_pages ? "disabled" : ""}>Next Page</button>
+                            </div>
+                        `;
+
+                        resultContainer.innerHTML = tableHTML; // 🚀 插入表格
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("result").innerText = `❌ 發生錯誤：${error.message}`;
+                });
+        }
+
+        // ✅ 切換頁面
+        function changePage(direction) {
+            fetchData(currentPage + direction);
+        }
+
+    </script>
+</body>
+</html>
