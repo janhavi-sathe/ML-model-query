@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Classification Query</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            margin-top: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin-left: 0; /* 靠左對齊 */
+            padding-left: 100px; /* 添加一點間距，避免貼邊 */
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px 25px; /* 第一個值是 row-gap（上下），第二個值是 column-gap（左右） */
+            /*justify-content: start;*/
+            /*padding-left: 10px;*/
+        }
+        .grid img {
+            width: 200px; /* 縮小圖片 */
+            height: auto;
+            border-radius: 5px;
+            border: 1px solid hsl(0, 0%, 87%);
+        }
+        .pagination {
+            margin-top: 10px;
+        }
+        .pagination button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        .pagination button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #loadingMessage {
+            font-size: 20px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Classification Query</h1>
+    <p id="loadingMessage">Loading data, please wait...</p>
+    <div id="queryInterface" style="display: none;">
+        <input type="number" id="imageClassValue" placeholder="Enter an image class value (0 to 9)" style="width: 300px; padding: 8px; font-size: 16px;">
+        <button onclick="fetchImageData()" style="padding: 8px 16px; font-size: 16px;">Search</button>
+    </div>
+    <div class="container">
+        <div id="imageResult" style="margin-top: 2px;"></div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const perPage = 8; // 每頁顯示 8 張圖片
+
+        // 檢查資料是否載入完成
+        function checkLoadingStatus() {
+            fetch('/image_query/check_status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.prediction_done) {
+                        document.getElementById("loadingMessage").style.display = "none";
+                        document.getElementById("queryInterface").style.display = "block";
+                        document.getElementById("imageResult").style.display = "block";
+                    } else {
+                        setTimeout(checkLoadingStatus, 2000); // 每 2 秒檢查一次
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("loadingMessage").innerText = `❌ 錯誤: ${error.message}`;
+                });
+        }
+
+        function fetchImageData(page = 1) {
+            let classValue = parseInt(document.getElementById("imageClassValue").value, 10);
+
+            fetch(`/image_query/image_data/query?class_value=${classValue}&page=${page}&per_page=${perPage}`)
+                .then(response => response.json())
+                .then(data => {
+                    let resultContainer = document.getElementById("imageResult");
+
+                    if (data.error) {
+                        resultContainer.innerText = `❌ ${data.error}`;
+                    } else {
+                        currentPage = data.current_page;
+                        
+                        let imageHTML = "<div class='grid'>";
+                        
+                        data.results.forEach(row => {
+                            imageHTML += `
+                                <div>
+                                    <p>Index ${row.Index}</p>
+                                    <img src="/image_query/image/${row.Index}" alt="Image ${row.Index}">
+                                </div>`;
+                        });
+                        
+                        imageHTML += "</div>";
+                        
+                        // 分頁按鈕
+                        imageHTML += `
+                            <div class="pagination">
+                                <button onclick="changePage(-1)" ${currentPage === 1 ? "disabled" : ""}>⬅️ Previous</button>
+                                <span> Page ${data.current_page} / ${data.total_pages} </span>
+                                <button onclick="changePage(1)" ${currentPage === data.total_pages ? "disabled" : ""}>➡️ Next</button>
+                            </div>
+                        `;
+
+                        resultContainer.innerHTML = imageHTML;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("imageResult").innerText = `❌ Error: ${error.message}`;
+                });
+        }
+
+        function changePage(direction) {
+            fetchImageData(currentPage + direction);
+        }
+
+        // 啟動時檢查數據載入狀態
+        checkLoadingStatus();
+    </script>
+</body>
+</html>

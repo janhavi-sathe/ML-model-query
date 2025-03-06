@@ -17,6 +17,8 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 
+prediction_done = False
+
 def train_model():
     # Parameters
     n_classes = 5
@@ -65,6 +67,10 @@ def train_model():
     joblib.dump(scaler, "scaler.pkl")
 
     print("🎉 模型已儲存！")
+    global prediction_done
+    prediction_done = True
+    print(f"Prediction done: {prediction_done}")
+
 
 
 '''def find_matching_features(target_value, y_pred, X_test):

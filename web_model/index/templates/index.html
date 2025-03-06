@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Selection</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            margin-top: 100px;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+        }
+        .option {
+            padding: 20px;
+            font-size: 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .option:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Select Query Type</h1>
+
+<div class="container">
+    <!-- ✅ 修正 URL，確保與 Flask Blueprint 一致 -->
+    <button class="option" onclick="window.location.href='/query/tabular_data'">Data Classification Query</button>
+    <button class="option" onclick="window.location.href='/image_query/image_data'">Image Classification Query</button>
+</div>
+
+</body>
+</html>

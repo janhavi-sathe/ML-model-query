@@ -3,14 +3,21 @@ from flask import render_template, request, jsonify
 import numpy as np
 import os
 from . import query_bp
+from .. import trainingRL
+
+@query_bp.route('/check_status', methods=['GET'])
+def check_status():
+    """回傳表格數據是否載入完成"""
+    print(f"return prediction_done: {trainingRL.prediction_done}")
+    return jsonify({"prediction_done": trainingRL.prediction_done})
 
 # 查詢畫面（首頁）
-@query_bp.route('/', methods=['GET'])
+@query_bp.route('/tabular_data', methods=['GET'])
 def index():
     return render_template('query_form.html')
 
 # 查詢 API（支援 GET & POST）
-@query_bp.route('/query', methods=['GET', 'POST'])
+@query_bp.route('/tabular_data/query', methods=['GET', 'POST'])
 def query():
     # 取得類別值
     if request.method == "POST":
