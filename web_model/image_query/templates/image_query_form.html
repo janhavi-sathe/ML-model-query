@@ -54,17 +54,30 @@
 <body>
     <h1>Image Classification Query</h1>
     <p id="loadingMessage">Loading data, please wait...</p>
+
+    <!-- 原本的查詢介面 -->
     <div id="queryInterface" style="display: none;">
-        <input type="number" id="imageClassValue" placeholder="Enter an image class value (0 to 9)" style="width: 300px; padding: 8px; font-size: 16px;">
+        <input type="number" id="imageClassValue" placeholder="Enter an image class value (0 to 4)" style="width: 300px; padding: 8px; font-size: 16px;">
         <button onclick="fetchImageData()" style="padding: 8px 16px; font-size: 16px;">Search</button>
     </div>
+
     <div class="container">
         <div id="imageResult" style="margin-top: 2px;"></div>
+    </div>
+
+    <!-- 右側的相似圖片搜尋介面 -->
+    <div id="searchInterface" style="position: absolute; top: 100px; right: 50px; width: 300px;">
+        <h3>Find Similar Images</h3>
+        <input type="number" id="imageIndexValue" placeholder="Enter image index" style="width: 200px; padding: 8px; font-size: 16px;">
+        <button onclick="fetchSimilarImages()" style="padding: 8px 16px; font-size: 16px;">Search</button>
     </div>
 
     <script>
         let currentPage = 1;
         const perPage = 8; // 每頁顯示 8 張圖片
+
+        // 取得分頁按鈕區域
+        const paginationContainer = document.querySelector(".pagination");
 
         // 檢查資料是否載入完成
         function checkLoadingStatus() {
@@ -119,6 +132,12 @@
                         `;
 
                         resultContainer.innerHTML = imageHTML;
+
+                        // 🔥 在這裡選擇 paginationContainer，避免 null
+                        let paginationContainer = document.querySelector(".pagination");
+                        if (paginationContainer) {
+                            paginationContainer.style.display = "block";
+                        }
                     }
                 })
                 .catch(error => {
@@ -128,6 +147,46 @@
 
         function changePage(direction) {
             fetchImageData(currentPage + direction);
+        }
+
+        // 🟢 按 Index 查詢相似圖片（新功能）
+        function fetchSimilarImages() {
+            let imageIndex = parseInt(document.getElementById("imageIndexValue").value, 10);
+            if (isNaN(imageIndex)) {
+                alert("Please enter a valid image index.");
+                return;
+            }
+
+            fetch(`/image_query/find_similar?index=${imageIndex}`)
+                .then(response => response.json())
+                .then(data => {
+                    let resultContainer = document.getElementById("imageResult");
+
+                    if (data.error) {
+                        resultContainer.innerText = `❌ ${data.error}`;
+                    } else {
+                        let imageHTML = "<div class='grid'>";
+                        data.similar_images.forEach(row => {
+                            imageHTML += `
+                                <div>
+                                    <p>Index ${row.Index}</p>
+                                    <img src="/image_query/image/${row.Index}" alt="Image ${row.Index}">
+                                </div>`;
+                        });
+                        imageHTML += "</div>";
+
+                        resultContainer.innerHTML = imageHTML;
+                        
+                        // 🛑 隱藏分頁按鈕
+                        let paginationContainer = document.querySelector(".pagination");
+                        if (paginationContainer) {
+                            paginationContainer.style.display = "none";
+                        }
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("imageResult").innerText = `❌ Error: ${error.message}`;
+                });
         }
 
         // 啟動時檢查數據載入狀態

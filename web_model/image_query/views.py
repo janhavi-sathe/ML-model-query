@@ -36,8 +36,8 @@ def query():
 
     try:
         category = int(category)
-        if category not in range(0, 10):  # ✅ 限制 0~9
-            return jsonify({"error": "Please enter a valid class value (0 to 9)."}), 400
+        if category not in range(0, 5):  # ✅ 限制 0~4
+            return jsonify({"error": "Please enter a valid class value (0 to 4)."}), 400
     except (TypeError, ValueError):
         return jsonify({"error": "The class value must be a number."}), 400
 
@@ -177,3 +177,43 @@ def delayed_remove(file_path, delay=5):
             print(f"Failed to delete {file_path}: {e}")
 
     threading.Thread(target=remove, daemon=True).start()  # 背景執行刪除
+
+@image_query_bp.route('/find_similar', methods=['GET'])
+def find_similar_images():
+    try:
+        image_index = request.args.get("index")
+        if image_index is None:
+            return jsonify({"error": "Missing image index parameter"}), 400
+
+        image_index = int(image_index)
+
+        # 讀取 X_test.npy（圖片特徵）
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        X_test_path = os.path.join(base_path, "..", "X_test.npy")
+
+        X_test_loaded = np.load(X_test_path)  # shape: (num_samples, feature_dim)
+
+        if image_index < 0 or image_index >= len(X_test_loaded):
+            return jsonify({"error": "Image index out of range"}), 404
+
+        # 取得指定圖片的特徵向量
+        query_image_feature = X_test_loaded[image_index]
+
+        # 計算歐幾里得距離
+        distances = np.linalg.norm(X_test_loaded - query_image_feature, axis=1)
+
+        # 取得最相似的 8 張圖片（排除自己）
+        sorted_indices = np.argsort(distances)
+        similar_indices = [int(idx) for idx in sorted_indices if idx != image_index][:8]
+
+        return jsonify({
+            "query_index": image_index,
+            "similar_images": [{"Index": idx} for idx in similar_indices]
+        })
+
+    except ValueError:
+        return jsonify({"error": "Invalid image index"}), 400
+    except FileNotFoundError:
+        return jsonify({"error": "X_test.npy not found"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
