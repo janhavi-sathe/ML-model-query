@@ -1,12 +1,8 @@
-from flask import render_template, request, jsonify, send_file, after_this_request
-
+from flask import render_template, request, jsonify, send_file
 import numpy as np
 import os
 import time
 import threading
-import torch
-from collections import OrderedDict
-from torchvision import transforms
 from PIL import Image
 from . import image_query_bp
 from .. import imageRL
@@ -28,52 +24,51 @@ def query():
     if request.method == "POST":
         category = request.json.get("class_value")
         page = request.json.get("page", 1)  # 預設為第 1 頁
-        per_page = 8  # ✅ 修改為每頁顯示 8 張圖
+        per_page = 8  # 修改為每頁顯示 8 張圖
     else:
         category = request.args.get("class_value")
         page = int(request.args.get("page", 1))  # 預設為第 1 頁
-        per_page = 8  # ✅ 修改為每頁顯示 8 張圖
+        per_page = 8  # 修改為每頁顯示 8 張圖
 
     try:
         category = int(category)
-        if category not in range(0, 5):  # ✅ 限制 0~4
+        if category not in range(0, 5):  # 限制 0~4
             return jsonify({"error": "Please enter a valid class value (0 to 4)."}), 400
     except (TypeError, ValueError):
         return jsonify({"error": "The class value must be a number."}), 400
 
-    print(f"📥 查詢類別: {category}, 頁數: {page}, 每頁顯示: {per_page}")
-
     try:
         # 取得檔案路徑
         base_path = os.path.dirname(os.path.abspath(__file__))
-        X_test_path = os.path.join(base_path, "..", "X_test.npy")
-        y_pred_path = os.path.join(base_path, "..", "y_pred.npy")
+        X_test_path = os.path.join(base_path, "..", "X_test_image.npz")
+        y_pred_path = os.path.join(base_path, "..", "y_pred_image.npy")
+
+        # 載入 X_test_image.npz
+        with np.load(X_test_path) as data:
+            print("X_test_image.npz keys:", list(data.keys()))  # 確保包含 'x'
+            X_test_loaded = data["x"]  # 讀取圖片數據
 
         # 載入檔案
-        X_test_loaded = np.load(X_test_path)
         y_pred_loaded = np.load(y_pred_path)
 
-        print(f"✅ 成功載入 X_test.npy 和 y_pred.npy")
-        print(f"📊 X_test 大小: {X_test_loaded.shape}")
-        print(f"📊 y_pred 大小: {y_pred_loaded.shape}")
+        y_pred_labels = y_pred_loaded.argmax(axis=1)
 
         # 取得符合條件的索引
-        matched_indices = np.where(y_pred_loaded == category)[0]
+        matched_indices = np.where(y_pred_labels == category)[0]
 
         # 查詢篩選
-        filtered_results = X_test_loaded[y_pred_loaded == category]
-        total_results = len(filtered_results)  # 全部資料數量
+        total_results = len(matched_indices)
 
         if total_results == 0:
-            return jsonify({"error": f"沒有找到類別 {category} 的資料"}), 404
+            return jsonify({"error": f"No data found for class {category}."}), 404
         
-        # ✅ 計算分頁範圍
+        # 計算分頁範圍
         start_idx = (page - 1) * per_page
         end_idx = start_idx + per_page
-        paginated_results = filtered_results[start_idx:end_idx]
+        #paginated_results = filtered_results[start_idx:end_idx]
         paginated_indices = matched_indices[start_idx:end_idx]  # 取得對應的 index
 
-        # ✅ 格式化數據（圖片索引）
+        # 格式化數據（圖片索引）
         formatted_results = [{"Index": int(idx)} for idx in paginated_indices]
 
         return jsonify({
@@ -145,18 +140,7 @@ def get_image(index):
         # 先傳送圖片，5 秒後刪除
         delayed_remove(img_path, delay=5)
 
-        '''# 確保 Flask 傳送完圖片後刪除
-        @after_this_request
-        def remove_file(response):
-            try:
-                os.remove(img_path)
-                print(f"Deleted temp file: {img_path}")
-            except Exception as e:
-                print(f"Failed to delete {img_path}: {e}")
-            return response'''
-
         # 返回圖片文件
-        #return send_file(img_path, mimetype='image/png')
         return send_file(img_path, mimetype='image/jpeg')
 
     except FileNotFoundError:
@@ -167,7 +151,7 @@ def get_image(index):
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
     
 def delayed_remove(file_path, delay=5):
-    """ 延遲刪除檔案，確保 Flask 已經成功傳送圖片 """
+    # 延遲刪除檔案，確保 Flask 已經成功傳送圖片
     def remove():
         time.sleep(delay)  # 延遲刪除，確保傳輸完成
         try:

@@ -1,4 +1,3 @@
-from typing import OrderedDict
 from flask import render_template, request, jsonify
 import numpy as np
 import os
@@ -7,7 +6,7 @@ from .. import trainingRL
 
 @query_bp.route('/check_status', methods=['GET'])
 def check_status():
-    """回傳表格數據是否載入完成"""
+    # 回傳表格數據是否載入完成
     print(f"return prediction_done: {trainingRL.prediction_done}")
     return jsonify({"prediction_done": trainingRL.prediction_done})
 
@@ -32,12 +31,10 @@ def query():
 
     try:
         category = int(category)
-        if category not in range(0, 5):  # ✅ 限制 0~4
+        if category not in range(0, 5):  # 限制 0~4
             return jsonify({"error": "Please enter a valid class value (0 to 4)."}), 400
     except (TypeError, ValueError):
         return jsonify({"error": "The class value must be a number."}), 400
-
-    print(f"📥 查詢類別: {category}, 頁數: {page}, 每頁顯示: {per_page}")
 
     try:
         # 取得檔案路徑
@@ -49,10 +46,6 @@ def query():
         X_test_loaded = np.load(X_test_path)
         y_pred_loaded = np.load(y_pred_path)
 
-        print(f"✅ 成功載入 X_test.npy 和 y_pred.npy")
-        print(f"📊 X_test 大小: {X_test_loaded.shape}")
-        print(f"📊 y_pred 大小: {y_pred_loaded.shape}")
-
         # 取得符合條件的索引
         matched_indices = np.where(y_pred_loaded == category)[0]
 
@@ -61,15 +54,15 @@ def query():
         total_results = len(filtered_results)  # 全部資料數量
 
         if total_results == 0:
-            return jsonify({"error": f"沒有找到類別 {category} 的資料"}), 404
+            return jsonify({"error": f"No data found for class {category}."}), 404
         
-        # ✅ 計算分頁範圍
+        # 計算分頁範圍
         start_idx = (page - 1) * per_page
         end_idx = start_idx + per_page
         paginated_results = filtered_results[start_idx:end_idx]
         paginated_indices = matched_indices[start_idx:end_idx]  # 取得對應的 index
 
-        # ✅ 加入 index 並使用 OrderedDict 確保 Feature 1 ~ Feature N 順序正確
+        # 加入 index 並使用 OrderedDict 確保 Feature 1 ~ Feature N 順序正確
         from collections import OrderedDict
         formatted_results = [
             OrderedDict(

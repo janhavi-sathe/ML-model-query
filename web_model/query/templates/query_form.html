@@ -53,19 +53,19 @@
     <h1>Tabular Data Classification Query</h1>
     <p id="loadingMessage">Loading data, please wait...</p>
 
-    <!-- ✅ 查詢介面，預設隱藏，等數據載入完成後顯示 -->
+    <!-- 查詢介面，預設隱藏，等數據載入完成後顯示 -->
     <div id="queryInterface" style="display: none;">
         <input type="number" id="classValue" placeholder="Enter a class value (0 to 4)" style="width: 300px; padding: 8px; font-size: 16px;">
         <button onclick="fetchData(1)" style="padding: 8px 16px; font-size: 16px;">Search</button>
-        <!-- ✅ 查詢結果和「上一頁 / 下一頁」按鈕 -->
+        <!-- 查詢結果和「上一頁 / 下一頁」按鈕 -->
         <div id="result" style="margin-top: 20px;"></div>
     </div>
 
     <script>
-        let currentPage = 1;  // ✅ 記錄當前頁數
-        const perPage = 10;   // ✅ 每頁顯示筆數
+        let currentPage = 1;  // 記錄當前頁數
+        const perPage = 10;   // 每頁顯示筆數
 
-        // ✅ 監測數據是否載入完成
+        // 監測數據是否載入完成
         function checkLoadingStatus() {
             fetch('/query/check_status')
                 .then(response => response.json())
@@ -84,20 +84,18 @@
 
         function fetchData(page = 1) {
             let classValue = parseInt(document.getElementById("classValue").value, 10);
-            console.log("📤 送出的 class_value:", classValue, "頁數:", page); // 🐞 除錯
 
             fetch(`/query/tabular_data/query?class_value=${classValue}&page=${page}&per_page=${perPage}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log("📥 伺服器回傳:", data); // 🐞 除錯
                     let resultContainer = document.getElementById("result");
 
                     if (data.error) {
                         resultContainer.innerText = `❌ ${data.error}`;
                     } else {
-                        currentPage = data.current_page;  // ✅ 更新當前頁數
+                        currentPage = data.current_page;  // 更新當前頁數
 
-                        // ✅ 取得所有特徵名稱，確保 index 在最前面
+                        // 取得所有特徵名稱，確保 index 在最前面
                         let headers = Object.keys(data.results[0]).sort((a, b) => {
                             if (a === "Index") return -1; // 讓 Index 永遠排在最前面
                             let numA = parseInt(a.replace("Feature ", ""));
@@ -105,15 +103,15 @@
                             return numA - numB;
                         });
 
-                        // ✅ 產生表格 HTML
+                        // 產生表格 HTML
                         let tableHTML = "<table border='1' style='border-collapse: collapse; width: 100%; text-align: center;'>";
                         
-                        // ✅ 表頭
+                        // 表頭
                         tableHTML += "<tr>";
                         headers.forEach(header => tableHTML += `<th style='padding: 8px; background-color: #f2f2f2;'>${header}</th>`);
                         tableHTML += "</tr>";
 
-                        // ✅ 插入數據，每筆資料橫排
+                        // 插入數據，每筆資料橫排
                         data.results.forEach(row => {
                             tableHTML += "<tr>";
                             headers.forEach(header => tableHTML += `<td style='padding: 8px;'>${row[header]}</td>`);
@@ -122,7 +120,7 @@
 
                         tableHTML += "</table>";
 
-                        // ✅ 加入「上一頁 / 下一頁」按鈕
+                        // 加入「上一頁 / 下一頁」按鈕
                         tableHTML += `
                             <div style="margin-top: 20px;">
                                 <button onclick="changePage(-1)" ${currentPage === 1 ? "disabled" : ""}>⬅️ Previous</button>
@@ -131,7 +129,7 @@
                             </div>
                         `;
 
-                        resultContainer.innerHTML = tableHTML; // 🚀 插入表格
+                        resultContainer.innerHTML = tableHTML; // 插入表格
                     }
                 })
                 .catch(error => {
@@ -139,12 +137,12 @@
                 });
         }
 
-        // ✅ 切換頁面
+        // 切換頁面
         function changePage(direction) {
             fetchData(currentPage + direction);
         }
 
-        // ✅ 啟動時檢查數據載入狀態
+        // 啟動時檢查數據載入狀態
         checkLoadingStatus();
     </script>
 </body>

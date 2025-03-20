@@ -19,8 +19,6 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 1px 25px; /* 第一個值是 row-gap（上下），第二個值是 column-gap（左右） */
-            /*justify-content: start;*/
-            /*padding-left: 10px;*/
         }
         .grid img {
             width: 200px; /* 縮小圖片 */
@@ -133,7 +131,7 @@
 
                         resultContainer.innerHTML = imageHTML;
 
-                        // 🔥 在這裡選擇 paginationContainer，避免 null
+                        // 在這裡選擇 paginationContainer，避免 null
                         let paginationContainer = document.querySelector(".pagination");
                         if (paginationContainer) {
                             paginationContainer.style.display = "block";
@@ -149,7 +147,7 @@
             fetchImageData(currentPage + direction);
         }
 
-        // 🟢 按 Index 查詢相似圖片（新功能）
+        // 按 Index 查詢相似圖片（新功能）
         function fetchSimilarImages() {
             let imageIndex = parseInt(document.getElementById("imageIndexValue").value, 10);
             if (isNaN(imageIndex)) {
@@ -177,7 +175,7 @@
 
                         resultContainer.innerHTML = imageHTML;
                         
-                        // 🛑 隱藏分頁按鈕
+                        // 隱藏分頁按鈕
                         let paginationContainer = document.querySelector(".pagination");
                         if (paginationContainer) {
                             paginationContainer.style.display = "none";

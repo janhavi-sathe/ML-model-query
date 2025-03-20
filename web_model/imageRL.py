@@ -2,15 +2,12 @@ import os
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
-from torchvision import transforms
 
 # 取得當前檔案的絕對路徑
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "cnn5layer_multi_label.pth")
 TEST_NPZ = os.path.join(BASE_DIR, "X_test_image.npz")
 image_prediction_done = False
-
 
 # Custom CNN Model
 class CNN5Layer(nn.Module):
@@ -64,8 +61,8 @@ class NPZImageDataset(torch.utils.data.Dataset):
 
 
 def predict_and_save():
-    '''
-    transform = transforms.Compose([
+    
+    '''transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
     ])
@@ -74,12 +71,11 @@ def predict_and_save():
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
     device = torch.device("cpu")
-    model = CNN5Layer(num_classes=10)
     model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
     model.to(device)
     model.eval()
 
-    print("開始預測...")
+    # 開始預測
     total_batches = len(test_loader)  # 計算總 batch 數
 
     # Perform predictions and save results
@@ -92,13 +88,10 @@ def predict_and_save():
             if batch_idx % 5 == 0 or batch_idx == total_batches:
                 print(f"Processing batch {batch_idx}/{total_batches}... ({(batch_idx / total_batches) * 100:.2f}%)")
 
-
-    print("預測完成，儲存結果...")
     # Convert to numpy array and save
     predictions = torch.cat(predictions, dim=0).cpu().numpy()  # 最後一次轉 NumPy
 
     np.save(os.path.join(BASE_DIR, "y_pred_image.npy"), predictions)'''
-    print(f"🎉 預測結果已儲存至y_pred_image")
 
     global image_prediction_done
     image_prediction_done = True
