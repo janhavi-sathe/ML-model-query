@@ -6,63 +6,63 @@ from .. import trainingRL
 
 @query_bp.route('/check_status', methods=['GET'])
 def check_status():
-    # 回傳表格數據是否載入完成
+    # Returns whether the table data has been loaded.
     print(f"return prediction_done: {trainingRL.prediction_done}")
     return jsonify({"prediction_done": trainingRL.prediction_done})
 
-# 查詢畫面（首頁）
+# Search screen (Home page)
 @query_bp.route('/tabular_data', methods=['GET'])
 def index():
     return render_template('query_form.html')
 
-# 查詢 API（支援 GET & POST）
+# Query API (supports GET & POST)
 @query_bp.route('/tabular_data/query', methods=['GET', 'POST'])
 def query():
-    # 取得類別值
+    # Get category value
     if request.method == "POST":
         category = request.json.get("class_value")
-        page = request.json.get("page", 1)  # 預設為第 1 頁
-        per_page = request.json.get("per_page", 10)  # 預設每頁顯示 10 筆
+        page = request.json.get("page", 1)  # Default is Page 1
+        per_page = request.json.get("per_page", 10)  # Default display is 10 records per page
     else:
         category = request.args.get("class_value")
-        page = int(request.args.get("page", 1))  # 預設為第 1 頁
-        per_page = int(request.args.get("per_page", 10))  # 預設每頁 10 筆
+        page = int(request.args.get("page", 1))  # Default is Page 1
+        per_page = int(request.args.get("per_page", 10))  # Default display is 10 records per page
 
 
     try:
         category = int(category)
-        if category not in range(0, 5):  # 限制 0~4
+        if category not in range(0, 5):  # Limit 0~4
             return jsonify({"error": "Please enter a valid class value (0 to 4)."}), 400
     except (TypeError, ValueError):
         return jsonify({"error": "The class value must be a number."}), 400
 
     try:
-        # 取得檔案路徑
+        # Get the file path
         base_path = os.path.dirname(os.path.abspath(__file__))
         X_test_path = os.path.join(base_path, "..", "X_test.npy")
         y_pred_path = os.path.join(base_path, "..", "y_pred.npy")
 
-        # 載入檔案
+        # Loading File
         X_test_loaded = np.load(X_test_path)
         y_pred_loaded = np.load(y_pred_path)
 
-        # 取得符合條件的索引
+        # Get the index that meets the conditions
         matched_indices = np.where(y_pred_loaded == category)[0]
 
-        # 查詢篩選
+        # Query Filter
         filtered_results = X_test_loaded[y_pred_loaded == category]
-        total_results = len(filtered_results)  # 全部資料數量
+        total_results = len(filtered_results)  # Total data quantity
 
         if total_results == 0:
             return jsonify({"error": f"No data found for class {category}."}), 404
         
-        # 計算分頁範圍
+        # Calculate the paging range
         start_idx = (page - 1) * per_page
         end_idx = start_idx + per_page
         paginated_results = filtered_results[start_idx:end_idx]
-        paginated_indices = matched_indices[start_idx:end_idx]  # 取得對應的 index
+        paginated_indices = matched_indices[start_idx:end_idx]  # Get the corresponding index
 
-        # 加入 index 並使用 OrderedDict 確保 Feature 1 ~ Feature N 順序正確
+        # Add index and use OrderedDict to ensure that Feature 1 ~ Feature N are in the correct order
         from collections import OrderedDict
         formatted_results = [
             OrderedDict(
