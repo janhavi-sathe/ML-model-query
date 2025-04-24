@@ -28,8 +28,8 @@ def query():
 
     try:
         category = int(category)
-        if category not in range(0, 5):  # Limit 0~4
-            return jsonify({"error": "Please enter a valid class value (0 to 4)."}), 400
+        if category not in range(0, 6):  # Limit 0~4
+            return jsonify({"error": "Please enter a valid class value (0 to 5)."}), 400
     except (TypeError, ValueError):
         return jsonify({"error": "The class value must be a number."}), 400
 
