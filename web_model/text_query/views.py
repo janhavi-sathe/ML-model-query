@@ -63,7 +63,6 @@ def query():
             )
             for idx, row in paginated_results.iterrows()
         ]
-        print("formatted_results: ", formatted_results)
 
         return jsonify({
             "category": category,
