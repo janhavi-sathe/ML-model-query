@@ -51,6 +51,11 @@
             font-size: 20px;
             color: red;
         }
+        .classValue {
+            padding: 8px; 
+            font-size: 16px;
+            color: hotpink;
+        }
     </style>
 </head>
 <body>
@@ -58,24 +63,33 @@
     <p id="loadingMessage">Loading data, please wait...</p>
 
     <!-- 查詢介面，預設隱藏，等數據載入完成後顯示 -->
-    <div id="queryInterface" style="position: absolute; top: 50px; left: 20px; width: 300px;">
-        <h3>Find by Class</h3>
-        <input type="number" id="classValue" placeholder="Enter a class value (0 to 5)" style="width:200px; padding: 8px; font-size: 16px;">
+    <div id="queryInterface" style="position: absolute; top: 50px; left: 20px; width: 300px; ">
+        <h3>Find by Model-assigned Class</h3>
+        <form>
+            <input type="radio" id="classValue" name="AddToPlaylist" value="0" ><label for="AddToPlaylist">AddToPlaylist</label><br>
+            <input type="radio" id="classValue" name="BookRestaurant" value="1" style="padding: 8px; font-size: 16px;"><label for="BookRestaurant">BookRestaurant</label><br>
+            <input type="radio" id="classValue" name="GetWeather" value="2" style="padding: 8px; font-size: 16px;"><label for="GetWeather">GetWeather</label><br>
+            <input type="radio" id="classValue" name="PlayMusic" value="3" style="padding: 8px; font-size: 16px;"><label for="PlayMusic">PlayMusic</label><br>
+            <input type="radio" id="classValue" name="RateBook" value="4" style="padding: 8px; font-size: 16px;"><label for="RateBook">RateBook</label><br>
+            <input type="radio" id="classValue" name="SearchCreativeWork" value="5" style="padding: 8px; font-size: 16px;"><label for="SearchCreativeWork">SearchCreativeWork</label><br>
+            <input type="radio" id="classValue" name="SearchScreeningEvent" value="6" style="padding: 8px; font-size: 16px;"><label for="SearchScreeningEvent">SearchScreeningEvent</label><br>
+        </form>
+        <!-- OLD <input type="number" id="classValue" placeholder="Enter a class value (0 to 6)" style="width:200px; padding: 8px; font-size: 16px;"> -->
         <button onclick="fetchData(1)" style="margin: 8px; padding: 8px 16px; font-size: 16px; align-self: center;">Search</button>
     </div>
     <!-- 右側的相似圖片搜尋介面 -->
-    <div id="searchInterface" style="position: absolute; top: 190px; left: 20px; width: 300px;">
+    <div id="searchInterface" style="position: absolute; top: 370px; left: 20px; width: 300px;">
         <h3>Find Similar Texts</h3>
         <input type="number" id="textIndexValue" placeholder="Enter text index" style="width: 200px; padding: 8px; font-size: 16px;">
         <button onclick="fetchSimilarText()" style="margin: 8px;padding: 8px 16px; font-size: 16px;">Search</button>
     </div>
-    <div id="searchInterface" style="position: absolute; top: 340px; left: 20px; width: 300px;">
+    <div id="searchInterface" style="position: absolute; top: 520px; left: 20px; width: 300px;">
         <h3>Find by Keyword</h3>
         <input type="text" id="keywordValue" placeholder="Enter keyword" style="width: 200px; padding: 8px; font-size: 16px;">
         <button onclick="fetchTextKeyword()" style="margin: 8px; padding: 8px 16px; font-size: 16px;">Search</button>
     </div>
 
-    <div id="feedbackInterface" style="position: absolute; top: 500px; left: 20px; width: 300px;">
+    <div id="feedbackInterface" style="position: absolute; top: 680px; left: 20px; width: 300px;">
         <h2>Feedback</h2>
         <label for="feedbackValue" style="margin: 5px; padding: 5px;;">Note observations about errors:</label>
         <textarea id="feedbackValue" placeholder="Enter feedback" style="width: 200px; padding: 8px; font-size: 16px;"></textarea>
@@ -93,7 +107,7 @@
 
     <script>
         let currentPage = 1;  // 記錄當前頁數
-        const perPage = 10;   // 每頁顯示筆數
+        const perPage = 5;   // 每頁顯示筆數
 
         // 監測數據是否載入完成
         function checkLoadingStatus() {
@@ -114,6 +128,7 @@
 
         function fetchData(page = 1) {
             let classValue = parseInt(document.getElementById("classValue").value, 10);
+            console.log(classValue);
             
             // Clear other query fields
             document.getElementById("textIndexValue").value = '';
@@ -131,7 +146,7 @@
 
                         // 取得所有特徵名稱，確保 index 在最前面
                         let headers = Object.keys(data.results[0]);
-                        headerOrder = ["Index", "Text", "Class", "Prediction", "Main Words"];
+                        headerOrder = ["Index", "Text", "Explanation", "Model-assigned Label", "Human-assigned Label"];
                         //console.log(headers);
 
                         // 產生表格 HTML
@@ -190,7 +205,7 @@
                         currentPage = data.current_page;
 
                         let headers = Object.keys(data.similar_results[0]);
-                        headerOrder = ["Index", "Text", "Class", "Prediction", "Main Words"];
+                        headerOrder = ["Index", "Text", "Explanation", "Model-assigned Label", "Human-assigned Label"];
                         console.log(headers);
 
                         // 產生表格 HTML
@@ -250,7 +265,7 @@
                         resultContainer.innerText = `❌ ${data.error}`;
                     } else {
                         let headers = Object.keys(data.results[0]);
-                        headerOrder = ["Index", "Text", "Class", "Prediction", "Main Words"];
+                        headerOrder = ["Index", "Text", "Explanation", "Model-assigned Label", "Human-assigned Label"];
                         //console.log(headers); // debugging
 
                         // 產生表格 HTML
