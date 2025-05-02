@@ -7,8 +7,12 @@
     <style>
         body {
             text-align: center;
-            font-family: Arial, sans-serif;
+            font-family: Helvetica, sans-serif;
             margin-top: 20px;
+        }
+        mark {
+            background-color: gainsboro;
+            color: black;
         }
         .container {
             max-width: 800px;
@@ -50,16 +54,42 @@
     </style>
 </head>
 <body>
-    <h1>Text Data Classification Query</h1>
+    <h1>Text Classification Query</h1>
     <p id="loadingMessage">Loading data, please wait...</p>
 
     <!-- 查詢介面，預設隱藏，等數據載入完成後顯示 -->
-    <div id="queryInterface" style="display: none;">
-        <input type="number" id="classValue" placeholder="Enter a class value (0 to 5)" style="width: 300px; padding: 8px; font-size: 16px;">
-        <button onclick="fetchData(1)" style="padding: 8px 16px; font-size: 16px;">Search</button>
-        <!-- 查詢結果和「上一頁 / 下一頁」按鈕 -->
-        <div id="result" style="margin-top: 20px;"></div>
+    <div id="queryInterface" style="position: absolute; top: 50px; left: 20px; width: 300px;">
+        <h3>Find by Class</h3>
+        <input type="number" id="classValue" placeholder="Enter a class value (0 to 5)" style="width:200px; padding: 8px; font-size: 16px;">
+        <button onclick="fetchData(1)" style="margin: 8px; padding: 8px 16px; font-size: 16px; align-self: center;">Search</button>
     </div>
+    <!-- 右側的相似圖片搜尋介面 -->
+    <div id="searchInterface" style="position: absolute; top: 190px; left: 20px; width: 300px;">
+        <h3>Find Similar Texts</h3>
+        <input type="number" id="textIndexValue" placeholder="Enter text index" style="width: 200px; padding: 8px; font-size: 16px;">
+        <button onclick="fetchSimilarText()" style="margin: 8px;padding: 8px 16px; font-size: 16px;">Search</button>
+    </div>
+    <div id="searchInterface" style="position: absolute; top: 340px; left: 20px; width: 300px;">
+        <h3>Find by Keyword</h3>
+        <input type="text" id="keywordValue" placeholder="Enter keyword" style="width: 200px; padding: 8px; font-size: 16px;">
+        <button onclick="fetchTextKeyword()" style="margin: 8px; padding: 8px 16px; font-size: 16px;">Search</button>
+    </div>
+
+    <div id="feedbackInterface" style="position: absolute; top: 500px; left: 20px; width: 300px;">
+        <h2>Feedback</h2>
+        <label for="feedbackValue" style="margin: 5px; padding: 5px;;">Note observations about errors:</label>
+        <textarea id="feedbackValue" placeholder="Enter feedback" style="width: 200px; padding: 8px; font-size: 16px;"></textarea>
+        <button onclick="sendFeedback()" style="margin: 8px; padding: 8px 16px; font-size: 16px;">Submit</button>
+        <div id="feedbackResult" style="margin-top: 2px; padding: 8px 16px; font-size: 16px;"></div>
+    </div>
+
+    <div class="container">
+        <div id="result" style="margin-top: 2px; position:absolute; left: 320px; right: 20px;">
+            <img src="/text_query/static/class_distr_barchart.png" alt="" style="width: 100%; height: auto; border-radius: 5px; border: 1px solid #ddd;">
+        </div>
+    </div>
+
+    
 
     <script>
         let currentPage = 1;  // 記錄當前頁數
@@ -84,6 +114,10 @@
 
         function fetchData(page = 1) {
             let classValue = parseInt(document.getElementById("classValue").value, 10);
+            
+            // Clear other query fields
+            document.getElementById("textIndexValue").value = '';
+            document.getElementById("keywordValue").value = '';
 
             fetch(`/text_query/text_data/query?class_value=${classValue}&page=${page}&per_page=${perPage}`)
                 .then(response => response.json())
@@ -98,7 +132,7 @@
                         // 取得所有特徵名稱，確保 index 在最前面
                         let headers = Object.keys(data.results[0]);
                         headerOrder = ["Index", "Text", "Class", "Prediction", "Main Words"];
-                        console.log(headers);
+                        //console.log(headers);
 
                         // 產生表格 HTML
                         let tableHTML = "<table border='1' style='border-collapse: collapse; width: 100%; text-align: center;'>";
@@ -134,9 +168,162 @@
                 });
         }
 
+        function fetchSimilarText(page = 1) {
+            let textIndex = parseInt(document.getElementById("textIndexValue").value, 10);
+            if (isNaN(textIndex)) {
+                alert("Please enter a valid text index.");
+                return;
+            }
+            
+            // Clear other query fields
+            document.getElementById("classValue").value = '';
+            document.getElementById("keywordValue").value = '';
+
+            fetch(`/text_query/text_data/find_similar?index=${textIndex}&page=${page}&per_page=${perPage}`)
+                .then(response => response.json())
+                .then(data => {
+                    let resultContainer = document.getElementById("result");
+
+                    if (data.error) {
+                        resultContainer.innerText = `❌ ${data.error}`;
+                    } else {
+                        currentPage = data.current_page;
+
+                        let headers = Object.keys(data.similar_results[0]);
+                        headerOrder = ["Index", "Text", "Class", "Prediction", "Main Words"];
+                        console.log(headers);
+
+                        // 產生表格 HTML
+                        let tableHTML = "<table border='1' style='border-collapse: collapse; width: 100%; text-align: center;'>";
+                        
+                        // 表頭
+                        tableHTML += "<tr>";
+                        headerOrder.forEach(header => tableHTML += `<th style='padding: 8px; background-color: #f2f2f2;'>${header}</th>`);
+                        tableHTML += "</tr>";
+
+                        // 插入數據，每筆資料橫排
+                        data.similar_results.forEach(row => {
+                            tableHTML += "<tr>";
+                            headerOrder.forEach(header => tableHTML += `<td style='padding: 8px;'>${row[header]}</td>`);
+                            tableHTML += "</tr>";
+                        });
+
+                        tableHTML += "</table>";
+
+                        tableHTML += `
+                            <div style="margin-top: 20px;">
+                                <button onclick="changePage(-1, 'similarity')" ${currentPage === 1 ? "disabled" : ""}>⬅️ Previous</button>
+                                <span> Page ${data.current_page} /  ${data.total_pages}  </span>
+                                <button onclick="changePage(1, 'similarity')" ${currentPage === data.total_pages ? "disabled" : ""}>Next ➡️</button>
+                            </div>
+                        `;
+
+                        resultContainer.innerHTML = tableHTML;
+                        
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("result").innerText = `❌ Error: ${error.message}`;
+                });
+        }
+
+        function fetchTextKeyword(page = 1) {
+            let keyword = document.getElementById("keywordValue").value;
+            
+            // Clear other query fields
+            document.getElementById("classValue").value = '';
+            document.getElementById("textIndexValue").value = '';
+            
+            if (keyword == null || keyword == "") {
+                alert("Please enter a valid text.");
+                return;
+            }
+
+            fetch(`/text_query/text_data/find_keyword?keyword=${keyword}&page=${page}&per_page=${perPage}`)
+                .then(response => response.json())
+                .then(data => {
+                    let resultContainer = document.getElementById("result");
+
+                    currentPage = data.current_page;
+
+                    if (data.error) {
+                        resultContainer.innerText = `❌ ${data.error}`;
+                    } else {
+                        let headers = Object.keys(data.results[0]);
+                        headerOrder = ["Index", "Text", "Class", "Prediction", "Main Words"];
+                        //console.log(headers); // debugging
+
+                        // 產生表格 HTML
+                        let tableHTML = "<table border='1' style='border-collapse: collapse; width: 100%; text-align: center;'>";
+                        
+                        // 表頭
+                        tableHTML += "<tr>";
+                        headerOrder.forEach(header => tableHTML += `<th style='padding: 8px; background-color: #f2f2f2;'>${header}</th>`);
+                        tableHTML += "</tr>";
+
+                        // 插入數據，每筆資料橫排
+                        data.results.forEach(row => {
+                            tableHTML += "<tr>";
+                            headerOrder.forEach(header => tableHTML += `<td style='padding: 8px;'>${row[header]}</td>`);
+                            tableHTML += "</tr>";
+                        });
+
+                        tableHTML += "</table>";
+
+                        tableHTML += `
+                            <div style="margin-top: 20px;">
+                                <button onclick="changePage(-1, 'keyword')" ${currentPage === 1 ? "disabled" : ""}>⬅️ Previous</button>
+                                <span> Page ${data.current_page} /  ${data.total_pages}  </span>
+                                <button onclick="changePage(1, 'keyword')" ${currentPage === data.total_pages ? "disabled" : ""}>Next ➡️</button>
+                            </div>
+                        `;
+
+                        resultContainer.innerHTML = tableHTML;
+                        
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("result").innerText = `❌ Error: ${error.message}`;
+                });
+        }
         // 切換頁面
-        function changePage(direction) {
-            fetchData(currentPage + direction);
+        function changePage(direction, search='class') {
+            newPage = currentPage + direction;
+            if (search == 'class'){
+                fetchData(newPage);}
+            else if (search == 'keyword') {
+                fetchTextKeyword(newPage);
+            }
+            else if (search == 'similarity') {
+                fetchSimilarText(newPage);
+            }
+        }
+
+        function sendFeedback() {
+            let feedback = document.getElementById("feedbackValue").value;
+            fetch(`/text_query/feedback`, { 
+                method: "POST", 
+                body: JSON.stringify({ 
+                    feedback: feedback,
+                    timestamp: new Date().toString()
+                    }),
+                    headers: {
+                        "Content-type": "application/json; charset=UTF-8"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    let resultContainer = document.getElementById("feedbackResult");
+                    if (data.error) {
+                        resultContainer.innerText = `❌ ${data.error}`;
+                    } else {
+                        document.getElementById("feedbackValue").value = '';
+                        resultContainer.innerText = `✅ Feedback sent successfully!`;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("result").innerText = `❌ Error: ${error.message}`;
+                });
         }
 
         // 啟動時檢查數據載入狀態
