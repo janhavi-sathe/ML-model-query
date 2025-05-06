@@ -41,10 +41,10 @@ def query():
     try:
         # Get the file path
         base_path = os.path.dirname(os.path.abspath(__file__))
-        text_data_path = os.path.join(base_path, "..", "snips_text_data.csv")
+        text_data_path = os.path.join(base_path, "..", "snips_text_data_ranked.csv")
 
         # Load snips_text_data.csv
-        text_data_df = pd.read_csv(text_data_path)
+        text_data_df = pd.read_csv(text_data_path, index_col=0)
         # Get the data that meets the conditions
         matched_indices = text_data_df.loc[text_data_df['model-assigned label'] == snips_id2label[category], :] # column ['utterance', 'explanation', 'model-assigned label', 'human-assigned label']
         
@@ -63,7 +63,7 @@ def query():
         from collections import OrderedDict
         formatted_results = [
             OrderedDict(
-                {"Index": int(idx), "Text": row.iloc[0], "Human-assigned Label": row.iloc[1] , "Model-assigned Label": row.iloc[2], "Explanation": row.iloc[3]}
+                {"Index": int(idx), "Text": row.iloc[0], "Human-assigned Label": row.iloc[1] , "Model-assigned Label": row.iloc[2], "Explanation": row.iloc[3], "featured": row.iloc[4]}
             )
             for idx, row in paginated_results.iterrows()
         ]
@@ -101,10 +101,10 @@ def find_similar_texts():
 
         # Get the file path
         base_path = os.path.dirname(os.path.abspath(__file__))
-        text_data_path = os.path.join(base_path, "..", "snips_text_data.csv")
+        text_data_path = os.path.join(base_path, "..", "snips_text_data_ranked.csv")
 
         # Load text_data.csv
-        text_data_df = pd.read_csv(text_data_path)
+        text_data_df = pd.read_csv(text_data_path, index_col=0)
 
         if text_index < 0 or text_index >= len(text_data_df):
             return jsonify({"error": "Text index out of range"}), 404
@@ -142,7 +142,7 @@ def find_similar_texts():
         from collections import OrderedDict
         formatted_results = [
             OrderedDict(
-                {"Index": int(idx), "Text": row.iloc[0], "Human-assigned Label": row.iloc[1] , "Model-assigned Label": row.iloc[2], "Explanation": row.iloc[3]}
+                {"Index": int(idx), "Text": row.iloc[0], "Human-assigned Label": row.iloc[1] , "Model-assigned Label": row.iloc[2], "Explanation": row.iloc[3], "featured": row.iloc[4]}
             )
             for idx, row in paginated_results.iterrows()
         ]
@@ -177,10 +177,10 @@ def find_keyword():
 
         # Get the file path
         base_path = os.path.dirname(os.path.abspath(__file__))
-        text_data_path = os.path.join(base_path, "..", "snips_text_data.csv")
+        text_data_path = os.path.join(base_path, "..", "snips_text_data_ranked.csv")
 
         # Load text_data.csv
-        text_data_df = pd.read_csv(text_data_path)
+        text_data_df = pd.read_csv(text_data_path, index_col=0)
 
         # Get texts that contain the keyword
         keyword_data = text_data_df.loc[text_data_df['utterance'].astype(str).str.contains(keyword, na=False), :] #columns=['utterance', 'human-assigned label', 'model-assigned label', 'explanation']
@@ -204,7 +204,7 @@ def find_keyword():
         from collections import OrderedDict
         formatted_results = [
             OrderedDict(
-                {"Index": int(idx), "Text": row.iloc[0], "Human-assigned Label": row.iloc[1] , "Model-assigned Label": row.iloc[2], "Explanation": row.iloc[3]}
+                {"Index": int(idx), "Text": row.iloc[0], "Human-assigned Label": row.iloc[1] , "Model-assigned Label": row.iloc[2], "Explanation": row.iloc[3], "featured": row.iloc[4]}
             )
             for idx, row in paginated_results.iterrows()
         ]

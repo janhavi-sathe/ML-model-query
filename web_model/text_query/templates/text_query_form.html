@@ -164,7 +164,13 @@
                         // 插入數據，每筆資料橫排
                         data.results.forEach(row => {
                             tableHTML += "<tr>";
+                            if (row["featured"]) {
+                                row["Text"] = row["Text"].concat(" [featured]");
+                                console.log(row["Text"]);
+                            }
+                            console.log(row)
                             headerOrder.forEach(header => tableHTML += `<td style='padding: 8px;'>${row[header]}</td>`);
+                            
                             tableHTML += "</tr>";
                         });
 
@@ -310,7 +316,7 @@
         function changePage(direction, search='class') {
             newPage = currentPage + direction;
             if (search == 'class'){
-                fetchData(newPage);}
+                fetchClassData(newPage);}
             else if (search == 'keyword') {
                 fetchTextKeyword(newPage);
             }
