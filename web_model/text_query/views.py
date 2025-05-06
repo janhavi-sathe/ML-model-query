@@ -33,7 +33,7 @@ def query():
     try:
         category = int(category)
         
-        if category not in range(0, 6):  # Limit 0~7
+        if category not in range(0, 7):  # Limit 0~7
             return jsonify({"error": "Please enter a valid class value (0 to 6)."}), 400
     except (TypeError, ValueError):
         return jsonify({"error": "The class value must be a number."}), 400
@@ -45,7 +45,6 @@ def query():
 
         # Load snips_text_data.csv
         text_data_df = pd.read_csv(text_data_path)
-        print("category name: ", snips_id2label[category], type(snips_id2label[category]))
         # Get the data that meets the conditions
         matched_indices = text_data_df.loc[text_data_df['model-assigned label'] == snips_id2label[category], :] # column ['utterance', 'explanation', 'model-assigned label', 'human-assigned label']
         
