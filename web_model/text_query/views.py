@@ -190,7 +190,8 @@ def find_keyword():
         print(total_results)
 
         if total_results == 0:
-            return jsonify({"error": f"No data found containing keyword {keyword}."}), 204
+            print("No data found containing keyword.")
+            return jsonify({"error": f"No data found containing keyword {keyword}"}), 404
         
         # Calculate the paging range
         start_idx = (page - 1) * per_page
