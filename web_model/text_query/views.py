@@ -82,7 +82,7 @@ def query():
 
 
 @text_query_bp.route('text_data/find_similar', methods=['GET'])
-def find_similar_images():
+def find_similar_texts():
     try:
         text_index = request.args.get("index")
         page = int(request.args.get("page", 1))  # Default is Page 1
@@ -113,7 +113,7 @@ def find_similar_images():
         similarities = sim_mat_loaded[text_index]
 
         # Get the TOP_N most similar texts (excluding yourself)
-        # TOP_N = 10
+        TOP_N = 10
         SIMILARITY_THRESHOLD = 0.9
         similar_indices = np.extract(similarities > SIMILARITY_THRESHOLD, similarities)
         
@@ -129,6 +129,9 @@ def find_similar_images():
 
         if total_results == 0:
             return jsonify({"error": f"No similar text found for index {text_index}."}), 404
+        
+        if total_results > TOP_N:
+            total_results = TOP_N
         
         # Calculate the paging range
         start_idx = (page - 1) * per_page
