@@ -51,10 +51,8 @@
             font-size: 20px;
             color: red;
         }
-        .classValue {
-            padding: 8px; 
-            font-size: 16px;
-            color: hotpink;
+        # {
+            align-content: left;
         }
     </style>
 </head>
@@ -65,15 +63,17 @@
     <!-- 查詢介面，預設隱藏，等數據載入完成後顯示 -->
     <div id="queryInterface" style="position: absolute; top: 50px; left: 20px; width: 300px; ">
         <h3>Find by AI Class</h3>
-            <input type="radio" id="AddToPlaylist" name="classValue" value="0" ><label for="AddToPlaylist">AddToPlaylist</label><br>
-            <input type="radio" id="BookRestaurant" name="classValue" value="1" style="padding: 8px; font-size: 16px;"><label for="BookRestaurant">BookRestaurant</label><br>
-            <input type="radio" id="GetWeather" name="classValue" value="2" style="padding: 8px; font-size: 16px;"><label for="GetWeather">GetWeather</label><br>
-            <input type="radio" id="PlayMusic" name="classValue" value="3" style="padding: 8px; font-size: 16px;"><label for="PlayMusic">PlayMusic</label><br>
+        <div style="align-items: left;">
+            <input type="radio" id="AddToPlaylist" name="classValue" value="0" ><label for="AddToPlaylist" >AddToPlaylist</label><br>
+            <input type="radio" id="BookRestaurant" name="classValue" value="1" style="padding: 10px; font-size: 16px;"><label for="BookRestaurant">BookRestaurant</label><br>
+            <input type="radio" id="GetWeather" name="classValue" value="2" style="padding: 10px; font-size: 16px;"><label for="GetWeather">GetWeather</label><br>
+            <input type="radio" id="PlayMusic" name="classValue" value="3"><label for="PlayMusic" >PlayMusic</label><br>
             <input type="radio" id="RateBook" name="classValue" value="4" style="padding: 8px; font-size: 16px;"><label for="RateBook">RateBook</label><br>
             <input type="radio" id="SearchCreativeWork" name="classValue" value="5" style="padding: 8px; font-size: 16px;"><label for="SearchCreativeWork">SearchCreativeWork</label><br>
             <input type="radio" id="SearchScreeningEvent" name="classValue" value="6" style="padding: 8px; font-size: 16px;"><label for="SearchScreeningEvent">SearchScreeningEvent</label><br>
             <button onclick="fetchClassData(1)" style="margin: 8px; padding: 8px 16px; font-size: 16px; align-self: center;">Search</button>
-        <!-- OLD <input type="number" id="classValue" placeholder="Enter a class value (0 to 6)" style="width:200px; padding: 8px; font-size: 16px;"> -->
+            <!-- OLD <input type="number" id="classValue" placeholder="Enter a class value (0 to 6)" style="width:200px; padding: 8px; font-size: 16px;"> -->
+        </div>
     </div>
     <!-- 右側的相似圖片搜尋介面 -->
     <div id="searchInterface" style="position: absolute; top: 320px; left: 20px; width: 300px;">

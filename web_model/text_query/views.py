@@ -41,7 +41,7 @@ def query():
     try:
         # Get the file path
         base_path = os.path.dirname(os.path.abspath(__file__))
-        text_data_path = os.path.join(base_path, "..", "snips_text_data_ranked.csv")
+        text_data_path = os.path.join(base_path, "..", "snips_bert-mini_test_ranked.csv")
 
         # Load snips_text_data.csv
         text_data_df = pd.read_csv(text_data_path, index_col=0)
@@ -101,7 +101,7 @@ def find_similar_texts():
 
         # Get the file path
         base_path = os.path.dirname(os.path.abspath(__file__))
-        text_data_path = os.path.join(base_path, "..", "snips_text_data_ranked.csv")
+        text_data_path = os.path.join(base_path, "..", "snips_bert-mini_test_ranked.csv")
 
         # Load text_data.csv
         text_data_df = pd.read_csv(text_data_path, index_col=0)
@@ -177,7 +177,7 @@ def find_keyword():
 
         # Get the file path
         base_path = os.path.dirname(os.path.abspath(__file__))
-        text_data_path = os.path.join(base_path, "..", "snips_text_data_ranked.csv")
+        text_data_path = os.path.join(base_path, "..", "snips_bert-mini_test_ranked.csv")
 
         # Load text_data.csv
         text_data_df = pd.read_csv(text_data_path, index_col=0)
