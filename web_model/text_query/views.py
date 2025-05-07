@@ -9,6 +9,8 @@ from config import Config
 EXPERIMENT_GROUP = Config.EXPERIMENT_GROUP
 
 DATA_FILE = Config.TEXT_DATA_FILENAME
+SIMILARITY_FILE = Config.TEXT_SIMILARITY_FILENAME
+
 snips_id2label = Config.TEXT_ID2LABEL
 SELECTED = Config.RLA_SELECTED_TEXTS
 
@@ -134,7 +136,7 @@ def find_similar_texts():
 
         # Read X_test.npy (text embeddings)
         base_path = os.path.dirname(os.path.abspath(__file__))
-        sim_mat_path = os.path.join(base_path, "..", "snips_sim_matrix.npy")
+        sim_mat_path = os.path.join(base_path, "..", SIMILARITY_FILE)
 
         sim_mat_loaded = np.load(sim_mat_path)  
 
