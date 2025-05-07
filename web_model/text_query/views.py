@@ -1,10 +1,12 @@
+import datetime
 from flask import render_template, request, jsonify
 from . import text_query_bp
 import pandas as pd
 import numpy as np
 import os
 import json, csv
-from config import Config
+from config import Config, LoggerConfig
+import logging 
 
 EXPERIMENT_GROUP = Config.EXPERIMENT_GROUP
 
@@ -18,6 +20,18 @@ TOP_N = Config.TOP_N_SIMILAR_TEXTS
 SIMILARITY_THRESHOLD = Config.TEXT_SIMILARITY_THRESHOLD
 
 DEFAULT_PER_PAGE = Config.DEFAULT_PER_PAGE
+
+filename = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".log"
+filepath = os.path.join(LoggerConfig.basepath, filename)
+
+logging.basicConfig(filename=filepath,
+                    encoding=LoggerConfig.encoding,
+                    filemode=LoggerConfig.filemode,
+                    format=LoggerConfig.format,
+                    style=LoggerConfig.style,
+                    datefmt=LoggerConfig.datefmt,
+                    level=LoggerConfig.level
+                )
 
 @text_query_bp.route('/check_status', methods=['GET'])
 def check_status():
@@ -56,6 +70,12 @@ def load_text_data():
     except FileNotFoundError as e:
         return jsonify({"error": f"File not found: {str(e)}. Please confirm that the file exists at {DATA_FILE}."}), 500
 
+@text_query_bp.route('/click_data', methods=['POST'])
+def click_data():
+    log_file = filepath
+    with open(log_file, "a") as f:
+        f.write(json.dumps(request.json) + "\n")
+    return jsonify({"success": True}), 200
 
 @text_query_bp.route('/text_data', methods=['GET'])
 def index():

@@ -1,4 +1,5 @@
 import os
+import logging
 
 class Config:
     EXPERIMENT_GROUP = True
@@ -15,3 +16,12 @@ class Config:
 
     DEFAULT_PER_PAGE = 8 
 
+class LoggerConfig:
+    foldername = "logs/experiment" if Config.EXPERIMENT_GROUP else "logs/control"
+    basepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), foldername)
+    encoding = "utf-8"
+    filemode = "a"
+    format = "{asctime} - {levelname} - {message}"
+    style = "{"
+    datefmt = "%Y-%m-%d %H:%M"
+    level = logging.INFO

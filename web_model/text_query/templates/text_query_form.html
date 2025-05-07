@@ -112,10 +112,35 @@
             // Log the data (for demonstration)
             console.log('Clicked element:', targetElement);
             console.log('Timestamp:', timestamp);
+            if (targetElement.value) {
+                console.log('Value:', targetElement.value);
+            }
 
             // Send data to server (implementation depends on your backend)
-            sendClickData(targetElement.tagName, timestamp);
+            sendClickData(targetElement.outerHTML, timestamp);
         });
+        document.addEventListener('keypress', function(event) {
+            const targetElement = event.target;
+            const timestamp = new Date().getTime();
+            console.log('Key press:', event.key, targetElement);
+            if (targetElement.value) {
+                console.log('Value:', targetElement.value);
+            }
+            sendClickData(targetElement.outerHTML+" "+targetElement.value+event.key, timestamp);
+        });
+        function sendClickData(element, timestamp) {
+            fetch('/text_query/click_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    element: JSON.stringify(element),
+                    timestamp: timestamp
+                })
+            })
+        }
+
         // 監測數據是否載入完成
         function checkLoadingStatus() {
             fetch('/query/check_status')
