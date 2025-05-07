@@ -166,8 +166,8 @@
                         data.results.forEach(row => {
                             tableHTML += "<tr>";
                             if (row["featured"]) {
-                                row["Text"] = row["Text"].concat(" [featured]");
-                                console.log(row["Text"]);
+                                row["Index"] = row["Index"].toString().concat("<br>🌟");
+                                row["Index"] = "<b>" + row["Index"] + "</b>";
                             }
                             console.log(row)
                             headerOrder.forEach(header => tableHTML += `<td style='padding: 8px;'>${row[header]}</td>`);

@@ -6,12 +6,16 @@ import os
 import json, csv
 from config import Config
 
+EXPERIMENT_GROUP = Config.EXPERIMENT_GROUP
+
 DATA_FILE = Config.TEXT_DATA_FILENAME
 snips_id2label = Config.TEXT_ID2LABEL
 SELECTED = Config.RLA_SELECTED_TEXTS
 
 TOP_N = Config.TOP_N_SIMILAR_TEXTS
 SIMILARITY_THRESHOLD = Config.TEXT_SIMILARITY_THRESHOLD
+
+DEFAULT_PER_PAGE = Config.DEFAULT_PER_PAGE
 
 @text_query_bp.route('/check_status', methods=['GET'])
 def check_status():
@@ -29,17 +33,21 @@ def load_text_data():
         text_data_df = pd.read_csv(text_data_path, index_col=0)
 
         ### sort according to the index
-        text_data_df.sort_index(inplace=True) #by=text_data_df.columns[0],
+        # text_data_df.sort_index(inplace=True) #by=text_data_df.columns[0],
 
-        # Create a Series mapping index to rank (1-based)
-        rank_map = {idx: i+1 for i, idx in enumerate(SELECTED)}
+        if EXPERIMENT_GROUP:
+            # Create a Series mapping index to rank (1-based)
+            rank_map = {idx: i+1 for i, idx in enumerate(SELECTED)}
 
-        # Assign priority_rank using the rank_map; others get NaN
-        text_data_df['priority_rank'] = text_data_df.index.map(rank_map)
+            # Assign priority_rank using the rank_map; others get NaN
+            text_data_df['priority_rank'] = text_data_df.index.map(rank_map)
 
-        # Sort by priority_rank: selected rows go to top in correct order
-        # NaNs (non-selected) will be placed at the end
-        text_data_df = text_data_df.sort_values(by='priority_rank', na_position='last')
+            # Sort by priority_rank: selected rows go to top in correct order
+            # NaNs (non-selected) will be placed at the end
+            text_data_df = text_data_df.sort_values(by='priority_rank', na_position='last')
+
+            # Set featured flag for RLA selected texts
+            text_data_df.loc[SELECTED, "featured"] = True
 
         return text_data_df
     
@@ -58,11 +66,11 @@ def query():
     if request.method == "POST":
         category = request.json.get("class_value")
         page = request.json.get("page", 1)  # Default is Page 1
-        per_page = int(request.args.get("per_page", 8))   # Default display 8 texts per page
+        per_page = int(request.args.get("per_page", DEFAULT_PER_PAGE))   
     else:
         category = request.args.get("class_value")
         page = int(request.args.get("page", 1))  # Default is Page 1
-        per_page = int(request.args.get("per_page", 8))  # Default display 8 texts per page
+        per_page = int(request.args.get("per_page", DEFAULT_PER_PAGE))  
 
     try:
         category = int(category)
@@ -117,7 +125,7 @@ def find_similar_texts():
         # Parse input parameters
         text_index = request.args.get("index")
         page = int(request.args.get("page", 1))  # Default is Page 1
-        per_page = int(request.args.get("per_page", 8))  # Default display 8 texts per page
+        per_page = int(request.args.get("per_page", DEFAULT_PER_PAGE))  
 
         if text_index is None:
             return jsonify({"error": "Missing text index parameter"}), 400
@@ -198,7 +206,7 @@ def find_keyword():
         keyword = keyword.strip()
 
         page = int(request.args.get("page", 1))  # Default is Page 1
-        per_page = int(request.args.get("per_page", 8))  # Deafult display 8 texts per page
+        per_page = int(request.args.get("per_page", DEFAULT_PER_PAGE))  
 
         text_data_df = load_text_data()
 
