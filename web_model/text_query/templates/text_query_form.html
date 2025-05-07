@@ -231,6 +231,10 @@
                         // 插入數據，每筆資料橫排
                         data.similar_results.forEach(row => {
                             tableHTML += "<tr>";
+                            if (row["featured"]) {
+                                row["Index"] = row["Index"].toString().concat("<br>🌟");
+                                row["Index"] = "<b>" + row["Index"] + "</b>";
+                            }
                             headerOrder.forEach(header => tableHTML += `<td style='padding: 8px;'>${row[header]}</td>`);
                             tableHTML += "</tr>";
                         });
@@ -291,6 +295,10 @@
                         // 插入數據，每筆資料橫排
                         data.results.forEach(row => {
                             tableHTML += "<tr>";
+                            if (row["featured"]) {
+                                row["Index"] = row["Index"].toString().concat("<br>🌟");
+                                row["Index"] = "<b>" + row["Index"] + "</b>";
+                            }
                             headerOrder.forEach(header => tableHTML += `<td style='padding: 8px;'>${row[header]}</td>`);
                             tableHTML += "</tr>";
                         });
