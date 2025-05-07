@@ -7,10 +7,13 @@ from .trainingRL import train_model  # 改為載入模型
 from .imageRL import predict_and_save  # 改為載入圖像模型
 import threading
 import time
+from config import Config
 
-def create_app(debug=False):
+def create_app(config_class=Config,debug=False):
 
   app = Flask(__name__)
+  app.config.from_prefixed_env("FLASK_")
+  app.config.from_object(config_class)
   app.debug = debug
 
   def load_tabular_data():
