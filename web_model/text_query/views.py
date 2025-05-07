@@ -187,6 +187,10 @@ def find_similar_texts():
         # Limit the number of results to TOP_N
         if total_results > TOP_N:
             total_results = TOP_N
+            similar_texts = similar_texts.head(TOP_N)
+        
+        if EXPERIMENT_GROUP:
+            similar_texts.sort_values(by='featured', ascending=False, inplace=True)
         
         # Calculate the paging range
         start_idx = (page - 1) * per_page
