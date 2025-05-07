@@ -105,7 +105,17 @@
     <script>
         let currentPage = 1;  // 記錄當前頁數
         const perPage = 5;   // 每頁顯示筆數
+        document.addEventListener('click', function(event) {
+            const targetElement = event.target;
+            const timestamp = new Date().getTime();
 
+            // Log the data (for demonstration)
+            console.log('Clicked element:', targetElement);
+            console.log('Timestamp:', timestamp);
+
+            // Send data to server (implementation depends on your backend)
+            sendClickData(targetElement.tagName, timestamp);
+        });
         // 監測數據是否載入完成
         function checkLoadingStatus() {
             fetch('/query/check_status')
@@ -132,7 +142,6 @@
                     break;
                 }
             };
-            console.log(classValue);
             
             // Clear other query fields
             document.getElementById("textIndexValue").value = '';
@@ -169,7 +178,6 @@
                                 row["Index"] = row["Index"].toString().concat("<br>🌟");
                                 row["Index"] = "<b>" + row["Index"] + "</b>";
                             }
-                            console.log(row)
                             headerOrder.forEach(header => tableHTML += `<td style='padding: 8px;'>${row[header]}</td>`);
                             
                             tableHTML += "</tr>";
@@ -218,7 +226,6 @@
 
                         let headers = Object.keys(data.similar_results[0]);
                         headerOrder = ["Index", "Text", "Explanation", "Model-assigned Label", "Human-assigned Label"];
-                        console.log(headers);
 
                         // 產生表格 HTML
                         let tableHTML = "<table border='1' style='border-collapse: collapse; width: 100%; text-align: center;'>";
@@ -360,7 +367,7 @@
                     document.getElementById("result").innerText = `❌ Error: ${error.message}`;
                 });
         }
-
+        
         // 啟動時檢查數據載入狀態
         checkLoadingStatus();
     </script>
