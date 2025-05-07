@@ -60,6 +60,11 @@
 <body>
     <h1>Text Classification Query</h1>
     <p id="loadingMessage">Loading data, please wait...</p>
+    <div>
+        {% if experiment_group %}
+            <p>🌟: AI Suggested Errors</p>
+        {% endif %}
+    </div>
 
     <!-- 查詢介面，預設隱藏，等數據載入完成後顯示 -->
     <div id="queryInterface" style="position: absolute; top: 50px; left: 20px; width: 300px; ">
@@ -100,7 +105,6 @@
         <div id="result" style="margin-top: 2px; position:absolute; left: 320px; right: 20px;"></div>
     </div>
 
-    
 
     <script>
         let currentPage = 1;  // 記錄當前頁數
@@ -128,6 +132,17 @@
             }
             sendClickData(targetElement.outerHTML+" "+targetElement.value+event.key, timestamp);
         });
+
+        document.addEventListener('keydown', function(event) {
+            console.log('Key up:', event.key, event.keyCode);
+            sendClickData(targetElement.outerHTML+" "+targetElement.value+event.key, timestamp);
+        });
+
+        document.addEventListener('keyup', function(event) {
+            console.log('Key up:', event.key, event.keyCode);
+            sendClickData(targetElement.outerHTML+" "+targetElement.value+event.key, timestamp);
+        });
+
         function sendClickData(element, timestamp) {
             fetch('/text_query/click_data', {
                 method: 'POST',

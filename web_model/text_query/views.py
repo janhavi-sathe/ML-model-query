@@ -79,7 +79,7 @@ def click_data():
 
 @text_query_bp.route('/text_data', methods=['GET'])
 def index():
-    return render_template('text_query_form.html')
+    return render_template('text_query_form.html', experiment_group=EXPERIMENT_GROUP)
 
 # Query API (supports GET & POST)
 @text_query_bp.route('/text_data/query', methods=['GET', 'POST'])
