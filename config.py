@@ -3,7 +3,7 @@ import os
 class Config:
     EXPERIMENT_GROUP = True
     TEXT_DATA_FILENAME = 'snips_bert-mini_test_ranked.csv'
-    TEXT_SIMILARITY_FILENAME = 'snips_sim_matrix.npy'
+    TEXT_SIMILARITY_FILENAME = 'bert-mini-sim_matrix.npy'
 
     TEXT_ID2LABEL = {0: 'AddToPlaylist', 1: 'BookRestaurant', 2: 'GetWeather', 3: 'PlayMusic', 4: 'RateBook', 5: 'SearchCreativeWork', 6: 'SearchScreeningEvent'}
     N_TEXT_CLASSES = 7
