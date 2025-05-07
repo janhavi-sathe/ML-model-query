@@ -6,7 +6,7 @@ import os
 import json, csv
 
 snips_id2label = {0: 'AddToPlaylist', 1: 'BookRestaurant', 2: 'GetWeather', 3: 'PlayMusic', 4: 'RateBook', 5: 'SearchCreativeWork', 6: 'SearchScreeningEvent'}
-
+SELECTED = [181, 54, 131, 133, 77, 159, 137, 125, 128, 103, 7, 153, 136, 190, 108, 66, 148, 6, 132, 138, 15, 63, 35, 38, 67, 91, 116, 32, 62, 161, 107, 83, 143, 41, 118, 162, 31, 163, 191, 130, 170, 79, 94, 80, 147, 39, 183, 113, 100, 196]
 @text_query_bp.route('/check_status', methods=['GET'])
 def check_status():
     # Returns whether the table data has been loaded.
@@ -45,6 +45,20 @@ def query():
 
         # Load snips_text_data.csv
         text_data_df = pd.read_csv(text_data_path, index_col=0)
+
+        ### sort according to the index
+        text_data_df.sort_index(inplace=True) #by=text_data_df.columns[0],
+
+        # Create a Series mapping index to rank (1-based)
+        rank_map = {idx: i+1 for i, idx in enumerate(SELECTED)}
+
+        # Assign priority_rank using the rank_map; others get NaN
+        text_data_df['priority_rank'] = text_data_df.index.map(rank_map)
+
+        # Sort by priority_rank: selected rows go to top in correct order
+        # NaNs (non-selected) will be placed at the end
+        text_data_df = text_data_df.sort_values(by='priority_rank', na_position='last')
+
         # Get the data that meets the conditions
         matched_indices = text_data_df.loc[text_data_df['model-assigned label'] == snips_id2label[category], :] # column ['utterance', 'explanation', 'model-assigned label', 'human-assigned label']
         
